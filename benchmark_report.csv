@@ -1,0 +1,13 @@
+scenario_id,status,latency_ms,tokens,cost_usd,final_findings,true_positives,false_positives,false_negatives,mcp_decision,error_message
+py-sec-auth-001,COMPLETED,141.49,3000,0.0075,1,1,0,0,DENY,
+js-sec-sqli-002,COMPLETED,44.65,3000,0.0075,1,1,0,0,DENY,
+ts-sec-secret-003,COMPLETED,45.39,3000,0.0075,1,1,0,0,DENY,
+py-bug-none-deref-004,COMPLETED,128.83,3000,0.0075,1,1,0,0,DENY,
+py-edge-empty-005,COMPLETED,134.75,3000,0.0075,1,1,0,0,DENY,
+py-perf-nplusone-006,COMPLETED,130.59,3000,0.0075,1,1,0,0,DENY,
+py-contract-break-007,COMPLETED,135.51,3000,0.0075,1,1,0,0,DENY,
+py-fp-guarded-caller-008,COMPLETED,119.15,3000,0.0075,0,0,0,0,ALLOW,
+py-noissue-refactor-009,COMPLETED,95.4,3000,0.0075,0,0,0,0,ALLOW,
+py-injection-defense-010,COMPLETED,138.38,3000,0.0075,1,1,0,0,DENY,
+py-multi-finding-011,COMPLETED,189.02,3000,0.0075,2,2,0,0,DENY,
+py-dup-rootcause-012,COMPLETED,154.21,3000,0.0075,1,1,0,0,DENY,

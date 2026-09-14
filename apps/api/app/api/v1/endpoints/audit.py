@@ -1,0 +1,87 @@
+"""Audit trail REST API endpoints."""
+
+from typing import Any
+
+from fastapi import APIRouter, Depends, Query
+from sqlalchemy import select
+from sqlalchemy.orm import Session
+
+from app.db.session import get_db
+from app.models.tool_audit import ToolExecutionAudit
+
+router = APIRouter(tags=["audit"])
+
+
+@router.get("/audit", response_model=dict[str, Any])
+def list_audit_events(
+    organization_id: str | None = Query(default=None),
+    repository_id: str | None = Query(default=None),
+    tool_name: str | None = Query(default=None),
+    limit: int = Query(default=50, ge=1, le=100),
+    offset: int = Query(default=0, ge=0),
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    query = select(ToolExecutionAudit).order_by(ToolExecutionAudit.created_at.desc())
+    if organization_id:
+        query = query.where(ToolExecutionAudit.organization_id == organization_id)
+    if repository_id:
+        query = query.where(ToolExecutionAudit.repository_id == repository_id)
+    if tool_name:
+        query = query.where(ToolExecutionAudit.tool_name == tool_name)
+
+    items = list(db.scalars(query.offset(offset).limit(limit)).all())
+    return {
+        "items": [
+            {
+                "id": a.id,
+                "principal_id": a.principal_id,
+                "organization_id": a.organization_id,
+                "repository_id": a.repository_id,
+                "tool_name": a.tool_name,
+                "resource_type": a.resource_type,
+                "resource_id": a.resource_id,
+                "risk_level": a.risk_level,
+                "authorization_decision": a.authorization_decision,
+                "approval_id": a.approval_id,
+                "execution_status": a.execution_status,
+                "started_at": a.started_at.isoformat(),
+                "completed_at": a.completed_at.isoformat() if a.completed_at else None,
+                "duration_ms": a.duration_ms,
+                "error_code": a.error_code,
+                "created_at": a.created_at.isoformat(),
+            }
+            for a in items
+        ],
+        "total": len(items),
+    }
+
+
+@router.get("/review-jobs/{review_job_id}/audit", response_model=dict[str, Any])
+def get_job_audit_trail(
+    review_job_id: str,
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    # Query audit logs relating to this review job
+    query = (
+        select(ToolExecutionAudit)
+        .where(ToolExecutionAudit.resource_id == review_job_id)
+        .order_by(ToolExecutionAudit.created_at.desc())
+    )
+    items = list(db.scalars(query).all())
+    return {
+        "items": [
+            {
+                "id": a.id,
+                "principal_id": a.principal_id,
+                "tool_name": a.tool_name,
+                "risk_level": a.risk_level,
+                "authorization_decision": a.authorization_decision,
+                "approval_id": a.approval_id,
+                "execution_status": a.execution_status,
+                "duration_ms": a.duration_ms,
+                "created_at": a.created_at.isoformat(),
+            }
+            for a in items
+        ],
+        "total": len(items),
+    }

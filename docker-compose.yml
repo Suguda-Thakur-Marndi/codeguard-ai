@@ -1,0 +1,131 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: codeguard-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-codeguard}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-codeguard_secret}
+      POSTGRES_DB: ${POSTGRES_DB:-codeguard}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U codeguard -d codeguard"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: codeguard-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: ./apps/api/Dockerfile
+    container_name: codeguard-api
+    restart: unless-stopped
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+    environment:
+      - APP_ENV=${APP_ENV:-development}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - DATABASE_URL=postgresql://codeguard:codeguard_secret@postgres:5432/codeguard
+      - REDIS_URL=redis://redis:6379/0
+      - GITHUB_APP_ID=${GITHUB_APP_ID:-dev-app-id}
+      - GITHUB_PRIVATE_KEY=${GITHUB_PRIVATE_KEY:-}
+      - GITHUB_WEBHOOK_SECRET=${GITHUB_WEBHOOK_SECRET:-dev-webhook-secret}
+      - GITHUB_CLIENT_ID=${GITHUB_CLIENT_ID:-dev-client-id}
+      - GITHUB_CLIENT_SECRET=${GITHUB_CLIENT_SECRET:-dev-client-secret}
+      - FRONTEND_URL=http://localhost:3000
+      - BACKEND_URL=http://localhost:8000
+      - DEV_AUTH_BYPASS=true
+      - MCP_SERVER_URL=http://mcp-server:8001
+      - MCP_SERVICE_TOKEN=${MCP_SERVICE_TOKEN:-dev-mcp-service-token}
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      mcp-server:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8000/api/v1/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mcp-server:
+    build:
+      context: ./apps/mcp-server
+      dockerfile: Dockerfile
+    container_name: codeguard-mcp
+    restart: unless-stopped
+    ports:
+      - "8001:8001"
+    environment:
+      - APP_ENV=${APP_ENV:-development}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - MCP_SERVICE_TOKEN=${MCP_SERVICE_TOKEN:-dev-mcp-service-token}
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8001/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  worker:
+    build:
+      context: .
+      dockerfile: ./apps/api/Dockerfile
+    container_name: codeguard-worker
+    restart: unless-stopped
+    command: ["celery", "-A", "app.workers.celery_app", "worker", "--loglevel=info", "--concurrency=2"]
+    environment:
+      - APP_ENV=${APP_ENV:-development}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - DATABASE_URL=postgresql://codeguard:codeguard_secret@postgres:5432/codeguard
+      - REDIS_URL=redis://redis:6379/0
+      - GITHUB_APP_ID=${GITHUB_APP_ID:-dev-app-id}
+      - GITHUB_PRIVATE_KEY=${GITHUB_PRIVATE_KEY:-}
+      - GITHUB_WEBHOOK_SECRET=${GITHUB_WEBHOOK_SECRET:-dev-webhook-secret}
+      - MCP_SERVER_URL=http://mcp-server:8001
+      - MCP_SERVICE_TOKEN=${MCP_SERVICE_TOKEN:-dev-mcp-service-token}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      mcp-server:
+        condition: service_healthy
+
+  web:
+    build:
+      context: ./apps/web
+      dockerfile: Dockerfile
+    container_name: codeguard-web
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000/api/v1
+    depends_on:
+      - api
+
+volumes:
+  postgres_data:
+  redis_data:

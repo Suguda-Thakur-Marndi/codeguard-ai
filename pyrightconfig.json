@@ -1,0 +1,9 @@
+{
+  "venvPath": ".",
+  "venv": ".venv",
+  "extraPaths": [
+    ".",
+    "packages/code-intelligence",
+    "apps/api"
+  ]
+}
