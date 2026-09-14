@@ -35,11 +35,11 @@ test:
 	$(VENV_BIN)/pytest apps/mcp-server/tests -o pythonpath=apps/mcp-server -v
 
 lint:
-	$(VENV_BIN)/ruff check apps/api apps/mcp-server packages/code-intelligence
+	$(VENV_BIN)/ruff check apps/api apps/mcp-server packages/code-intelligence scripts
 	cd apps/web && npm run lint
 
 format:
-	$(VENV_BIN)/ruff check --fix apps/api apps/mcp-server packages/code-intelligence
+	$(VENV_BIN)/ruff check --fix apps/api apps/mcp-server packages/code-intelligence scripts
 
 validate-benchmark:
 	$(VENV_BIN)/python benchmark.py validate
