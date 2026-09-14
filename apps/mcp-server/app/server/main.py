@@ -1,5 +1,4 @@
-"""MCP Server FastAPI application exposing authenticated tool boundary."""
-
+import os
 import time
 import uuid
 from datetime import UTC, datetime
@@ -21,11 +20,16 @@ app = FastAPI(
     description="Dedicated Model Context Protocol (MCP) tool gateway with zero-trust policy engine.",
 )
 
+mcp_cors_origins = [
+    o.strip()
+    for o in os.getenv("MCP_CORS_ORIGINS", "http://localhost:8000,http://localhost:3000").split(",")
+    if o.strip()
+]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=mcp_cors_origins,
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["*"],
 )
 
@@ -59,6 +63,16 @@ async def get_authenticated_principal(
 @app.get("/health")
 async def health_check() -> dict[str, str]:
     return {"status": "ok", "service": "mcp-server"}
+
+
+@app.get("/live")
+async def liveness_check() -> dict[str, str]:
+    return {"status": "ok", "service": "mcp-server"}
+
+
+@app.get("/ready")
+async def readiness_check() -> dict[str, str]:
+    return {"status": "ready", "service": "mcp-server"}
 
 
 @app.get("/mcp/v1/tools")

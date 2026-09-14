@@ -7,6 +7,7 @@ from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.core.security import get_current_user_or_bypass
 from app.db.session import get_db
 from app.models.github_publication import GitHubReviewPublication, PublicationStatus
 from app.services.publication_service import PublicationService
@@ -23,6 +24,7 @@ class PublishRequestPayload(BaseModel):
 def get_job_publication(
     review_job_id: str,
     db: Session = Depends(get_db),
+    _user: dict = Depends(get_current_user_or_bypass),
 ) -> dict[str, Any]:
     pub = db.scalar(
         select(GitHubReviewPublication)
@@ -67,6 +69,7 @@ def publish_job_review(
     review_job_id: str,
     payload: PublishRequestPayload = PublishRequestPayload(),
     db: Session = Depends(get_db),
+    _user: dict = Depends(get_current_user_or_bypass),
 ) -> dict[str, Any]:
     service = PublicationService(db)
     try:

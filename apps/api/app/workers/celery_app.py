@@ -28,5 +28,5 @@ celery_app.conf.update(
     worker_prefetch_multiplier=1,
     task_acks_late=True,
     task_always_eager=is_test_or_eager,
-    broker_connection_retry_on_startup=False,
+    broker_connection_retry_on_startup=not is_test_or_eager,
 )

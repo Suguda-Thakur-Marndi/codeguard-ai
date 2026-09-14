@@ -36,7 +36,16 @@ class ServiceAuthenticator:
     """Validates service tokens and authenticates internal callers to the MCP server."""
 
     def __init__(self, secret_key: str | None = None) -> None:
-        self.secret_key = secret_key or os.getenv("MCP_SERVICE_TOKEN", "dev-mcp-service-token")
+        env = os.getenv("APP_ENV", "development")
+        token = secret_key or os.getenv("MCP_SERVICE_TOKEN", "")
+        if not token:
+            if env in ("development", "test"):
+                token = "dev-mcp-service-token"
+            else:
+                raise ValueError("MCP_SERVICE_TOKEN must be securely configured in production.")
+        elif env == "production" and token == "dev-mcp-service-token":
+            raise ValueError("Default 'dev-mcp-service-token' is forbidden in production.")
+        self.secret_key = token
 
     def authenticate_request(
         self,

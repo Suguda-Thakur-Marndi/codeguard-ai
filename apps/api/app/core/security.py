@@ -3,7 +3,7 @@
 import hashlib
 import hmac
 
-from fastapi import Header, HTTPException, Request, status
+from fastapi import Depends, Header, HTTPException, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from app.core.config import settings
@@ -39,7 +39,7 @@ def verify_github_signature(raw_body: bytes, signature_header: str | None) -> bo
 
 async def get_current_user_or_bypass(
     request: Request,
-    auth_header: HTTPAuthorizationCredentials | None = None,
+    auth_header: HTTPAuthorizationCredentials | None = Depends(security_bearer),
     x_dev_token: str | None = Header(None, alias="X-Dev-Token"),
 ) -> dict:
     """
@@ -71,8 +71,8 @@ async def get_current_user_or_bypass(
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    # In Phase 1 foundation, validate token against SECRET_KEY or dev token
-    if token == settings.DEV_AUTH_TOKEN:
+    # Validate dev token only in non-production environments
+    if token == settings.DEV_AUTH_TOKEN and settings.APP_ENV != "production":
         return {
             "id": "dev-token-user",
             "login": "dev-token-user",

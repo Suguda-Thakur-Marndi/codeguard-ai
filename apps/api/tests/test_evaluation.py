@@ -1,22 +1,8 @@
 """Comprehensive test suite for Phase 7 Empirical Benchmarking & Validation subsystem."""
 
 from datetime import UTC, datetime
-from typing import Any
 
 import pytest
-from fastapi.testclient import TestClient
-from sqlalchemy.orm import Session
-
-from app.agents.schemas.finding import (
-    FindingCategory,
-    FindingSeverity,
-    ReviewFinding,
-)
-from app.models.benchmark import (
-    BenchmarkFindingEvaluationModel,
-    BenchmarkResultModel,
-    BenchmarkRunModel,
-)
 from evaluation.metrics.definitions import (
     calculate_category_accuracy,
     calculate_f1,
@@ -34,9 +20,7 @@ from evaluation.runners.pipeline_runner import PipelineRunner
 from evaluation.scenarios.loader import ScenarioLoader
 from evaluation.scenarios.schema import (
     BenchmarkDataset,
-    BenchmarkScenario,
     FindingClassification,
-    GroundTruthFinding,
     ScenarioCategory,
     ScenarioType,
 )
@@ -46,6 +30,19 @@ from evaluation.validators.isolation_guard import (
 )
 from evaluation.validators.patch_validator import PatchValidator
 from evaluation.validators.semantic_matcher import MatchResult, SemanticFindingMatcher
+from fastapi.testclient import TestClient
+from sqlalchemy.orm import Session
+
+from app.agents.schemas.finding import (
+    FindingCategory,
+    FindingSeverity,
+    ReviewFinding,
+)
+from app.models.benchmark import (
+    BenchmarkFindingEvaluationModel,
+    BenchmarkResultModel,
+    BenchmarkRunModel,
+)
 
 
 class TestScenarioLoaderAndSchema:

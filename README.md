@@ -1,97 +1,112 @@
 # CodeGuard AI — Agentic GitHub Pull Request Review Platform
 
-> **Phase 2 — Code Intelligence Engine**  
-> *Deterministic AST semantic expansion, symbol resolution, repository dependency graphs, and token-budgeted context ranking.*  
-> *(Note: LLM agents, Gemini API, LangGraph, and MCP are intentionally NOT enabled in Phase 2. Phase 2 outputs deterministic code intelligence for future AI review agents.)*
+> **Production Release — Phase 8 Verified**  
+> *Deterministic AST code intelligence, multi-agent LangGraph review engine, adversarial verification judge, MCP zero-trust governance, human authorization gates, and atomic GitHub publication.*
 
-CodeGuard AI transforms raw GitHub Pull Request diffs and repository source code into structured, semantically meaningful code intelligence. By parsing code into Tree-sitter Concrete/Abstract Syntax Trees, deterministically mapping diff hunks to enclosing semantic entities (functions, methods, classes), and resolving cross-file references and dependencies in a PostgreSQL-backed repository graph, CodeGuard AI delivers high-precision context for automated code reviews.
-
----
-
-## Architecture Overview
-
-```mermaid
-flowchart TD
-    PR[GitHub Pull Request] --> RawDiff[Raw Unified Diff]
-    RawDiff --> UDP[UnifiedDiffParser]
-    UDP --> ChangedFiles[Changed Files & Hunks]
-    UDP --> LineIndex[ChangedLineIndex: LEFT vs RIGHT]
-    
-    ChangedFiles --> SourceProv[RepositorySourceProvider]
-    SourceProv --> TS[Tree-sitter Language Parsers\nPython | JavaScript | TypeScript]
-    
-    TS --> ASTMapper[DiffToASTMapper: Changed Line -> Enclosing AST Chunk]
-    TS --> SymExt[Symbol Extractor]
-    TS --> ImpExt[Import & Dependency Extractor]
-    
-    SymExt --> RefRes[Static ReferenceResolver]
-    ImpExt --> RefRes
-    
-    RefRes --> Graph[Repository Graph: PostgreSQL Symbols, References, File Dependencies]
-    
-    ASTMapper --> Ranker[Deterministic ContextRanker & Token Budgeter]
-    Graph --> Ranker
-    
-    Ranker --> API[Code Intelligence REST API]
-    API --> NextJS[Engineering Dashboard & Dev Debug Console]
-    API --> Phase3[Future Phase 3 AI Agents]
-```
+CodeGuard AI is an enterprise-grade agentic platform that automates GitHub Pull Request security, correctness, and contract reviews with mathematical precision and zero hallucinations.
 
 ---
 
-## Core Code Intelligence Pipeline
+## Production System Architecture
 
-### 1. Unified Diff Parsing & Deterministic Line Index
-- **`UnifiedDiffParser`**: Parses unified git diffs into strongly typed models (`DiffFile`, `DiffHunk`, `DiffLine`). Handles additions, deletions, renames, and binary files without regex-only fragility. Fallback recovery ensures individual broken hunks do not crash the entire review.
-- **`ChangedLineIndex`**: Creates a deterministic line lookup index distinguishing:
-  - **`RIGHT`**: Head file lines (additions and hunk context lines) eligible for PR inline comments.
-  - **`LEFT`**: Base file lines (deletions and hunk context lines).
-  - Enforces review boundaries with `is_valid_review_line(file_path, line_number, side)`.
-
-### 2. Pluggable Tree-sitter Language Parsers
-Language support uses a decoupled adapter pattern (`LanguageParser`):
-- **`PythonParser`**: Tree-sitter Python adapter extracting functions, methods, classes, imports, variables, and cross-file calls.
-- **`JavaScriptParser`**: Tree-sitter JavaScript adapter extracting functions, methods, classes, imports, and exports.
-- **`TypeScriptParser`**: Tree-sitter TypeScript & TSX adapter extracting interfaces, types, classes, methods, functions, and exports.
-- **`LanguageParserRegistry`**: Auto-detects parser from file extensions (`.py`, `.js`, `.mjs`, `.ts`, `.tsx`).
-
-### 3. Diff &rarr; AST Semantic Mapping
-Given an added line in a PR diff (e.g. `src/payment.py:143`), the `DiffToASTMapper` identifies the smallest enclosing semantic entity:
 ```
-Changed Line (L143)
-       │
-       ▼
-Method (PaymentService.refund, L130-L160)
-       │
-       ▼
-Class (PaymentService, L20-L220)
-       │
-       ▼
-Module (src/payment.py)
+                    GitHub
+                       │
+                       ▼
+                GitHub Webhook (HMAC-SHA256)
+                       │
+                       ▼
+                 FastAPI Backend
+                       │
+          ┌────────────┼─────────────┐
+          ▼            ▼             ▼
+      PostgreSQL     Redis       MCP Server
+          │            │
+          └────── Worker Queue ────┐
+                       │           │
+                       ▼           │
+                Review Pipeline    │
+                       │           │
+                       ▼           │
+               Code Intelligence   │
+              (Tree-sitter & AST)  │
+                       │           │
+                       ▼           │
+                  LangGraph        │
+                       │           │
+          ┌────────────┼───────────┴─┐
+          ▼            ▼             ▼
+      Security     Bug/Error   Test/Contract
+        Agent        Agent         Agent
+          \            │            /
+           \           │           /
+            └──────────┼──────────┘
+                       │
+                       ▼
+                Adversarial Judge
+                (4-Gate Verification)
+                       │
+                       ▼
+              Execution Validation
+                (Docker Sandbox)
+                       │
+                       ▼
+               Governance Policy
+                       │
+                ┌──────┴──────┐
+                ▼             ▼
+          Human Approval   Read-only
+                │
+                ▼
+          GitHub Review (Atomic Inline Comments)
+                │
+                ▼
+            Audit Log (Immutable Append-Only)
 ```
-Generates `ASTChunk` models complete with start/end byte offsets, line spans, signatures, parameters, and attached changed line numbers.
 
-### 4. Cross-file Reference Resolution & Repository Graph
-- **`ReferenceResolver`**: Statically discovers caller-callee and inheritance relationships across files using import mappings and unique symbol lookups. If a symbol call cannot be resolved confidently, it is marked unresolved rather than hallucinating targets.
-- **`RepositoryGraphBuilder`**: Constructs a directed dependency graph persisted in PostgreSQL:
-  - **Nodes**: `Repository`, `File`, `Class`, `Function`, `Method`, `Interface`, `Type`.
-  - **Edges**: `IMPORTS`, `CALLS`, `REFERENCES`, `INHERITS`, `IMPLEMENTS`, `DEFINES`.
-  - Normalized database tables: `repository_indices`, `code_symbols`, `symbol_references`, `file_dependencies`.
+---
 
-### 5. Deterministic Context Ranking & Token Budgeting
-Future LLM agents have finite token context windows. The `ContextRanker` scores and prioritizes context items deterministically:
-- **`1.00`**: Target changed AST chunk
-- **`0.95`**: Sibling symbols within the changed file
-- **`0.85`**: Direct cross-file callers (e.g. `RefundController.handle_refund` calling `PaymentService.refund`)
-- **`0.80`**: Direct dependencies (e.g. `PaymentRepository`, `AuthService`, `Payment`)
-- **`0.50`**: Two-hop transitive dependencies
-- **Token Budgeter**: Enforces configurable `max_files`, `max_symbols`, and `max_characters` limits.
+## Key Subsystems
 
-### 6. Incremental Indexing Strategy
-To avoid re-parsing repositories of 10,000+ files for each PR, the engine supports:
-- **Initial Indexing**: Full repository scan at commit SHA.
-- **Incremental Indexing**: Selectively re-parses only modified files in the PR diff, re-links their affected references, and preserves unchanged graph records.
-- **Deletions & Renames**: Safely purges or updates graph entries for deleted or renamed files.
+### 1. Code Intelligence Engine (`packages/code-intelligence`)
+- **Tree-sitter AST Parsing**: Python, JavaScript, and TypeScript language adapters.
+- **Unified Diff Parser**: Deterministic hunk parsing with line classification (`LEFT` base vs `RIGHT` head).
+- **Enclosing Entity Resolution**: Maps added/modified lines to enclosing function, method, or class AST chunks.
+- **Repository Dependency Graph**: Cross-file caller-callee and inheritance graphs stored in PostgreSQL.
+- **Context Ranking**: Deterministic token-budgeted context ranking (1.00 for target AST, 0.95 for sibling symbols, 0.85 for direct callers).
+
+### 2. Agentic Multi-Agent Review Pipeline (`apps/api/app/agents`)
+- **LangGraph StateGraph**: Orchestrates comprehension, risk-based routing, parallel specialist dispatch, and aggregation.
+- **Specialist Agents**:
+  - `SecurityAgent`: OWASP Top 10, auth bypass, injection, hardcoded secrets.
+  - `BugAgent`: Null dereference, unhandled exceptions, logic drift, off-by-one errors.
+  - `TestAgent`: Test contract compliance, regression risk, missing edge-case test coverage.
+  - `PerformanceAgent`: Algorithmic complexity, N+1 database queries, resource leaks.
+- **Strict Structured Outputs**: JSON schema-validated Pydantic models with token and cost tracking.
+
+### 3. Adversarial Verification & Execution Sandbox (`apps/api/app/agents/judge`, `validation`)
+- **4-Gate Adversarial Judge**:
+  - *Gate 1*: Diff Boundary Conformity (rejects line hallucinations outside diff hunks).
+  - *Gate 2*: Contextual Factuality (detects existing guards/callers mitigating the issue).
+  - *Gate 3*: Actionability Heuristics (rejects vague suggestions without concrete resolutions).
+  - *Gate 4*: Severity Penalty Audit (downgrades over-inflated severity ratings).
+- **Root-Cause Deduplication**: Merges multi-agent duplicate findings into canonical findings.
+- **Execution Sandbox**: Isolated ephemeral container execution (`network_mode="none"`, non-root user, CPU/memory limits, 30s timeout, command allowlist).
+
+### 4. Zero-Trust MCP Governance & Human Authorization (`apps/mcp-server`, `apps/api/app/mcp`)
+- **Model Context Protocol (MCP)** gateway exposing strictly typed tool definitions.
+- **Anti-Self-Approval Enforcement**: AI agents are strictly prohibited from approving their own reviews.
+- **Role-Based Authorization**: Only users with `REVIEWER` or `ADMIN` roles can authorize consequential publications.
+- **SHA-Bound Approvals & Commit Drift Protection**: Approvals are cryptographically bound to the PR head commit SHA. If a developer pushes new commits, existing approvals are automatically marked `STALE` and rejected.
+
+### 5. Atomic GitHub Publication (`apps/api/app/github`)
+- Idempotent review publication with inline comment coordinates strictly validated against diff hunks.
+- Automatic secret scrubbers redact bearer tokens, private keys, and API credentials from comment bodies.
+
+### 6. Empirical Benchmarking & Regression Detection (`evaluation`)
+- 12 real-world multi-language evaluation scenarios across Security, Bugs, and Contract compliance.
+- Automated calculation of Precision, Recall, F1 score, Line Accuracy, and Latency percentiles (P50/P95).
+- Regression detector flags performance degradations before deployments.
 
 ---
 
@@ -100,130 +115,131 @@ To avoid re-parsing repositories of 10,000+ files for each PR, the engine suppor
 ```
 codeguard-ai/
 ├── apps/
-│   ├── api/                      # FastAPI service, Celery worker, and Alembic migrations
+│   ├── api/                      # FastAPI REST API, Celery worker, Alembic migrations
 │   │   ├── app/
-│   │   │   ├── api/v1/endpoints/ # REST routes (repositories, code_intelligence, review_jobs)
-│   │   │   ├── db/repositories/  # Data access (code_symbols, repository_indices, etc.)
-│   │   │   ├── models/           # SQLAlchemy ORM models
+│   │   │   ├── agents/           # LangGraph orchestrator, specialists, judge, sandbox
+│   │   │   ├── api/v1/endpoints/ # Protected REST endpoints (reviews, approvals, audit, etc.)
+│   │   │   ├── core/             # Configuration, security, logging
+│   │   │   ├── db/               # PostgreSQL connection pooling and ORM repositories
+│   │   │   ├── github/           # GitHub App client, JWT auth, review publisher
+│   │   │   ├── mcp/              # MCP policy engine and risk classification
+│   │   │   ├── models/           # SQLAlchemy 2.0 ORM models (27 tables)
 │   │   │   ├── schemas/          # Pydantic v2 schemas
-│   │   │   ├── services/         # CodeIntelligenceService, ReviewJobService
-│   │   │   └── workers/          # Celery background worker
-│   │   ├── alembic/              # Migrations 001 (core) and 002 (code intelligence)
-│   │   ├── tests/                # 61 comprehensive unit & integration tests
-│   │   └── Dockerfile
+│   │   │   ├── services/         # Domain services (approval, publication, review jobs)
+│   │   │   └── workers/          # Celery asynchronous task definitions
+│   │   ├── alembic/              # Database schema migrations (001 through 006)
+│   │   ├── tests/                # 163 unit and integration tests
+│   │   └── Dockerfile            # Production hardened non-root container image
+│   │
+│   ├── mcp-server/               # Standalone Model Context Protocol gateway
+│   │   ├── app/                  # MCP server tools, policies, audit logger, service auth
+│   │   ├── tests/                # 9 policy and tool execution tests
+│   │   └── Dockerfile            # Hardened non-root MCP container image
 │   │
 │   └── web/                      # Next.js 15 App Router engineering dashboard
-│       ├── app/
-│       │   ├── dashboard/        # System health and review metrics
-│       │   ├── repositories/     # Repo list with Index Status & "Index Repository" trigger
-│       │   ├── pull-requests/    # PR list & detail view with Code Intelligence flow
-│       │   └── debug/            # Platform Developer Debug Console
+│       ├── app/                  # Dashboard, PR list, Review details, Approvals, Policies
 │       ├── components/           # UI components
-│       └── lib/                  # Typed API client
+│       ├── lib/                  # Typed API client
+│       └── Dockerfile            # Multi-stage standalone Next.js image
 │
 ├── packages/
-│   └── code-intelligence/        # Production Tree-sitter & AST intelligence engine
-│       ├── code_intelligence/
-│       │   ├── ast/              # DiffToASTMapper
-│       │   ├── context/          # ContextRanker & Budgeting
-│       │   ├── diff/             # UnifiedDiffParser & ChangedLineIndex
-│       │   ├── filter/           # FileFilter (security, binary, size limits)
-│       │   ├── graph/            # RepositoryGraph & Builder
-│       │   ├── languages/        # Pluggable Tree-sitter adapters (Python, JS, TS)
-│       │   ├── references/       # Static ReferenceResolver
-│       │   ├── source/           # RepositorySourceProvider
-│       │   ├── engine.py         # CodeIntelligenceEngine
-│       │   └── models.py         # Pydantic typed intelligence models
-│       └── pyproject.toml
+│   └── code-intelligence/        # Tree-sitter AST & Context Ranking engine
 │
-├── fixtures/                     # Realistic multi-file test repositories
-│   ├── python_repo/              # Payment service, repository, auth, controller, tests
-│   ├── javascript_repo/          # JS classes, functions, and imports
-│   └── typescript_repo/          # TS interfaces, types, classes, and gateways
+├── evaluation/                   # Empirical benchmarking subsystem & datasets
+├── fixtures/                     # Test repositories (Python, JavaScript, TypeScript)
+├── scripts/                      # Database backup & restore utilities
+├── docs/                         # Runbooks & Disaster Recovery guides
+│   ├── RUNBOOK.md                # Operations incident response procedures
+│   ├── SECURITY_RUNBOOK.md       # Security incident & secret rotation runbook
+│   └── DISASTER_RECOVERY.md      # RPO/RTO & recovery verification procedures
 │
-├── docker-compose.yml            # Multi-container orchestration (API, worker, web, postgres, redis)
-├── verify_phase2.py              # End-to-end real-world verification script
-└── README.md
+├── docker-compose.yml            # Local development orchestration
+├── docker-compose.prod.yml       # Production container orchestration
+├── Makefile                      # Standardized developer & release commands
+└── benchmark.py                  # Benchmarking CLI
 ```
 
 ---
 
-## Database Schema (Phase 2 Additions)
+## Getting Started
 
-Phase 2 adds 4 database tables via Alembic migration `002_phase2_code_intelligence_tables`:
+### Prerequisites
+- Python 3.11+ (Python 3.12 recommended)
+- Node.js 20+ / 22
+- Docker & Docker Compose
+- PostgreSQL 16 & Redis 7
 
-1. **`repository_indices`**:
-   - `repository_id`, `commit_sha`, `status` (`NOT_INDEXED`, `INDEXING`, `READY`, `PARTIAL`, `FAILED`)
-   - `files_processed`, `files_failed`, `error_count`, `index_started_at`, `index_completed_at`
-2. **`code_symbols`**:
-   - `repository_id`, `commit_sha`, `file_path`, `name`, `kind`, `language`
-   - `start_line`, `end_line`, `signature`, `return_type`, `parent_symbol`, `source_code`
-3. **`symbol_references`**:
-   - `repository_id`, `commit_sha`, `source_file`, `source_symbol`, `target_file`, `target_symbol`
-   - `line_number`, `reference_type` (`CALL`, `IMPORT`, `INHERITANCE`, `IMPLEMENTATION`), `resolved`
-4. **`file_dependencies`**:
-   - `repository_id`, `commit_sha`, `source_file`, `target_file`, `dependency_type`, `is_external`
-
----
-
-## REST API Reference (Phase 2 Additions)
-
-| Method | Endpoint | Description |
-|---|---|---|
-| `GET` | `/api/v1/repositories/{id}/index` | Inspect current repository indexing state and commit |
-| `POST` | `/api/v1/repositories/{id}/index` | Trigger repository indexing at specified commit SHA |
-| `GET` | `/api/v1/repositories/{id}/symbols` | Query indexed symbols (paginated, kind & file filters) |
-| `GET` | `/api/v1/repositories/{id}/symbols/{symbol_id}` | Retrieve specific symbol details |
-| `GET` | `/api/v1/repositories/{id}/files/{path}/symbols` | Retrieve all symbols defined in a file |
-| `GET` | `/api/v1/repositories/{id}/files/{path}/dependencies`| Retrieve static imports and dependencies of a file |
-| `GET` | `/api/v1/repositories/{id}/context` | Query token-budgeted ranked context for a changed file/symbol |
-| `GET` | `/api/v1/review-jobs/{id}/diff` | Retrieve parsed unified diff files and hunks |
-| `GET` | `/api/v1/review-jobs/{id}/chunks` | Retrieve AST semantic chunks covering changed lines |
-| `GET` | `/api/v1/review-jobs/{id}/changed-lines` | Retrieve deterministic changed line index (LEFT vs RIGHT) |
-
----
-
-## Security & Protection Guards
-
-1. **Path Traversal Protection**: All paths are validated against directory traversal attacks (e.g. `../../etc/passwd`). Violations raise immediate errors and reject the operation.
-2. **Binary File Skipping**: Content is checked for binary null bytes and high non-printable byte density. Marked `SKIPPED_BINARY` and excluded from Tree-sitter parsing.
-3. **Large File Protection**: Threshold limits enforce maximum file size (500 KB), maximum source lines (5,000 lines), and maximum AST nodes (20,000 nodes). Large files record structured `ParserDiagnostic` records without crashing.
-4. **Source Code Secrecy in Logs**: Full source code, complete diffs, and raw credentials are NEVER output to application logs.
-
----
-
-## Verification & Testing
-
-Run all 61 automated tests:
+### Local Installation
 ```bash
-.venv\Scripts\pytest apps/api/tests -v
+# 1. Clone repository
+git clone https://github.com/your-org/codeguard-ai.git
+cd codeguard-ai
+
+# 2. Install dependencies
+make install
+
+# 3. Configure environment
+cp .env.example .env
+
+# 4. Apply database migrations
+make migrate
+
+# 5. Run development servers
+make dev
 ```
 
-Run code formatting and lint verification:
+### Running Test Suites
 ```bash
-.venv\Scripts\ruff check apps/api packages/code-intelligence
-```
+# Run all backend and MCP tests
+make test
 
-Run the real-world end-to-end verification script:
-```bash
-.venv\Scripts\python verify_phase2.py
-```
+# Run code linter
+make lint
 
-Build the Next.js engineering dashboard:
-```bash
-cd apps/web && npm run build
+# Validate benchmark dataset integrity
+make validate-benchmark
+
+# Run all 6 end-to-end verification suites
+make verify-all
 ```
 
 ---
 
-## Supported Languages & Known Limitations
+## Production Deployment
 
-### Supported in Phase 2
-- **Python** (3.8 - 3.13): Functions, methods, classes, variables, imports, calls, inheritance.
-- **JavaScript** (ES6+): Functions, arrow functions, methods, classes, imports, exports.
-- **TypeScript & TSX**: Functions, methods, classes, interfaces, type aliases, imports, exports.
+### 1. Configure Environment
+Create `.env` based on `.env.production.example`:
+```bash
+cp .env.production.example .env.production
+# Populate all required production secrets:
+# - GITHUB_APP_ID, GITHUB_PRIVATE_KEY, GITHUB_WEBHOOK_SECRET
+# - DATABASE_URL, REDIS_URL, REDIS_PASSWORD
+# - GEMINI_API_KEY, SECRET_KEY, MCP_SERVICE_TOKEN
+```
 
-### Known Limitations (Planned for Future Phases)
-- **Dynamic Reflection**: Dynamically computed imports (e.g. `importlib.import_module`, `require(variable)`) are marked unresolved.
-- **Full Type Inference**: Static cross-file references resolve by symbol and file dependency paths rather than a full LSP semantic compiler server.
-- **C/C++, Go, Rust, Java**: Language adapter architecture is pluggable; additional Tree-sitter grammars will be added in subsequent phases.
+### 2. Deploy with Docker Compose
+```bash
+docker compose -f docker-compose.prod.yml up --build -d
+```
+
+### 3. Verify Deployment
+```bash
+# Check process liveness
+curl -f http://localhost:8000/api/v1/live
+
+# Check database and Redis readiness
+curl -f http://localhost:8000/api/v1/ready
+
+# Check MCP gateway health
+curl -f http://localhost:8001/health
+```
+
+---
+
+## Operations & Disaster Recovery
+
+- **Operations Runbook**: [docs/RUNBOOK.md](file:///c:/Users/sugud/OneDrive/Documents/codeguard-ai/docs/RUNBOOK.md)
+- **Security Runbook & Secret Rotation**: [docs/SECURITY_RUNBOOK.md](file:///c:/Users/sugud/OneDrive/Documents/codeguard-ai/docs/SECURITY_RUNBOOK.md)
+- **Disaster Recovery**: [docs/DISASTER_RECOVERY.md](file:///c:/Users/sugud/OneDrive/Documents/codeguard-ai/docs/DISASTER_RECOVERY.md)
+- **Automated Backup**: `python scripts/backup_db.py --output-dir /var/backups`
+- **Automated Restore**: `python scripts/restore_db.py --backup-file /var/backups/<backup>.gz --confirm-restore`

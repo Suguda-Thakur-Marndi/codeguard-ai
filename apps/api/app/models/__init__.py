@@ -1,6 +1,11 @@
 from app.models.agent_run import AgentExecutionStatus, AgentRun
 from app.models.agent_trace import AgentTrace
 from app.models.approval_request import ApprovalRequest, ApprovalStatus
+from app.models.benchmark import (
+    BenchmarkFindingEvaluationModel,
+    BenchmarkResultModel,
+    BenchmarkRunModel,
+)
 from app.models.code_symbol import CodeSymbol
 from app.models.file_dependency import FileDependency
 from app.models.finding_evidence import FindingEvidenceModel
@@ -27,11 +32,6 @@ from app.models.review_finding import (
 )
 from app.models.review_job import ReviewJob, ReviewJobStatus
 from app.models.symbol_reference import SymbolReference
-from app.models.benchmark import (
-    BenchmarkFindingEvaluationModel,
-    BenchmarkResultModel,
-    BenchmarkRunModel,
-)
 from app.models.tool_audit import ToolExecutionAudit
 from app.models.validation_result import ValidationResultModel
 from app.models.validation_scenario import ValidationScenarioModel

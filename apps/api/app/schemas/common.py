@@ -28,7 +28,9 @@ class HealthResponse(BaseModel):
     """Liveness check response."""
     status: str = "ok"
     app: str = "codeguard-ai"
-    version: str = "0.1.0"
+    version: str = "1.0.0"
+    environment: str = "development"
+    git_revision: str | None = None
 
 
 class ReadinessCheckItem(BaseModel):

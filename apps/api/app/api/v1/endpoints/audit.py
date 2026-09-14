@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.core.security import get_current_user_or_bypass
 from app.db.session import get_db
 from app.models.tool_audit import ToolExecutionAudit
 
@@ -20,6 +21,7 @@ def list_audit_events(
     limit: int = Query(default=50, ge=1, le=100),
     offset: int = Query(default=0, ge=0),
     db: Session = Depends(get_db),
+    _user: dict = Depends(get_current_user_or_bypass),
 ) -> dict[str, Any]:
     query = select(ToolExecutionAudit).order_by(ToolExecutionAudit.created_at.desc())
     if organization_id:
@@ -60,6 +62,7 @@ def list_audit_events(
 def get_job_audit_trail(
     review_job_id: str,
     db: Session = Depends(get_db),
+    _user: dict = Depends(get_current_user_or_bypass),
 ) -> dict[str, Any]:
     # Query audit logs relating to this review job
     query = (

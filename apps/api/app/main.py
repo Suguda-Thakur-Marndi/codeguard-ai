@@ -98,7 +98,7 @@ def create_app() -> FastAPI:
     app = FastAPI(
         title="CodeGuard AI API",
         description="Production-grade agentic GitHub Pull Request review platform API (Phase 1)",
-        version="0.1.0",
+        version=settings.APP_VERSION,
         docs_url="/docs" if settings.APP_ENV != "production" else None,
         redoc_url="/redoc" if settings.APP_ENV != "production" else None,
         lifespan=lifespan,
@@ -173,9 +173,13 @@ def create_app() -> FastAPI:
     def root() -> dict:
         return {
             "name": "CodeGuard AI API",
+            "version": settings.APP_VERSION,
             "phase": "Phase 1 - Production Foundation",
+            "release_phase": "Phase 8 - Production Release",
+            "environment": settings.APP_ENV,
             "docs": "/docs" if settings.APP_ENV != "production" else "disabled",
             "health": "/api/v1/health",
+            "live": "/api/v1/live",
             "ready": "/api/v1/ready",
         }
 

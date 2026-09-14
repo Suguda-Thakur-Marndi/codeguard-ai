@@ -54,7 +54,14 @@ class ReviewJobService:
         self.engine = CodeIntelligenceEngine()
 
     def _resolve_default_llm_provider(self) -> LLMProvider:
-        """Resolve LLM provider from settings; fallback to MockLLMProvider if no API key in dev/test."""
+        """Resolve LLM provider from settings; fallback to MockLLMProvider only in non-production dev/test environments."""
+        if settings.APP_ENV == "production":
+            if not settings.GEMINI_API_KEY:
+                raise ValueError("GEMINI_API_KEY must be configured in production environment.")
+            if settings.LLM_PROVIDER == "mock":
+                raise ValueError("LLM_PROVIDER cannot be 'mock' in production environment.")
+            return GeminiProvider()
+
         if settings.LLM_PROVIDER == "mock" or not settings.GEMINI_API_KEY:
             return MockLLMProvider()
         return GeminiProvider()

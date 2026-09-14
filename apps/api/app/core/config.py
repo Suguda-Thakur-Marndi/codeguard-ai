@@ -26,9 +26,16 @@ class Settings(BaseSettings):
     BACKEND_URL: str = "http://localhost:8000"
     FRONTEND_URL: str = "http://localhost:3000"
 
+    # Build & Release Versioning
+    APP_VERSION: str = "1.0.0"
+    GIT_REVISION: str = "v1.0.0-release"
+
     # Database & Redis
     DATABASE_URL: str = "postgresql://codeguard:codeguard@localhost:5432/codeguard"
     REDIS_URL: str = "redis://localhost:6379/0"
+    DB_POOL_SIZE: int = 10
+    DB_MAX_OVERFLOW: int = 20
+    DB_POOL_TIMEOUT: int = 30
 
     # GitHub App Credentials
     GITHUB_APP_ID: str = "dev-app-id"
@@ -132,6 +139,14 @@ class Settings(BaseSettings):
                 errors.append("Production SECRET_KEY must be securely configured.")
             if self.DEV_AUTH_BYPASS:
                 errors.append("DEV_AUTH_BYPASS cannot be True in production.")
+            if self.LLM_PROVIDER == "mock":
+                errors.append("LLM_PROVIDER cannot be 'mock' in production.")
+            if not self.GEMINI_API_KEY:
+                errors.append("GEMINI_API_KEY must be configured in production.")
+            if self.MCP_SERVICE_TOKEN in ("dev-mcp-service-token", ""):
+                errors.append("Production MCP_SERVICE_TOKEN must be securely configured.")
+            if "localhost" in self.DATABASE_URL or "codeguard_secret" in self.DATABASE_URL:
+                errors.append("Production DATABASE_URL must not use local default credentials or localhost.")
             if errors:
                 raise ValueError(
                     f"Production configuration validation failed: {'; '.join(errors)}"

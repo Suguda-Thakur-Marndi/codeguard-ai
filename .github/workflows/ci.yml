@@ -40,7 +40,7 @@ jobs:
         run: |
           ruff check apps/api apps/mcp-server packages/code-intelligence
 
-      - name: Run Pytest Suite
+      - name: Run Backend Pytest Suite
         env:
           APP_ENV: test
           GITHUB_WEBHOOK_SECRET: test-webhook-secret-ci
@@ -48,7 +48,17 @@ jobs:
           DEV_AUTH_BYPASS: true
           CELERY_TASK_ALWAYS_EAGER: true
         run: |
-          pytest apps/api/tests apps/mcp-server/tests -v
+          pytest apps/api/tests -v
+
+      - name: Run MCP Server Pytest Suite
+        env:
+          APP_ENV: test
+        run: |
+          pytest apps/mcp-server/tests -o pythonpath=apps/mcp-server -v
+
+      - name: Validate Benchmark Dataset Integrity
+        run: |
+          python benchmark.py validate
 
   frontend-build:
     name: Frontend Lint & Build

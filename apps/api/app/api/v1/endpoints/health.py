@@ -22,10 +22,30 @@ def check_redis_connectivity() -> bool:
 @router.get("/health", response_model=HealthResponse)
 def health_check() -> HealthResponse:
     """
+    General health probe exposing application name, version, and environment.
+    """
+    return HealthResponse(
+        status="ok",
+        app="codeguard-ai",
+        version="0.1.0",
+        environment=settings.APP_ENV,
+        git_revision=settings.GIT_REVISION,
+    )
+
+
+@router.get("/live", response_model=HealthResponse)
+def liveness_check() -> HealthResponse:
+    """
     Liveness probe: Confirms that the API process is alive and responsive.
     Does not verify external backing services.
     """
-    return HealthResponse(status="ok", app="codeguard-ai", version="0.1.0")
+    return HealthResponse(
+        status="ok",
+        app=settings.APP_NAME,
+        version=settings.APP_VERSION,
+        environment=settings.APP_ENV,
+        git_revision=settings.GIT_REVISION,
+    )
 
 
 @router.get("/ready", response_model=ReadinessResponse)

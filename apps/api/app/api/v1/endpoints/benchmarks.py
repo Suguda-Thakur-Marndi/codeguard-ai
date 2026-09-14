@@ -5,8 +5,8 @@ from typing import Any
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
+from app.core.security import get_current_user_or_bypass
 from app.db.repositories.benchmark_repo import (
-    BenchmarkResultRepository,
     BenchmarkRunRepository,
 )
 from app.db.session import get_db
@@ -19,6 +19,7 @@ def list_benchmark_runs(
     page: int = Query(default=1, ge=1),
     page_size: int = Query(default=20, ge=1, le=100),
     db: Session = Depends(get_db),
+    _user: dict = Depends(get_current_user_or_bypass),
 ) -> dict[str, Any]:
     """List benchmark execution runs ordered by creation date descending."""
     repo = BenchmarkRunRepository(db)
@@ -52,6 +53,7 @@ def list_benchmark_runs(
 def get_benchmark_run(
     run_id: str,
     db: Session = Depends(get_db),
+    _user: dict = Depends(get_current_user_or_bypass),
 ) -> dict[str, Any]:
     """Get full details of a specific benchmark run, including scenario results and evaluations."""
     repo = BenchmarkRunRepository(db)
@@ -121,6 +123,7 @@ def compare_benchmark_runs(
     baseline_run_id: str = Query(..., description="ID of baseline benchmark run"),
     candidate_run_id: str = Query(..., description="ID of candidate benchmark run"),
     db: Session = Depends(get_db),
+    _user: dict = Depends(get_current_user_or_bypass),
 ) -> dict[str, Any]:
     """Compare two benchmark runs and calculate delta metrics and regression analysis."""
     repo = BenchmarkRunRepository(db)

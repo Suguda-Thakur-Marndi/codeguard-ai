@@ -1,9 +1,9 @@
 """Atomic GitHub PR Review Publisher with Line Validation & Stale Detection."""
 
 import asyncio
-from collections.abc import Mapping
 import random
 import re
+from collections.abc import Mapping
 from typing import Any, NamedTuple
 
 SECRET_PATTERNS = [

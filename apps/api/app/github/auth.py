@@ -40,7 +40,8 @@ class GitHubAppAuth:
         }
 
         try:
-            return jwt.encode(payload, self.private_key, algorithm="RS256")
+            private_key = self.private_key.replace("\\n", "\n")
+            return jwt.encode(payload, private_key, algorithm="RS256")
         except Exception as e:
             logger.error("Failed to sign GitHub App JWT", exc_info=True)
             raise GitHubAuthError(f"Failed to generate GitHub App JWT: {str(e)}") from e

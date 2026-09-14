@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends, Header, HTTPException, status
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
+from app.core.security import get_current_user_or_bypass
 from app.db.session import get_db
 from app.services.policy_service import PolicyService
 
@@ -26,6 +27,7 @@ class PolicyUpdatePayload(BaseModel):
 def get_organization_policies(
     organization_id: str,
     db: Session = Depends(get_db),
+    _user: dict = Depends(get_current_user_or_bypass),
 ) -> dict[str, Any]:
     service = PolicyService(db)
     policy = service.get_or_create_policy(organization_id)
@@ -49,14 +51,20 @@ def get_organization_policies(
 def update_organization_policies(
     organization_id: str,
     payload: PolicyUpdatePayload,
-    x_user_role: str = Header(default="ADMIN"),
+    x_user_role: str | None = Header(default=None),
     db: Session = Depends(get_db),
+    _user: dict = Depends(get_current_user_or_bypass),
 ) -> dict[str, Any]:
     service = PolicyService(db)
+    user_role = str(_user.get("role", "MEMBER")).upper()
+    if _user.get("is_dev") or user_role == "ADMIN":
+        if x_user_role:
+            user_role = x_user_role.upper()
+
     try:
         policy = service.update_policy(
             organization_id=organization_id,
-            updater_role=x_user_role,
+            updater_role=user_role,
             updates=payload.model_dump(exclude_unset=True),
         )
         return {

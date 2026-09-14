@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends, Header, HTTPException, Query, status
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
+from app.core.security import get_current_user_or_bypass
 from app.db.session import get_db
 from app.models.approval_request import ApprovalStatus
 from app.services.approval_service import ApprovalService
@@ -30,6 +31,7 @@ def list_approvals(
     limit: int = Query(default=50, ge=1, le=100),
     offset: int = Query(default=0, ge=0),
     db: Session = Depends(get_db),
+    _user: dict = Depends(get_current_user_or_bypass),
 ) -> dict[str, Any]:
     service = ApprovalService(db)
     items = service.list_approval_requests(
@@ -70,6 +72,7 @@ def list_approvals(
 def get_approval(
     approval_id: str,
     db: Session = Depends(get_db),
+    _user: dict = Depends(get_current_user_or_bypass),
 ) -> dict[str, Any]:
     service = ApprovalService(db)
     req = service.get_approval_request(approval_id)
@@ -100,16 +103,27 @@ def get_approval(
 def approve_request(
     approval_id: str,
     payload: ApprovePayload,
-    x_user_id: str = Header(default="human-reviewer-1"),
-    x_user_role: str = Header(default="REVIEWER"),
+    x_user_id: str | None = Header(default=None),
+    x_user_role: str | None = Header(default=None),
     db: Session = Depends(get_db),
+    _user: dict = Depends(get_current_user_or_bypass),
 ) -> dict[str, Any]:
     service = ApprovalService(db)
+    approver_principal_id = _user.get("id") or "human-reviewer"
+    approver_role = str(_user.get("role", "REVIEWER")).upper()
+
+    # In dev/test bypass mode or admin role, allow explicit header overrides
+    if _user.get("is_dev") or _user.get("role") == "admin":
+        if x_user_id:
+            approver_principal_id = x_user_id
+        if x_user_role:
+            approver_role = x_user_role.upper()
+
     try:
         req = service.approve_request(
             approval_id=approval_id,
-            approver_principal_id=x_user_id,
-            approver_role=x_user_role,
+            approver_principal_id=approver_principal_id,
+            approver_role=approver_role,
             is_ai_agent=False,
             comment=payload.comment,
         )
@@ -149,16 +163,27 @@ def approve_request(
 def reject_request(
     approval_id: str,
     payload: RejectPayload,
-    x_user_id: str = Header(default="human-reviewer-1"),
-    x_user_role: str = Header(default="REVIEWER"),
+    x_user_id: str | None = Header(default=None),
+    x_user_role: str | None = Header(default=None),
     db: Session = Depends(get_db),
+    _user: dict = Depends(get_current_user_or_bypass),
 ) -> dict[str, Any]:
     service = ApprovalService(db)
+    approver_principal_id = _user.get("id") or "human-reviewer"
+    approver_role = str(_user.get("role", "REVIEWER")).upper()
+
+    # In dev/test bypass mode or admin role, allow explicit header overrides
+    if _user.get("is_dev") or _user.get("role") == "admin":
+        if x_user_id:
+            approver_principal_id = x_user_id
+        if x_user_role:
+            approver_role = x_user_role.upper()
+
     try:
         req = service.reject_request(
             approval_id=approval_id,
-            approver_principal_id=x_user_id,
-            approver_role=x_user_role,
+            approver_principal_id=approver_principal_id,
+            approver_role=approver_role,
             is_ai_agent=False,
             reason=payload.reason,
         )
