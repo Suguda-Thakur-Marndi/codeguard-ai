@@ -1,8 +1,7 @@
 """Pydantic schemas for Phase 7 Benchmark Scenarios, Ground Truth, and Results."""
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from enum import StrEnum
-from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -111,5 +110,5 @@ class BenchmarkDataset(BaseModel):
 
     dataset_version: str = Field(default="v1", description="Dataset version (e.g. 'v1', 'v2')")
     description: str = Field(default="", description="Description of the dataset")
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     scenarios: list[BenchmarkScenario] = Field(default_factory=list)

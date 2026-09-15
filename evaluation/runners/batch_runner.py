@@ -4,7 +4,6 @@ import asyncio
 import time
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
-from typing import Any
 
 from evaluation.metrics.engine import BenchmarkMetricsSummary, MetricsEngine
 from evaluation.runners.pipeline_runner import PipelineRunner, ScenarioExecutionResult

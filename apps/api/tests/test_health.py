@@ -9,9 +9,10 @@ def test_health_check(client: TestClient) -> None:
     response = client.get("/api/v1/health")
     assert response.status_code == 200
     data = response.json()
+    from app.core.config import settings
     assert data["status"] == "ok"
-    assert data["app"] == "codeguard-ai"
-    assert data["version"] == "0.1.0"
+    assert data["app"] == settings.APP_NAME
+    assert data["version"] == settings.APP_VERSION
 
 
 def test_root_endpoint(client: TestClient) -> None:

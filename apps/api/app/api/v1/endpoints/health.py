@@ -26,8 +26,8 @@ def health_check() -> HealthResponse:
     """
     return HealthResponse(
         status="ok",
-        app="codeguard-ai",
-        version="0.1.0",
+        app=settings.APP_NAME,
+        version=settings.APP_VERSION,
         environment=settings.APP_ENV,
         git_revision=settings.GIT_REVISION,
     )

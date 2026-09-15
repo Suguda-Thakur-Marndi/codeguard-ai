@@ -1,9 +1,7 @@
 """Dataset and scenario loader for CodeGuard AI benchmarks."""
 
 import json
-import os
 from pathlib import Path
-from typing import Any
 
 from evaluation.scenarios.schema import (
     BenchmarkDataset,
@@ -39,7 +37,7 @@ class ScenarioLoader:
         if not dataset_path.exists():
             raise FileNotFoundError(f"Benchmark dataset '{version}' not found at {dataset_path}")
 
-        with open(dataset_path, "r", encoding="utf-8") as f:
+        with open(dataset_path, encoding="utf-8") as f:
             raw_data = json.load(f)
 
         if isinstance(raw_data, dict) and "scenarios" in raw_data:

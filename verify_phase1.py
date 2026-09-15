@@ -5,22 +5,18 @@ import hmac
 import json
 import os
 import sys
-import time
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "apps", "api")))
 os.environ["APP_ENV"] = "development"
 os.environ["DATABASE_URL"] = "sqlite:///local_verify.db"
 os.environ["CELERY_TASK_ALWAYS_EAGER"] = "true"
 
-from fastapi.testclient import TestClient
-
 from app.core.config import settings
 from app.db.base import Base
-from app.db.session import engine, SessionLocal
+from app.db.session import SessionLocal, engine
 from app.main import app
-from app.models.review_artifact import ReviewArtifact
-from app.models.review_job import ReviewJob, ReviewJobStatus
 from app.workers.tasks import run_review_job_sync
+from fastapi.testclient import TestClient
 
 
 def log_step(name: str):

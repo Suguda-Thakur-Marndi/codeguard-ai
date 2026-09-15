@@ -192,23 +192,41 @@ make dev
 ```bash
 # Run all backend and MCP tests
 make test
+# or:
+pytest apps/api/tests
+pytest apps/mcp-server/tests
 
 # Run code linter
 make lint
+# or:
+ruff check .
 
 # Validate benchmark dataset integrity
-make validate-benchmark
+python benchmark.py validate
 
-# Run all 6 end-to-end verification suites
-make verify-all
+# Run benchmark suite and check for performance/quality regressions
+python benchmark.py run --dataset v1
+python benchmark.py regression
+
+# Run Phase 8 Master 20-Criteria Production Verification
+python verify_phase8.py
 ```
 
 ---
 
-## Production Deployment
+## Production Deployment & CI/CD
+
+### CI/CD Pipeline
+The repository includes an enterprise-grade GitHub Actions workflow (`.github/workflows/ci.yml`) featuring:
+1. **Linting & Code Quality**: `ruff check .` with zero-tolerance rules.
+2. **Unit & Integration Test Matrix**: Full API (163 tests) and MCP Server (9 tests) suites with coverage enforcement.
+3. **Empirical Benchmark Regression Gate**: Runs the 12-scenario benchmark and asserts 0 precision/recall/latency regressions against baseline.
+4. **Frontend Production Build**: Compiles Next.js 15 App Router into standalone production bundle with strict TypeScript verification.
+5. **Container Image Build & Security Scan**: Builds multi-stage Docker images and executes Trivy vulnerability scanning.
+6. **Automated Staging & Human-Gated Production Deployments**: Deploys to staging with post-deploy HTTP smoke tests (`/live`, `/health`, `/ready`), followed by manual approval gate for production releases.
 
 ### 1. Configure Environment
-Create `.env` based on `.env.production.example`:
+Create `.env` based on `.env.production.example` or `.env.staging.example`:
 ```bash
 cp .env.production.example .env.production
 # Populate all required production secrets:
@@ -240,6 +258,6 @@ curl -f http://localhost:8001/health
 
 - **Operations Runbook**: [docs/RUNBOOK.md](file:///c:/Users/sugud/OneDrive/Documents/codeguard-ai/docs/RUNBOOK.md)
 - **Security Runbook & Secret Rotation**: [docs/SECURITY_RUNBOOK.md](file:///c:/Users/sugud/OneDrive/Documents/codeguard-ai/docs/SECURITY_RUNBOOK.md)
-- **Disaster Recovery**: [docs/DISASTER_RECOVERY.md](file:///c:/Users/sugud/OneDrive/Documents/codeguard-ai/docs/DISASTER_RECOVERY.md)
+- **Disaster Recovery Plan (RPO/RTO)**: [docs/DISASTER_RECOVERY.md](file:///c:/Users/sugud/OneDrive/Documents/codeguard-ai/docs/DISASTER_RECOVERY.md)
 - **Automated Backup**: `python scripts/backup_db.py --output-dir /var/backups`
-- **Automated Restore**: `python scripts/restore_db.py --backup-file /var/backups/<backup>.gz --confirm-restore`
+- **Automated Restore Drill**: `python scripts/restore_db.py --backup-file /var/backups/<backup>.gz --confirm-restore`

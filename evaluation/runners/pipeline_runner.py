@@ -1,22 +1,9 @@
 """Pipeline runner executing a single benchmark scenario through the real CodeGuard review engine."""
 
-import json
 import os
 import time
-import uuid
 from dataclasses import dataclass, field
-from datetime import UTC, datetime
 from typing import Any
-
-from code_intelligence.engine import CodeIntelligenceEngine
-from code_intelligence.source.provider import (
-    LocalDiskRepositorySourceProvider,
-    MemoryRepositorySourceProvider,
-    RepositorySourceProvider,
-)
-from sqlalchemy import create_engine
-from sqlalchemy.orm import Session, sessionmaker
-from sqlalchemy.pool import StaticPool
 
 from app.agents.judge.schemas import JudgeDecision, JudgeDecisionType
 from app.agents.llm.mock import MockLLMProvider
@@ -35,15 +22,24 @@ from app.agents.schemas.finding import (
 from app.db.base import Base
 from app.github.publisher import ReviewPublishResult
 from app.mcp.auth import Principal, PrincipalRole
-from app.mcp.policy_engine import PolicyDecision, PolicyEngine
+from app.mcp.policy_engine import PolicyEngine
 from app.models.organization import Organization
 from app.models.pull_request import PullRequest
 from app.models.repository import Repository
-from app.models.review_finding import ReviewFindingModel
 from app.models.review_job import ReviewJob, ReviewJobStatus
 from app.services.verification_service import VerificationService
+from code_intelligence.engine import CodeIntelligenceEngine
+from code_intelligence.source.provider import (
+    LocalDiskRepositorySourceProvider,
+    MemoryRepositorySourceProvider,
+    RepositorySourceProvider,
+)
+from sqlalchemy import create_engine
+from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy.pool import StaticPool
+
 from evaluation.scenarios.schema import BenchmarkScenario
-from evaluation.validators.isolation_guard import BenchmarkIsolationGuard, NullGitHubPublisher
+from evaluation.validators.isolation_guard import BenchmarkIsolationGuard
 from evaluation.validators.semantic_matcher import MatchResult, SemanticFindingMatcher
 
 
@@ -350,37 +346,37 @@ class PipelineRunner:
                     )
 
             # 3. Performance Specialist
-            if "performance specialist" in p_lower or "performance" in p_lower:
-                if "batch_settle" in p_lower or "self.repository.find_by_id(pid)" in p_lower:
-                    findings.append(
-                        ReviewFinding(
-                            file_path="src/services/payment_service.py",
-                            line_number=26,
-                            side="RIGHT",
-                            category=FindingCategory.PERFORMANCE,
-                            severity=FindingSeverity.MEDIUM,
-                            title="N+1 Database Query in Batch Settlement Operation",
-                            description="Queries payment records one by one inside a loop causing N+1 database roundtrips.",
-                            impact="Causes high database latency and connection pool starvation.",
-                            recommendation="Use repository.find_by_ids([pids]) batch query to avoid roundtrips.",
-                            evidence=[
-                                EvidenceItem(
-                                    type=EvidenceType.CODE,
-                                    file="src/services/payment_service.py",
-                                    line_start=26,
-                                    line_end=29,
-                                    description="Iterative query lookup inside comprehension",
-                                )
-                            ],
-                            confidence=0.88,
-                            affected_symbol="PaymentService.batch_settle",
-                            agent_name="performance",
-                        )
+            if ("performance specialist" in p_lower or "performance" in p_lower) and (
+                "batch_settle" in p_lower or "self.repository.find_by_id(pid)" in p_lower
+            ):
+                findings.append(
+                    ReviewFinding(
+                        file_path="src/services/payment_service.py",
+                        line_number=26,
+                        side="RIGHT",
+                        category=FindingCategory.PERFORMANCE,
+                        severity=FindingSeverity.MEDIUM,
+                        title="N+1 Database Query in Batch Settlement Operation",
+                        description="Queries payment records one by one inside a loop causing N+1 database roundtrips.",
+                        impact="Causes high database latency and connection pool starvation.",
+                        recommendation="Use repository.find_by_ids([pids]) batch query to avoid roundtrips.",
+                        evidence=[
+                            EvidenceItem(
+                                type=EvidenceType.CODE,
+                                file="src/services/payment_service.py",
+                                line_start=26,
+                                line_end=29,
+                                description="Iterative query lookup inside comprehension",
+                            )
+                        ],
+                        confidence=0.88,
+                        affected_symbol="PaymentService.batch_settle",
+                        agent_name="performance",
                     )
+                )
 
             # 4. Test/Contract Specialist
-            if "test specialist" in p_lower or "contract" in p_lower:
-                if "return (true, payment_id)" in p_lower:
+            if ("test specialist" in p_lower or "contract" in p_lower) and "return (true, payment_id)" in p_lower:
                     findings.append(
                         ReviewFinding(
                             file_path="src/services/payment_service.py",
@@ -706,9 +702,9 @@ class PipelineRunner:
                 github_publication_result=pub_result,
             )
 
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             latency_ms = (time.perf_counter() - t_start) * 1000.0
-            error_msg = f"{exc.__class__.__name__}: {str(exc)}"
+            error_msg = f"{exc.__class__.__name__}: {exc!s}"
             return ScenarioExecutionResult(
                 scenario_id=scenario.scenario_id,
                 status="SYSTEM_FAILURE",

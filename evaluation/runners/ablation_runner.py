@@ -1,7 +1,7 @@
 """Ablation evaluation runner testing component contributions."""
 
 from dataclasses import dataclass, field
-from typing import Any
+from typing import ClassVar
 
 from evaluation.metrics.engine import BenchmarkMetricsSummary, MetricsEngine
 from evaluation.runners.pipeline_runner import PipelineRunner, ScenarioExecutionResult
@@ -33,7 +33,7 @@ class AblationRunResult:
 class AblationRunner:
     """Executes controlled ablations to measure the empirical value of architectural components."""
 
-    STANDARD_CONFIGS = [
+    STANDARD_CONFIGS: ClassVar[list[AblationConfig]] = [
         AblationConfig(name="FULL_PIPELINE"),
         AblationConfig(name="WITHOUT_COMPREHENSION", disable_comprehension=True),
         AblationConfig(name="WITHOUT_SECURITY", disable_security=True),

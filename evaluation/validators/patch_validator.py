@@ -5,7 +5,6 @@ import os
 import shutil
 import tempfile
 from dataclasses import dataclass
-from typing import Any
 
 from app.agents.validation.sandbox import ExecutionSandbox
 

@@ -2,17 +2,17 @@
 
 import argparse
 import asyncio
+import json
 import os
 import sys
-from pathlib import Path
 
+from evaluation.metrics.engine import BenchmarkMetricsSummary
 from evaluation.metrics.regression import RegressionDetector
 from evaluation.reports.generator import BenchmarkReportGenerator
-from evaluation.runners.ablation_runner import AblationConfig, AblationRunner
+from evaluation.runners.ablation_runner import AblationRunner
 from evaluation.runners.batch_runner import BatchBenchmarkRunner
 from evaluation.runners.pipeline_runner import PipelineRunner
 from evaluation.scenarios.loader import ScenarioLoader
-from evaluation.scenarios.schema import BenchmarkScenario
 
 
 def cmd_list(args: argparse.Namespace) -> int:
@@ -53,7 +53,7 @@ def cmd_validate(args: argparse.Namespace) -> int:
                     assert gt.line_start > 0, f"{sc.scenario_id}: line_start must be positive"
         print(f"[PASS] All {len(ds.scenarios)} scenarios in dataset '{version}' passed integrity validation.")
         return 0
-    except Exception as exc:
+    except Exception as exc:  # noqa: BLE001
         print(f"[FAIL] Scenario validation failed: {exc}", file=sys.stderr)
         return 1
 
@@ -125,6 +125,83 @@ def cmd_run(args: argparse.Namespace) -> int:
     return 0 if result.summary_metrics.scenarios_failed == 0 else 1
 
 
+def cmd_regression(args: argparse.Namespace) -> int:
+    """Compare candidate benchmark run against baseline run to detect regressions."""
+    baseline_path = args.baseline or "benchmark_report.json"
+    if not os.path.exists(baseline_path):
+        print(f"Error: Baseline report '{baseline_path}' not found.", file=sys.stderr)
+        return 1
+
+    with open(baseline_path, encoding="utf-8") as f:
+        baseline_raw = json.load(f)
+
+    baseline_metrics_dict = baseline_raw.get("metrics", {})
+    baseline_summary = BenchmarkMetricsSummary(
+        **{k: v for k, v in baseline_metrics_dict.items() if k in BenchmarkMetricsSummary.__dataclass_fields__}
+    )
+
+    if args.candidate:
+        if not os.path.exists(args.candidate):
+            print(f"Error: Candidate report '{args.candidate}' not found.", file=sys.stderr)
+            return 1
+        with open(args.candidate, encoding="utf-8") as f:
+            candidate_raw = json.load(f)
+        candidate_summary = BenchmarkMetricsSummary(
+            **{k: v for k, v in candidate_raw.get("metrics", {}).items() if k in BenchmarkMetricsSummary.__dataclass_fields__}
+        )
+        candidate_id = candidate_raw.get("run_id", "candidate-run")
+    else:
+        # Run scenarios to generate fresh candidate
+        loader = ScenarioLoader()
+        version = args.dataset or "v1"
+        scenarios = loader.load_scenarios(version=version)
+        pipeline_runner = PipelineRunner()
+        batch_runner = BatchBenchmarkRunner(pipeline_runner, max_concurrency=args.concurrency)
+        res = asyncio.run(
+            batch_runner.run_batch(
+                scenarios=scenarios,
+                run_name="regression-check",
+                dataset_version=version,
+            )
+        )
+        candidate_summary = res.summary_metrics
+        candidate_id = res.run_id
+
+    detector = RegressionDetector(
+        f1_tolerance=args.f1_tolerance,
+        precision_tolerance=args.precision_tolerance,
+        recall_tolerance=args.recall_tolerance,
+    )
+    comp = detector.compare(
+        baseline_run_id=baseline_raw.get("run_id", "baseline"),
+        baseline=baseline_summary,
+        candidate_run_id=candidate_id,
+        candidate=candidate_summary,
+    )
+
+    print("=" * 70)
+    print("CODEGUARD AI BENCHMARK REGRESSION ANALYSIS")
+    print("=" * 70)
+    print(f"Baseline Run:  {comp.baseline_run_id} (F1: {baseline_summary.f1:.4f}, P: {baseline_summary.precision * 100:.1f}%, R: {baseline_summary.recall * 100:.1f}%)")
+    print(f"Candidate Run: {comp.candidate_run_id} (F1: {candidate_summary.f1:.4f}, P: {candidate_summary.precision * 100:.1f}%, R: {candidate_summary.recall * 100:.1f}%)")
+    print(f"Delta F1:        {comp.delta_f1:+.4f}")
+    print(f"Delta Precision: {comp.delta_precision:+.4f}")
+    print(f"Delta Recall:    {comp.delta_recall:+.4f}")
+    print(f"Delta Latency:   {comp.delta_avg_latency_ms:+.2f} ms")
+    print(f"Delta Cost:      ${comp.delta_estimated_cost_usd:+.6f}")
+    print("-" * 70)
+    if comp.is_regression:
+        print("[REGRESSION DETECTED]")
+        for reason in comp.reasons:
+            print(f"  - {reason}")
+        print("=" * 70)
+        return 1
+
+    print("[PASS] Zero performance or quality regressions detected!")
+    print("=" * 70)
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     """Build command line argument parser."""
     parser = argparse.ArgumentParser(
@@ -158,6 +235,17 @@ def build_parser() -> argparse.ArgumentParser:
     p_run.add_argument("--export-json", help="Path to write JSON report")
     p_run.add_argument("--export-csv", help="Path to write CSV report")
     p_run.set_defaults(func=cmd_run)
+
+    # regression
+    p_reg = subparsers.add_parser("regression", help="Run benchmark regression analysis")
+    p_reg.add_argument("--baseline", "-b", default="benchmark_report.json", help="Path to baseline JSON report")
+    p_reg.add_argument("--candidate", help="Path to candidate JSON report (if omitted, runs scenarios)")
+    p_reg.add_argument("--dataset", "-d", default="v1", help="Dataset version (default: v1)")
+    p_reg.add_argument("--concurrency", type=int, default=4, help="Max concurrency (default: 4)")
+    p_reg.add_argument("--f1-tolerance", type=float, default=0.05, help="Allowable F1 drop (default: 0.05)")
+    p_reg.add_argument("--precision-tolerance", type=float, default=0.05, help="Allowable precision drop (default: 0.05)")
+    p_reg.add_argument("--recall-tolerance", type=float, default=0.05, help="Allowable recall drop (default: 0.05)")
+    p_reg.set_defaults(func=cmd_regression)
 
     return parser
 

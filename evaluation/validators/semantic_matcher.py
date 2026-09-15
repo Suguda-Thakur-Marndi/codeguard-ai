@@ -1,11 +1,10 @@
 """Semantic finding matcher and location/severity/category evaluator."""
 
-import os
 import re
 from dataclasses import dataclass, field
-from typing import Any
 
-from app.agents.schemas.finding import FindingCategory, FindingSeverity, ReviewFinding
+from app.agents.schemas.finding import ReviewFinding
+
 from evaluation.scenarios.schema import (
     BenchmarkScenario,
     FindingClassification,
@@ -35,8 +34,7 @@ CATEGORY_COMPATIBILITY = {
 def normalize_path(path: str) -> str:
     """Normalize file path for cross-platform and relative comparison."""
     p = path.replace("\\", "/").strip()
-    if p.startswith("./"):
-        p = p[2:]
+    p = p.removeprefix("./")
     return p
 
 
@@ -154,7 +152,7 @@ class SemanticFindingMatcher:
 
             if valid_lines_by_file:
                 # Check file existence in diff
-                norm_diff_files = {normalize_path(k): k for k in valid_lines_by_file.keys()}
+                norm_diff_files = {normalize_path(k): k for k in valid_lines_by_file}
                 if pred_file in norm_diff_files:
                     is_wrong_file = False
                     orig_key = norm_diff_files[pred_file]

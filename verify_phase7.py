@@ -17,8 +17,6 @@ os.environ["CODEGUARD_BENCHMARK_MODE"] = "true"
 os.environ["DATABASE_URL"] = "sqlite:///local_verify.db"
 os.environ["CELERY_TASK_ALWAYS_EAGER"] = "true"
 
-from fastapi.testclient import TestClient
-
 from app.db.base import Base
 from app.db.session import SessionLocal, engine
 from app.main import app
@@ -27,6 +25,8 @@ from app.models.benchmark import (
     BenchmarkResultModel,
     BenchmarkRunModel,
 )
+from fastapi.testclient import TestClient
+
 from evaluation.metrics.definitions import (
     calculate_category_accuracy,
     calculate_f1,
@@ -36,7 +36,7 @@ from evaluation.metrics.definitions import (
     calculate_recall,
     calculate_severity_accuracy,
 )
-from evaluation.metrics.engine import BenchmarkMetricsSummary, MetricsEngine
+from evaluation.metrics.engine import BenchmarkMetricsSummary
 from evaluation.metrics.regression import RegressionDetector
 from evaluation.reports.generator import BenchmarkReportGenerator
 from evaluation.runners.batch_runner import BatchBenchmarkRunner, BatchResult
@@ -44,18 +44,11 @@ from evaluation.runners.pipeline_runner import PipelineRunner
 from evaluation.scenarios.loader import ScenarioLoader
 from evaluation.scenarios.schema import (
     BenchmarkDataset,
-    BenchmarkScenario,
-    FindingClassification,
-    GroundTruthFinding,
-    ScenarioCategory,
-    ScenarioType,
 )
 from evaluation.validators.isolation_guard import (
     BenchmarkIsolationGuard,
     NullGitHubPublisher,
 )
-from evaluation.validators.patch_validator import PatchValidator
-from evaluation.validators.semantic_matcher import SemanticFindingMatcher
 
 
 def log_step(name: str):
