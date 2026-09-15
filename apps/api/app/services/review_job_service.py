@@ -113,7 +113,10 @@ class ReviewJobService:
             logger.warning(f"Review job {job_id} is currently RUNNING by another worker.")
             return job
 
-        job = self.job_repo.mark_running(job_id)
+        running_job = self.job_repo.mark_running(job_id)
+        if not running_job:
+            raise EntityNotFoundError("ReviewJob", job_id)
+        job = running_job
         logger.info(
             f"Starting review job {job_id}",
             extra={"event": "review_job_started", "extra_fields": {"job_id": job_id}},
@@ -297,10 +300,15 @@ class ReviewJobService:
                 self.db.commit()
 
                 # Build source code dict
-                source_code_by_file = {
-                    df.file_path: source_provider.get_file(df.file_path) or ""
-                    for df in analysis.diff_files
-                }
+                source_code_by_file: dict[str, str] = {}
+                for df in analysis.diff_files:
+                    raw_content = source_provider.get_file(df.file_path)
+                    if isinstance(raw_content, bytes):
+                        source_code_by_file[df.file_path] = raw_content.decode("utf-8", errors="replace")
+                    elif isinstance(raw_content, str):
+                        source_code_by_file[df.file_path] = raw_content
+                    else:
+                        source_code_by_file[df.file_path] = ""
 
                 initial_state: dict[str, Any] = {
                     "review_job_id": job.id,
@@ -573,10 +581,10 @@ class ReviewJobService:
                 extra={"event": "review_job_failed", "extra_fields": {"error": error_msg}},
                 exc_info=True,
             )
-            self.job_repo.mark_failed(job.id, error_msg)
+            failed_job = self.job_repo.mark_failed(job.id, error_msg)
             if isinstance(exc, GitHubAPIError) and exc.retryable:
                 raise
-            return job
+            return failed_job if failed_job is not None else job
 
     async def rerun_job(self, job_id: str) -> ReviewJob:
         """Reset and re-execute a review job without deleting historical artifacts."""

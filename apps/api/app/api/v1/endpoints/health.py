@@ -14,7 +14,7 @@ def check_redis_connectivity() -> bool:
     try:
         import redis
         client = redis.from_url(settings.REDIS_URL, socket_timeout=2.0)
-        return bool(client.ping())
+        return client.ping()
     except Exception:
         return False
 
