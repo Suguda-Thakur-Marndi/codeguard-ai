@@ -1,0 +1,18 @@
+{
+  "mcpServers": {
+    "serena-codebase-intel": {
+      "command": "python",
+      "args": ["scripts/workflow/serena_bridge.py", "--mcp-mode"],
+      "env": {
+        "PYTHONPATH": ".:apps/api:packages/code-intelligence"
+      }
+    },
+    "context7-docs": {
+      "command": "python",
+      "args": ["scripts/workflow/context7_bridge.py", "--mcp-mode"],
+      "env": {
+        "PYTHONPATH": ".:apps/api:packages/code-intelligence"
+      }
+    }
+  }
+}

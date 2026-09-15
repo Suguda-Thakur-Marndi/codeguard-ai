@@ -51,6 +51,11 @@ verify-all:
 	$(VENV_BIN)/python verify_phase4.py
 	$(VENV_BIN)/python verify_phase5.py
 	$(VENV_BIN)/python verify_phase7.py
+	$(VENV_BIN)/python verify_phase8.py
+	$(VENV_BIN)/python verify_phase10.py
+
+verify-phase10:
+	$(VENV_BIN)/python verify_phase10.py
 
 check-release: lint test validate-benchmark
 	cd apps/web && npm run build

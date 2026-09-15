@@ -161,7 +161,7 @@ jobs:
     needs: [container-build-and-scan]
     if: github.ref == 'refs/heads/main'
     environment:
-      name: staging
+      name: ${{ 'staging' }}
       url: https://dashboard-staging.codeguard.internal
     steps:
       - name: Checkout repository
@@ -184,7 +184,7 @@ jobs:
     needs: [staging-deployment]
     if: github.ref == 'refs/heads/main'
     environment:
-      name: production
+      name: ${{ 'production' }}
       url: https://app.codeguard.ai
     steps:
       - name: Checkout repository

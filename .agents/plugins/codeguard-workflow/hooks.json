@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "preToolExecution": [
+      {
+        "name": "enforce-security-boundary",
+        "description": "Validates that requested tool calls do not attempt to bypass auth or access forbidden credentials"
+      }
+    ],
+    "postEditValidation": [
+      {
+        "name": "ui-ux-preservation-check",
+        "description": "Ensures that modifications do not alter existing UI/UX styles, colors, or layouts"
+      }
+    ]
+  }
+}
