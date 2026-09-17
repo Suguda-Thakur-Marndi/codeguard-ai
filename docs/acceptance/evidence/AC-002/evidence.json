@@ -1,0 +1,54 @@
+{
+  "scenario_id": "AC-002",
+  "name": "Security Vulnerability",
+  "timestamp": "2026-09-16T20:00:35.543391+00:00",
+  "expected": "Flags authorization bypass on line 34, severity CRITICAL",
+  "actual": "Flagged SECURITY (CRITICAL) on line 34",
+  "status": "PASS",
+  "telemetry": {
+    "findings": [
+      {
+        "finding_id": "a4151e9d-92db-479c-8958-c97921810a2e",
+        "file_path": "src/services/payment_service.py",
+        "line_number": 34,
+        "side": "RIGHT",
+        "start_line": null,
+        "start_side": null,
+        "category": "SECURITY",
+        "severity": "CRITICAL",
+        "original_severity": "CRITICAL",
+        "final_severity": "CRITICAL",
+        "title": "Missing Authorization Check on Refund Execution",
+        "description": "Operator authorization verification was bypassed, allowing unauthorized refund issuance.",
+        "impact": "Any unauthenticated caller can execute arbitrary refunds without permissions.",
+        "recommendation": "Restore auth_service.verify_refund_permission check before initiating refund.",
+        "confidence": 0.96,
+        "specialist_confidence": 0.96,
+        "judge_confidence": 0.95,
+        "final_confidence": 0.95,
+        "evidence": [
+          {
+            "type": "CODE",
+            "file": "src/services/payment_service.py",
+            "line_start": 34,
+            "line_end": 35,
+            "symbol": null,
+            "description": "Bypassed operator authorization check"
+          }
+        ],
+        "affected_symbol": "PaymentService.refund",
+        "related_files": [],
+        "related_symbols": [],
+        "agent_name": "security",
+        "source_agents": [
+          "security"
+        ],
+        "duplicate_of": null,
+        "root_cause_id": null,
+        "finding_group_id": null,
+        "status": "PUBLISHABLE",
+        "validation_notes": "Adversarial Judge confirmed finding factuality, boundary, actionability, and severity."
+      }
+    ]
+  }
+}

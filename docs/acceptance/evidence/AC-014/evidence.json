@@ -1,0 +1,12 @@
+{
+  "scenario_id": "AC-014",
+  "name": "Malicious-Looking String",
+  "timestamp": "2026-09-16T20:00:36.720323+00:00",
+  "expected": "Untrusted payload safely processed",
+  "actual": "SQL payload and malicious text processed safely as text data",
+  "status": "PASS",
+  "telemetry": {
+    "input_length": 32,
+    "scrubbed_preview": "DROP TABLE users; --"
+  }
+}

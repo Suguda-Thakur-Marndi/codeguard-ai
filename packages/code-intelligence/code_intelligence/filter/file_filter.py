@@ -64,11 +64,13 @@ class FileFilter:
 
     @staticmethod
     def is_safe_path(path: str) -> bool:
-        """Validate path against directory traversal attacks (e.g. ../../)."""
+        """Validate path against directory traversal and absolute path attacks (e.g. ../../, /etc/passwd)."""
         if not path or "\x00" in path:
             return False
         # Normalize slashes
         clean = path.replace("\\", "/").strip()
+        if clean.startswith("/") or (len(clean) >= 2 and clean[1] == ":"):
+            return False
         parts = clean.split("/")
         # Disallow upward traversal
         depth = 0

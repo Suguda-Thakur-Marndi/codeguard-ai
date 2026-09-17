@@ -1,12 +1,12 @@
 """Agency Agent role definitions, boundaries, and report schemas."""
 
-from enum import Enum
 import re
-from typing import Any
+from enum import StrEnum
+
 from pydantic import BaseModel, Field
 
 
-class AgentRole(str, Enum):
+class AgentRole(StrEnum):
     ARCHITECT = "ARCHITECT AGENT"
     BACKEND = "BACKEND AGENT"
     FRONTEND = "FRONTEND AGENT"
@@ -21,7 +21,7 @@ class AgentRole(str, Enum):
     FINAL_INTEGRATION = "FINAL INTEGRATION AGENT"
 
 
-class AgentStatus(str, Enum):
+class AgentStatus(StrEnum):
     SUCCESS = "SUCCESS"
     REJECTED = "REJECTED"
     BLOCKED = "BLOCKED"

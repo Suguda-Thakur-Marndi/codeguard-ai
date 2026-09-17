@@ -82,11 +82,16 @@ class ApprovalService:
         approver_role: str,
         is_ai_agent: bool,
         comment: str | None = None,
+        approver_organization_id: str | None = None,
     ) -> ApprovalRequest:
-        """Approve an approval request with role validation and stale commit detection."""
+        """Approve an approval request with role validation, tenant isolation, and stale commit detection."""
         req = self.get_approval_request(approval_id)
         if not req:
             raise ValueError(f"Approval request '{approval_id}' not found.")
+
+        # Guard 0: Cross-tenant isolation check
+        if approver_organization_id and approver_role.upper() != "ADMIN" and approver_organization_id != req.organization_id:
+            raise ValueError(f"Cross-tenant authorization denied: principal belongs to organization '{approver_organization_id}', not '{req.organization_id}'.")
 
         # Guard 1: No AI agent self-approval
         if is_ai_agent or "agent" in approver_principal_id.lower():
@@ -135,11 +140,16 @@ class ApprovalService:
         approver_role: str,
         is_ai_agent: bool,
         reason: str,
+        approver_organization_id: str | None = None,
     ) -> ApprovalRequest:
         """Reject an approval request with reason recorded in audit trail."""
         req = self.get_approval_request(approval_id)
         if not req:
             raise ValueError(f"Approval request '{approval_id}' not found.")
+
+        # Guard 0: Cross-tenant isolation check
+        if approver_organization_id and approver_role.upper() != "ADMIN" and approver_organization_id != req.organization_id:
+            raise ValueError(f"Cross-tenant authorization denied: principal belongs to organization '{approver_organization_id}', not '{req.organization_id}'.")
 
         if is_ai_agent or "agent" in approver_principal_id.lower():
             raise ValueError("AI agents cannot reject approvals.")

@@ -1,0 +1,54 @@
+{
+  "scenario_id": "AC-003",
+  "name": "Error Handling Bug",
+  "timestamp": "2026-09-16T20:00:35.617815+00:00",
+  "expected": "Flags None dereference on line 40-43, severity HIGH",
+  "actual": "Flagged BUG at line 40",
+  "status": "PASS",
+  "telemetry": {
+    "findings": [
+      {
+        "finding_id": "354fceed-7ac1-4a87-9f57-dd9cf8e5afed",
+        "file_path": "src/services/payment_service.py",
+        "line_number": 40,
+        "side": "RIGHT",
+        "start_line": null,
+        "start_side": null,
+        "category": "BUG",
+        "severity": "HIGH",
+        "original_severity": "HIGH",
+        "final_severity": "CRITICAL",
+        "title": "Potential NoneType Dereference on Missing Payment",
+        "description": "payment.status is accessed before validating whether find_by_id returned None.",
+        "impact": "Raises AttributeError and crashes the application when payment_id does not exist.",
+        "recommendation": "Verify that payment is not None before accessing payment.status.",
+        "confidence": 0.92,
+        "specialist_confidence": 0.92,
+        "judge_confidence": 0.95,
+        "final_confidence": 0.94,
+        "evidence": [
+          {
+            "type": "CODE",
+            "file": "src/services/payment_service.py",
+            "line_start": 40,
+            "line_end": 42,
+            "symbol": null,
+            "description": "Unchecked payment status access"
+          }
+        ],
+        "affected_symbol": "PaymentService.refund",
+        "related_files": [],
+        "related_symbols": [],
+        "agent_name": "bug",
+        "source_agents": [
+          "bug"
+        ],
+        "duplicate_of": null,
+        "root_cause_id": null,
+        "finding_group_id": null,
+        "status": "PUBLISHABLE",
+        "validation_notes": "Adversarial Judge confirmed finding factuality, boundary, actionability, and severity."
+      }
+    ]
+  }
+}

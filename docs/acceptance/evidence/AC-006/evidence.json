@@ -1,0 +1,54 @@
+{
+  "scenario_id": "AC-006",
+  "name": "Performance Issue",
+  "timestamp": "2026-09-16T20:00:35.885336+00:00",
+  "expected": "Flags N+1 database query loop",
+  "actual": "Flagged PERFORMANCE N+1 at line 26",
+  "status": "PASS",
+  "telemetry": {
+    "findings": [
+      {
+        "finding_id": "94dcc43b-7731-4672-8b90-1fbf237e2e44",
+        "file_path": "src/services/payment_service.py",
+        "line_number": 26,
+        "side": "RIGHT",
+        "start_line": null,
+        "start_side": null,
+        "category": "PERFORMANCE",
+        "severity": "MEDIUM",
+        "original_severity": "MEDIUM",
+        "final_severity": "CRITICAL",
+        "title": "N+1 Database Query in Batch Settlement Operation",
+        "description": "Queries payment records one by one inside a loop causing N+1 database roundtrips.",
+        "impact": "Causes high database latency and connection pool starvation.",
+        "recommendation": "Use repository.find_by_ids([pids]) batch query to avoid roundtrips.",
+        "confidence": 0.88,
+        "specialist_confidence": 0.88,
+        "judge_confidence": 0.95,
+        "final_confidence": 0.93,
+        "evidence": [
+          {
+            "type": "CODE",
+            "file": "src/services/payment_service.py",
+            "line_start": 26,
+            "line_end": 29,
+            "symbol": null,
+            "description": "Iterative query lookup inside comprehension"
+          }
+        ],
+        "affected_symbol": "PaymentService.batch_settle",
+        "related_files": [],
+        "related_symbols": [],
+        "agent_name": "performance",
+        "source_agents": [
+          "performance"
+        ],
+        "duplicate_of": null,
+        "root_cause_id": null,
+        "finding_group_id": null,
+        "status": "PUBLISHABLE",
+        "validation_notes": "Adversarial Judge confirmed finding factuality, boundary, actionability, and severity."
+      }
+    ]
+  }
+}

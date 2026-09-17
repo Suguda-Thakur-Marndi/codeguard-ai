@@ -5,6 +5,7 @@ import json
 import os
 import sys
 from typing import Any
+
 from pydantic import BaseModel, Field
 
 # Ensure packages can be imported
@@ -67,7 +68,7 @@ class SerenaNavigator:
         for tdir in target_dirs:
             if not os.path.exists(tdir):
                 continue
-            for root, dirs, files in os.walk(tdir):
+            for root, _dirs, files in os.walk(tdir):
                 if any(ignored in root for ignored in [".venv", "__pycache__", ".pytest_cache", ".ruff_cache", "node_modules"]):
                     continue
                 for f in files:
@@ -79,7 +80,7 @@ class SerenaNavigator:
         if file_path in self._cache_ast:
             return self._cache_ast[file_path]
         try:
-            with open(file_path, "r", encoding="utf-8") as f:
+            with open(file_path, encoding="utf-8") as f:
                 content = f.read()
             tree = ast.parse(content, filename=file_path)
             self._cache_ast[file_path] = tree
@@ -140,7 +141,7 @@ class SerenaNavigator:
         if not tree:
             return {"error": f"Failed to parse AST for {file_path}"}
 
-        with open(abs_path, "r", encoding="utf-8") as f:
+        with open(abs_path, encoding="utf-8") as f:
             lines = f.readlines()
 
         for node in ast.walk(tree):
@@ -171,7 +172,7 @@ class SerenaNavigator:
                 continue
             rel_path = os.path.relpath(fpath, self.workspace_root).replace("\\", "/")
 
-            with open(fpath, "r", encoding="utf-8") as f:
+            with open(fpath, encoding="utf-8") as f:
                 lines = f.readlines()
 
             for node in ast.walk(tree):
@@ -214,7 +215,7 @@ class SerenaNavigator:
             elif isinstance(node, ast.ImportFrom) and node.module:
                 dependencies.append(node.module)
 
-        return sorted(list(set(dependencies)))
+        return sorted(set(dependencies))
 
     def execute_11_step_workflow(self, task: str, target_symbols: list[str]) -> SerenaWorkflowRecord:
         """Execute the full 11-step Serena exploration workflow."""
@@ -244,7 +245,7 @@ class SerenaNavigator:
             step2_located_symbols=located_symbols,
             step3_inspected_definitions=inspected_defs,
             step4_inspected_callers=all_callers,
-            step5_inspected_dependencies=sorted(list(set(dependencies))),
+            step5_inspected_dependencies=sorted(set(dependencies)),
             step6_existing_patterns="Consistent typed service layer; explicit error handling; dependency injection.",
             step7_minimal_change_plan="Formulate minimal isolated surgical diff adhering to existing patterns.",
             step8_implementation_notes="Implement only approved changes without altering public API contracts.",

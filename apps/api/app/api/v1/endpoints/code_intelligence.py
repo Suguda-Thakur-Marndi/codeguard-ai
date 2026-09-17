@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 from app.core.security import get_current_user_or_bypass
 from app.db.repositories.repository_repo import RepositoryRepository
 from app.db.session import get_db
+from code_intelligence.filter.file_filter import FileFilter
 from app.schemas.code_intelligence import (
     CodeSymbolRead,
     FileDependencyRead,
@@ -131,6 +132,11 @@ def get_file_symbols(
     _user: dict = Depends(get_current_user_or_bypass),
 ) -> list[CodeSymbolRead]:
     """Retrieve all symbols defined in a specific repository file."""
+    if not FileFilter.is_safe_path(file_path):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Invalid file path or path traversal detected: '{file_path}'",
+        )
     service = CodeIntelligenceService(db)
     symbols = service.get_file_symbols(repository_id, file_path, commit_sha=commit_sha)
     return [CodeSymbolRead.model_validate(s) for s in symbols]
@@ -145,6 +151,11 @@ def get_file_dependencies(
     _user: dict = Depends(get_current_user_or_bypass),
 ) -> list[FileDependencyRead]:
     """Retrieve static file dependencies (imports) for a specific file."""
+    if not FileFilter.is_safe_path(file_path):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Invalid file path or path traversal detected: '{file_path}'",
+        )
     service = CodeIntelligenceService(db)
     deps = service.get_file_dependencies(repository_id, file_path, commit_sha=commit_sha)
     return [FileDependencyRead.model_validate(d) for d in deps]
@@ -163,6 +174,11 @@ def get_code_context(
     _user: dict = Depends(get_current_user_or_bypass),
 ) -> RelevantContextSchema:
     """Retrieve semantically ranked context for a changed file and symbol."""
+    if not FileFilter.is_safe_path(changed_file):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Invalid changed file path or path traversal detected: '{changed_file}'",
+        )
     service = CodeIntelligenceService(db)
     context = service.get_context(
         repository_id=repository_id,

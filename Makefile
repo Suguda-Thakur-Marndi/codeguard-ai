@@ -1,4 +1,4 @@
-.PHONY: help install dev test lint format migrate migration docker-up docker-down validate-benchmark verify-all check-release
+.PHONY: help install dev test lint format migrate migration docker-up docker-down validate-benchmark verify-all verify-phase10 verify-phase11 verify-phase12 check-release
 
 PYTHON ?= python
 VENV_BIN ?= .venv/bin
@@ -53,9 +53,17 @@ verify-all:
 	$(VENV_BIN)/python verify_phase7.py
 	$(VENV_BIN)/python verify_phase8.py
 	$(VENV_BIN)/python verify_phase10.py
+	$(VENV_BIN)/python verify_phase11.py
+	$(VENV_BIN)/python verify_phase12.py
 
 verify-phase10:
 	$(VENV_BIN)/python verify_phase10.py
+
+verify-phase11:
+	$(VENV_BIN)/python verify_phase11.py
+
+verify-phase12:
+	$(VENV_BIN)/python verify_phase12.py
 
 check-release: lint test validate-benchmark
 	cd apps/web && npm run build

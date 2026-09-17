@@ -1,5 +1,4 @@
 import argparse
-import json
 import os
 import sys
 
@@ -7,7 +6,7 @@ _root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 if _root not in sys.path:
     sys.path.insert(0, _root)
 
-from scripts.workflow.agent_roles import ROLE_REGISTRY, AgentRole
+from scripts.workflow.agent_roles import ROLE_REGISTRY
 from scripts.workflow.context7_bridge import Context7Bridge
 from scripts.workflow.orchestrator import WorkflowOrchestrator
 from scripts.workflow.serena_bridge import SerenaNavigator
@@ -51,12 +50,12 @@ def main() -> None:
             external_libraries=args.libs,
             simulate_security_bypass=args.simulate_bypass,
         )
-        print(f"\n========================================================")
+        print("\n========================================================")
         print(f"TASK: {result.task_description}")
         print(f"OVERALL STATUS: {result.overall_status} (Duration: {result.total_duration_ms:.2f}ms)")
         print(f"SECURITY VERDICT: {result.security_verdict}")
         print(f"REVIEW VERDICT: {result.review_verdict}")
-        print(f"========================================================")
+        print("========================================================")
         for s in result.steps:
             print(f"[{s.status}] Step {s.step_number}: {s.name} ({s.duration_ms:.2f}ms)")
             print(f"       {s.summary}")
@@ -81,10 +80,10 @@ def main() -> None:
         print(f"\nContext7 Documentation for '{doc.library}' (Version: {doc.installed_version}):")
         print(f"Topic: {doc.topic}")
         print(f"Signature: {doc.authoritative_signature}")
-        print(f"Recommended Patterns:")
+        print("Recommended Patterns:")
         for r in doc.recommended_patterns:
             print(f"  - {r}")
-        print(f"Deprecated Patterns:")
+        print("Deprecated Patterns:")
         for d in doc.deprecated_patterns:
             print(f"  - {d}")
 

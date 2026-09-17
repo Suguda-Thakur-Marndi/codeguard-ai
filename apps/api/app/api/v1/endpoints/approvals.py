@@ -33,9 +33,17 @@ def list_approvals(
     db: Session = Depends(get_db),
     _user: dict = Depends(get_current_user_or_bypass),
 ) -> dict[str, Any]:
+    user_org_id = _user.get("organization_id")
+    user_role = str(_user.get("role", "MEMBER")).upper()
+    effective_org_id = organization_id
+    if user_org_id and user_role != "ADMIN":
+        if organization_id and organization_id != user_org_id:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Cross-tenant access forbidden")
+        effective_org_id = user_org_id
+
     service = ApprovalService(db)
     items = service.list_approval_requests(
-        organization_id=organization_id,
+        organization_id=effective_org_id,
         repository_id=repository_id,
         pull_request_id=pull_request_id,
         status=status_filter,
@@ -79,6 +87,11 @@ def get_approval(
     if not req:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Approval request not found.")
 
+    user_org_id = _user.get("organization_id")
+    user_role = str(_user.get("role", "MEMBER")).upper()
+    if user_org_id and user_role != "ADMIN" and req.organization_id != user_org_id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Cross-tenant access forbidden")
+
     return {
         "id": req.id,
         "organization_id": req.organization_id,
@@ -119,6 +132,7 @@ def approve_request(
         if x_user_role:
             approver_role = x_user_role.upper()
 
+    approver_org_id = _user.get("organization_id")
     try:
         req = service.approve_request(
             approval_id=approval_id,
@@ -126,6 +140,7 @@ def approve_request(
             approver_role=approver_role,
             is_ai_agent=False,
             comment=payload.comment,
+            approver_organization_id=approver_org_id,
         )
 
         # Transition associated publication from APPROVAL_REQUIRED to PENDING and trigger publication
@@ -179,6 +194,7 @@ def reject_request(
         if x_user_role:
             approver_role = x_user_role.upper()
 
+    approver_org_id = _user.get("organization_id")
     try:
         req = service.reject_request(
             approval_id=approval_id,
@@ -186,6 +202,7 @@ def reject_request(
             approver_role=approver_role,
             is_ai_agent=False,
             reason=payload.reason,
+            approver_organization_id=approver_org_id,
         )
 
         from sqlalchemy import select

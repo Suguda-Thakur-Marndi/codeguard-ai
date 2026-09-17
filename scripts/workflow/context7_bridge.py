@@ -5,6 +5,7 @@ import os
 import re
 import sys
 from typing import Any
+
 from pydantic import BaseModel, Field
 
 _root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
@@ -153,7 +154,7 @@ class Context7Bridge:
         api_pyproject = os.path.join(self.workspace_root, "apps", "api", "pyproject.toml")
         if os.path.exists(api_pyproject):
             try:
-                with open(api_pyproject, "r", encoding="utf-8") as f:
+                with open(api_pyproject, encoding="utf-8") as f:
                     content = f.read()
                 for line in content.splitlines():
                     match = re.search(r'"([a-zA-Z0-9_\-]+)(?:\[[^\]]+\])?([><=~^0-9\.]+)"', line)
@@ -166,7 +167,7 @@ class Context7Bridge:
         web_pkg = os.path.join(self.workspace_root, "apps", "web", "package.json")
         if os.path.exists(web_pkg):
             try:
-                with open(web_pkg, "r", encoding="utf-8") as f:
+                with open(web_pkg, encoding="utf-8") as f:
                     data = json.load(f)
                 for dep, ver in data.get("dependencies", {}).items():
                     versions[dep.lower()] = ver

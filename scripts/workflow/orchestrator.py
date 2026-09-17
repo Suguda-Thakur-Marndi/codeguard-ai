@@ -7,6 +7,7 @@ import os
 import sys
 import time
 from typing import Any
+
 from pydantic import BaseModel, Field
 
 _root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
@@ -17,7 +18,6 @@ from scripts.workflow.agent_roles import (
     AgentReport,
     AgentRole,
     AgentStatus,
-    TaskInput,
     get_role_definition,
     validate_agent_report,
 )
@@ -93,7 +93,7 @@ class WorkflowOrchestrator:
         # STEP 1: Architect Agent Analysis
         # =========================================================================
         s1_start = time.perf_counter()
-        architect_def = get_role_definition(AgentRole.ARCHITECT)
+        _ = get_role_definition(AgentRole.ARCHITECT)
         arch_report = AgentReport(
             role=AgentRole.ARCHITECT,
             task=task_description,

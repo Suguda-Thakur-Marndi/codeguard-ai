@@ -11,8 +11,8 @@ from code_intelligence.models import (
     DiffLineType,
     ParserDiagnostic,
 )
-from unidiff import PatchSet
 from unidiff.errors import UnidiffParseError
+from unidiff.patch import PatchSet
 
 
 def _clean_path(path: str | None) -> str:
@@ -39,8 +39,10 @@ class UnifiedDiffParser:
         if not raw_diff or not raw_diff.strip():
             return parsed_files, diagnostics
 
+        normalized_diff = raw_diff.replace("\r\n", "\n")
+
         try:
-            patch_set = PatchSet(raw_diff)
+            patch_set = PatchSet(normalized_diff)
         except UnidiffParseError as exc:
             diagnostics.append(
                 ParserDiagnostic(
@@ -52,7 +54,7 @@ class UnifiedDiffParser:
                 )
             )
             # Attempt fallback hunk-by-hunk / file-by-file extraction
-            return cls._fallback_parse(raw_diff, diagnostics)
+            return cls._fallback_parse(normalized_diff, diagnostics)
         except Exception as exc:  # noqa: BLE001
             diagnostics.append(
                 ParserDiagnostic(

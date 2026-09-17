@@ -190,6 +190,26 @@ class PolicyEngine:
                 requires_approval=True,
             )
 
+        # Check repository binding if present
+        appr_repo = approval_record.get("repository_id")
+        if appr_repo and repository_id and appr_repo != repository_id:
+            return AuthorizationResult(
+                decision=PolicyDecision.DENY,
+                reason=f"Approval request '{approval_record.get('id')}' is bound to repository '{appr_repo}', not target repository '{repository_id}'.",
+                risk_level=effective_risk,
+                requires_approval=True,
+            )
+
+        # Check organization binding if present
+        appr_org = approval_record.get("organization_id")
+        if appr_org and organization_id and appr_org != organization_id:
+            return AuthorizationResult(
+                decision=PolicyDecision.DENY,
+                reason=f"Approval request '{approval_record.get('id')}' belongs to another organization '{appr_org}'.",
+                risk_level=effective_risk,
+                requires_approval=True,
+            )
+
         expires_at = approval_record.get("expires_at")
         if expires_at:
             if isinstance(expires_at, str):

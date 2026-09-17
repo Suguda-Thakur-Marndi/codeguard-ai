@@ -1,0 +1,54 @@
+{
+  "scenario_id": "AC-004",
+  "name": "Edge Case",
+  "timestamp": "2026-09-16T20:00:35.694848+00:00",
+  "expected": "Flags ZeroDivisionError on empty amounts list",
+  "actual": "Flagged edge-case BUG (ZeroDivisionError) at line 55",
+  "status": "PASS",
+  "telemetry": {
+    "findings": [
+      {
+        "finding_id": "a5806ec4-031b-4f4a-a70e-7c9346452dd1",
+        "file_path": "src/services/payment_service.py",
+        "line_number": 55,
+        "side": "RIGHT",
+        "start_line": null,
+        "start_side": null,
+        "category": "BUG",
+        "severity": "MEDIUM",
+        "original_severity": "MEDIUM",
+        "final_severity": "CRITICAL",
+        "title": "ZeroDivisionError on Empty Transactions Collection",
+        "description": "Division by len(amounts) without checking if amounts list is empty causing ZeroDivisionError.",
+        "impact": "Crashes with ZeroDivisionError when called with empty list of amounts.",
+        "recommendation": "Add guard: if not amounts: return 0.0",
+        "confidence": 0.9,
+        "specialist_confidence": 0.9,
+        "judge_confidence": 0.95,
+        "final_confidence": 0.93,
+        "evidence": [
+          {
+            "type": "CODE",
+            "file": "src/services/payment_service.py",
+            "line_start": 55,
+            "line_end": 57,
+            "symbol": null,
+            "description": "Division by len(amounts) without empty check"
+          }
+        ],
+        "affected_symbol": "PaymentService.compute_average_refund",
+        "related_files": [],
+        "related_symbols": [],
+        "agent_name": "bug",
+        "source_agents": [
+          "bug"
+        ],
+        "duplicate_of": null,
+        "root_cause_id": null,
+        "finding_group_id": null,
+        "status": "PUBLISHABLE",
+        "validation_notes": "Adversarial Judge confirmed finding factuality, boundary, actionability, and severity."
+      }
+    ]
+  }
+}

@@ -1,0 +1,54 @@
+{
+  "scenario_id": "AC-005",
+  "name": "Missing Test/Contract",
+  "timestamp": "2026-09-16T20:00:35.789405+00:00",
+  "expected": "Flags breaking return type contract change",
+  "actual": "Flagged CONTRACT contract break at line 53",
+  "status": "PASS",
+  "telemetry": {
+    "findings": [
+      {
+        "finding_id": "8a09ff8c-b99e-4191-b92b-f89a90c2f763",
+        "file_path": "src/services/payment_service.py",
+        "line_number": 53,
+        "side": "RIGHT",
+        "start_line": null,
+        "start_side": null,
+        "category": "CONTRACT",
+        "severity": "HIGH",
+        "original_severity": "HIGH",
+        "final_severity": "CRITICAL",
+        "title": "Breaking Public API Return Type Contract",
+        "description": "Changed return type from bool to tuple without updating callers or contract.",
+        "impact": "Breaks callers expecting boolean return type and causes test assertion errors.",
+        "recommendation": "Preserve bool return type or deprecate cleanly with new method signature.",
+        "confidence": 0.89,
+        "specialist_confidence": 0.89,
+        "judge_confidence": 0.95,
+        "final_confidence": 0.93,
+        "evidence": [
+          {
+            "type": "CODE",
+            "file": "src/services/payment_service.py",
+            "line_start": 53,
+            "line_end": 54,
+            "symbol": null,
+            "description": "Changed return type signature"
+          }
+        ],
+        "affected_symbol": "PaymentService.refund",
+        "related_files": [],
+        "related_symbols": [],
+        "agent_name": "test",
+        "source_agents": [
+          "test"
+        ],
+        "duplicate_of": null,
+        "root_cause_id": null,
+        "finding_group_id": null,
+        "status": "PUBLISHABLE",
+        "validation_notes": "Adversarial Judge confirmed finding factuality, boundary, actionability, and severity."
+      }
+    ]
+  }
+}

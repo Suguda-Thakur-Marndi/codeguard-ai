@@ -1,0 +1,12 @@
+{
+  "scenario_id": "AC-028",
+  "name": "Publication Idempotency",
+  "timestamp": "2026-09-16T20:00:37.168155+00:00",
+  "expected": "Re-publication does not duplicate reviews",
+  "actual": "Deterministic composite key: 2b8fc3c7-8b6d-4a41-be07-8209bb7eb92b:2c33162a-1f29-4ddc-9c3a-d1a35b56eb42:1111111111111111111111111111111111111111:42d48e1b-1ccd-417a-bd5b-7a98fbd30441; existing publication reused",
+  "status": "PASS",
+  "telemetry": {
+    "publication_key": "2b8fc3c7-8b6d-4a41-be07-8209bb7eb92b:2c33162a-1f29-4ddc-9c3a-d1a35b56eb42:1111111111111111111111111111111111111111:42d48e1b-1ccd-417a-bd5b-7a98fbd30441",
+    "idempotent_match": true
+  }
+}

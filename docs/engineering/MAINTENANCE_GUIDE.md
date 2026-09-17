@@ -1,0 +1,101 @@
+# CodeGuard AI — Long-Term Maintenance & Upgrade Guide
+
+**Document Status**: Active / Authoritative  
+**Date**: September 17, 2026  
+**Target Audience**: DevOps, Backend, AI & Platform Engineers
+
+---
+
+## 1. Overview & Golden Invariants
+
+When modifying, maintaining, or upgrading CodeGuard AI, engineers must preserve the following architectural invariants:
+1. **Never Bypass Human Authorization**: Consequential actions (publishing reviews, modifying external resources) require authenticated human approval.
+2. **Never Weaken Tests**: If a test fails after an upgrade, the upgrade is defective or incompatible. Fix the implementation or revert the upgrade.
+3. **Never Redesign Frontend UI/UX**: Visual styling, components, colors, and layouts in `apps/web/` must remain preserved.
+4. **Never Commit Secrets**: Ensure all environment configs use placeholders and all telemetry scrubs credentials.
+
+---
+
+## 2. Dependency Upgrades
+
+Follow the **Context7 Protocol** for all third-party package upgrades:
+1. **Inspect Target Version**: Check `apps/api/pyproject.toml` or `apps/web/package.json` for current bounds.
+2. **Review Changelogs**: Identify breaking changes and deprecations in the target release.
+3. **Minimal Diff**: Upgrade only the specific dependency required rather than doing wholesale `pip upgrade`.
+4. **Validation Suite**:
+   ```powershell
+   # Run full test suites
+   .\.venv\Scripts\python.exe -m pytest apps/api/tests apps/mcp-server/tests -v
+   # Run benchmark regression
+   .\.venv\Scripts\python.exe benchmark.py regression --baseline benchmark_report.json --concurrency 4
+   # Run acceptance suite
+   .\.venv\Scripts\python.exe scripts/run_acceptance_suite.py
+   ```
+
+---
+
+## 3. Database Schema Evolution & Alembic Migrations
+
+To add or modify database tables:
+1. **Model Definition**: Update SQLAlchemy 2.0 type-annotated models in `apps/api/app/models/`.
+2. **Generate Migration**:
+   ```powershell
+   cd apps/api
+   alembic revision --autogenerate -m "describe_schema_change"
+   ```
+3. **Inspect Migration File**:
+   - Verify both `upgrade()` and `downgrade()` functions.
+   - Enforce explicit column defaults, foreign key constraints, and indices.
+   - **Never write destructive operations (`drop_table`, `drop_column`) against production without data migration plans.**
+4. **Test Clean Migration From Zero**:
+   ```powershell
+   .\.venv\Scripts\python.exe scripts/run_acceptance_suite.py  # Tests clean SQLite staging migration
+   ```
+
+---
+
+## 4. Gemini Model Upgrades
+
+CodeGuard AI isolates LLM interactions within `app/agents/llm/`. To update or migrate model tiers:
+1. **Configuration**: Edit `app/core/config.py` (`GEMINI_MODEL_FAST`, `GEMINI_MODEL_REASONING`).
+2. **Verify Provider Abstraction**:
+   - Check structured output schemas conforming to `ReviewFinding`.
+   - Ensure token cost formula in `app/agents/llm/gemini.py` matches current pricing.
+3. **Empirical Benchmark Gate**:
+   - Execute benchmark evaluation:
+     ```powershell
+     .\.venv\Scripts\python.exe benchmark.py run --dataset v1 --save candidate_report.json
+     .\.venv\Scripts\python.exe benchmark.py regression --baseline benchmark_report.json --candidate candidate_report.json
+     ```
+   - If Delta F1 < 0.0 or False Positives > 0, the model change is rejected.
+
+---
+
+## 5. Adding New MCP Tools
+
+Every newly introduced tool in `apps/mcp-server/` or `app/mcp/` must follow the 8-point governance contract:
+1. **Pydantic Schema**: Define explicit input/output schemas with field descriptions.
+2. **Risk Classification**: Assign a `ToolRiskLevel` in `app/mcp/classification.py`:
+   - `READ_ONLY`: Low risk, automated execution permitted.
+   - `CONSEQUENTIAL`: High impact (e.g., publishing review, modifying files), requires human approval.
+   - `FORBIDDEN`: Shell access, secret reading, or privilege escalation — permanently blocked by Sentinel.
+3. **Audit Logging**: Ensure tool execution dispatches `ToolExecutionAudit` records with redacted inputs.
+4. **Tests**: Add unit tests in `apps/mcp-server/tests/test_mcp_tools.py` and policy tests in `test_mcp_policy.py`.
+
+---
+
+## 6. Tree-sitter Parser Updates
+
+When upgrading Tree-sitter language grammars:
+1. Test grammar loading in `packages/code-intelligence/code_intelligence/treesitter/`.
+2. Verify AST symbol extraction across functions, classes, decorators, and nested blocks.
+3. Verify syntax-broken sources degrade gracefully to line diffs without throwing unhandled exceptions.
+
+---
+
+## 7. Operational Health Probes
+
+Verify active service health locally or in staging:
+- **Liveness Probe**: `GET http://localhost:8000/api/v1/live` -> HTTP 200 `{"status": "alive"}`
+- **Readiness Probe**: `GET http://localhost:8000/api/v1/health` -> HTTP 200 `{"status": "healthy", "database": "connected", "redis": "connected"}`
+- **MCP Server**: `GET http://localhost:8001/health` -> HTTP 200 `{"status": "ok"}`

@@ -1,0 +1,12 @@
+{
+  "scenario_id": "AC-015",
+  "name": "Stale Context",
+  "timestamp": "2026-09-16T20:00:36.726902+00:00",
+  "expected": "Head SHA mismatch invalidates review context",
+  "actual": "Head SHA divergence detected; review marked STALE and aborted",
+  "status": "PASS",
+  "telemetry": {
+    "status": "STALE",
+    "error_message": "PR HEAD SHA mismatch: verified on commit_o, but PR HEAD is now commit_n."
+  }
+}

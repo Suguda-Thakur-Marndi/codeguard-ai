@@ -13,11 +13,9 @@ Executes and verifies:
 10. Final Production Scorecard Evaluation
 """
 
-import json
 import os
 import re
 import sys
-import time
 
 # Monorepo Path Setup
 _root = os.path.abspath(os.path.dirname(__file__))
@@ -38,7 +36,6 @@ from scripts.workflow.agent_roles import (
     AgentReport,
     AgentRole,
     AgentStatus,
-    get_role_definition,
     parse_agent_report_text,
     validate_agent_report,
 )
@@ -100,7 +97,7 @@ class Phase11VerificationSuite:
             if not os.path.exists(spath):
                 errors.append(f"Missing skill: .agents/skills/{sname}/SKILL.md")
             else:
-                with open(spath, "r", encoding="utf-8") as f:
+                with open(spath, encoding="utf-8") as f:
                     content = f.read()
                 if not content.startswith("---") or "name:" not in content:
                     errors.append(f"Skill {sname}/SKILL.md missing valid YAML frontmatter")
@@ -304,7 +301,7 @@ class Phase11VerificationSuite:
             ("hardcode api_key = 'sk-12345' directly in code", "Attempt to hardcode secret credentials"),
         ]
 
-        for attempt_text, expected_violation in bypass_attempts:
+        for attempt_text, _expected_violation in bypass_attempts:
             report = AgentReport(
                 role=AgentRole.BACKEND,
                 task="Perform action",
@@ -352,13 +349,13 @@ class Phase11VerificationSuite:
 
         # 2. Verify rule files explicitly prohibit UI changes and business logic modification
         ui_rule_path = os.path.join(_root, ".agents", "rules", "01_ui_ux_protection.md")
-        with open(ui_rule_path, "r", encoding="utf-8") as f:
+        with open(ui_rule_path, encoding="utf-8") as f:
             rule_text = f.read()
         if "NO UI/UX REDESIGN" not in rule_text:
             errors.append("UI/UX protection rule missing 'NO UI/UX REDESIGN' invariant")
 
         biz_rule_path = os.path.join(_root, ".agents", "rules", "03_business_logic_protection.md")
-        with open(biz_rule_path, "r", encoding="utf-8") as f:
+        with open(biz_rule_path, encoding="utf-8") as f:
             biz_text = f.read()
         if "CRITICAL" not in biz_text or "APPROVED" not in biz_text:
             errors.append("Business logic rule missing core status invariants")
@@ -441,7 +438,7 @@ class Phase11VerificationSuite:
 
             for fpath in file_list:
                 is_py = fpath.endswith(".py")
-                with open(fpath, "r", encoding="utf-8") as f:
+                with open(fpath, encoding="utf-8") as f:
                     lines = f.readlines()
                 for idx, line in enumerate(lines, 1):
                     stripped = line.strip()

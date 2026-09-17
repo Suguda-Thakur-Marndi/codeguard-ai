@@ -34,6 +34,15 @@ def get_job_publication(
     if not pub:
         return {"publication": None}
 
+    user_org_id = _user.get("organization_id")
+    user_role = str(_user.get("role", "MEMBER")).upper()
+    if user_org_id and user_role != "ADMIN":
+        from app.models.repository import Repository
+
+        repo = db.scalar(select(Repository).where(Repository.id == pub.repository_id))
+        if repo and repo.organization_id != user_org_id:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Cross-tenant access forbidden")
+
     comments = [
         {
             "id": c.id,
@@ -71,6 +80,21 @@ def publish_job_review(
     db: Session = Depends(get_db),
     _user: dict = Depends(get_current_user_or_bypass),
 ) -> dict[str, Any]:
+    user_org_id = _user.get("organization_id")
+    user_role = str(_user.get("role", "MEMBER")).upper()
+    if user_org_id and user_role != "ADMIN":
+        from app.models.pull_request import PullRequest
+        from app.models.repository import Repository
+        from app.models.review_job import ReviewJob
+
+        job = db.scalar(select(ReviewJob).where(ReviewJob.id == review_job_id))
+        if job:
+            pr = db.scalar(select(PullRequest).where(PullRequest.id == job.pull_request_id))
+            if pr:
+                repo = db.scalar(select(Repository).where(Repository.id == pr.repository_id))
+                if repo and repo.organization_id != user_org_id:
+                    raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Cross-tenant access forbidden")
+
     service = PublicationService(db)
     try:
         pub, approval_req = service.prepare_publication(
