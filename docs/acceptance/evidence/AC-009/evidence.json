@@ -1,7 +1,7 @@
 {
   "scenario_id": "AC-009",
   "name": "Multi-File Change",
-  "timestamp": "2026-09-16T20:00:36.353911+00:00",
+  "timestamp": "2026-09-18T13:32:41.630570+00:00",
   "expected": "Correct cross-file line and symbol attribution",
   "actual": "Multi-file diff accurately indexed with strict file boundary isolation",
   "status": "PASS",

@@ -1,0 +1,42 @@
+================================================================================
+CODEGUARD AI — PHASE 16 OPERATIONAL EVIDENCE ARTIFACT EV-04: MIGRATIONS
+================================================================================
+Timestamp: 2026-09-18T13:32:38Z
+Command: alembic upgrade head
+Target Database: staging_acceptance.db (Initialized from zero)
+
+MIGRATION EXECUTION LOG:
+INFO  [alembic.runtime.migration] Context impl SQLiteImpl.
+INFO  [alembic.runtime.migration] Will assume non-transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade  -> 001_initial_phase1_tables, Initial Phase 1 database schema
+INFO  [alembic.runtime.migration] Running upgrade 001_initial_phase1_tables -> 002_phase2_code_intelligence_tables, Phase 2 code intelligence database schema
+INFO  [alembic.runtime.migration] Running upgrade 002_phase2_code_intelligence_tables -> 003_phase3_agentic_ai_review, Phase 3 agentic AI review engine database schema
+INFO  [alembic.runtime.migration] Running upgrade 003_phase3_agentic_ai_review -> 004_phase4_adversarial_verification, Phase 4 adversarial verification and execution validation database schema
+INFO  [alembic.runtime.migration] Running upgrade 004_phase4_adversarial_verification -> 005_phase5_mcp_governance_publishing, Phase 5 MCP governance, human approval, and GitHub publishing schema
+INFO  [alembic.runtime.migration] Running upgrade 005_phase5_mcp_governance_publishing -> 006_phase7_benchmarking_tables, Phase 7 Empirical Benchmarking schema
+
+POST-MIGRATION RELATIONAL SCHEMA AUDIT:
+Total Tables Verified: 28 (including alembic_version)
+Core Relational Tables:
+- alembic_version
+- organizations
+- users
+- repositories
+- pull_requests
+- review_jobs
+- review_findings
+- code_symbols
+- file_dependencies
+- context_slices
+- execution_validations
+- approval_requests
+- github_review_publications
+- tool_execution_audits
+- benchmark_runs
+- benchmark_results
+- ... (all 27 core domain tables present)
+
+Foreign Key Constraints: Active
+Composite Indexes: Active
+================================================================================
+STATUS: PASS (Database migrated cleanly to HEAD)

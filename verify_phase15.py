@@ -31,8 +31,7 @@ import hmac
 import os
 import sys
 import time
-from datetime import datetime, timezone, timedelta
-from typing import Any, Dict, List, Tuple
+from datetime import UTC, datetime, timedelta
 
 # Monorepo Path Setup
 _root = os.path.abspath(os.path.dirname(__file__))
@@ -50,12 +49,8 @@ os.environ["DEV_AUTH_BYPASS"] = "false"
 
 # Import core modules
 import jwt
-from app.core.config import settings
-from app.core.security import verify_github_signature
-from app.mcp.auth import Principal, PrincipalRole
-from app.mcp.classification import PolicyDecision, ToolRiskLevel, FORBIDDEN_TOOL_ACTIONS
-from app.mcp.policy_engine import PolicyEngine, AuthorizationResult
 from app.agents.judge.adversarial_judge import AdversarialJudge
+from app.agents.llm.mock import MockLLMProvider
 from app.agents.schemas.finding import (
     EvidenceItem,
     EvidenceType,
@@ -63,13 +58,18 @@ from app.agents.schemas.finding import (
     FindingSeverity,
     ReviewFinding,
 )
-from app.agents.llm.mock import MockLLMProvider
+from app.core.config import settings
+from app.core.security import verify_github_signature
+from app.mcp.auth import Principal, PrincipalRole
+from app.mcp.classification import PolicyDecision
+from app.mcp.policy_engine import PolicyEngine
 from code_intelligence.filter.file_filter import FileFilter
+
 
 class SecurityVerificationReport:
     def __init__(self):
-        self.gates: List[Tuple[int, str, bool, str]] = []
-        self.timings: Dict[str, float] = {}
+        self.gates: list[tuple[int, str, bool, str]] = []
+        self.timings: dict[str, float] = {}
 
     def record_gate(self, gate_id: int, name: str, passed: bool, evidence: str):
         self.gates.append((gate_id, name, passed, evidence))
@@ -102,7 +102,7 @@ class SecurityVerificationReport:
 
 def make_jwt(claims: dict, expires_delta: timedelta) -> str:
     payload = claims.copy()
-    payload["exp"] = datetime.now(timezone.utc) + expires_delta
+    payload["exp"] = datetime.now(UTC) + expires_delta
     return jwt.encode(payload, settings.SECRET_KEY, algorithm="HS256")
 
 def check_jwt(token: str) -> dict | None:
@@ -123,11 +123,11 @@ def run_security_verification() -> bool:
     t0 = time.perf_counter()
     valid_token = make_jwt({"sub": "user_123", "org": "org_sec", "role": "MEMBER"}, timedelta(minutes=15))
     payload = check_jwt(valid_token)
-    
+
     # Tampered token
     tampered_token = valid_token[:-4] + "ABCD"
     tampered_payload = check_jwt(tampered_token)
-    
+
     # Expired token
     expired_token = make_jwt({"sub": "user_123", "org": "org_sec", "role": "MEMBER"}, timedelta(minutes=-10))
     expired_payload = check_jwt(expired_token)
@@ -150,7 +150,7 @@ def run_security_verification() -> bool:
         organization_id="org_sec",
         tool_name="merge_pull_request",
     )
-    
+
     # Admin attempting safe read tool
     admin_principal = Principal(principal_id="u_adm", role=PrincipalRole.ADMIN, organization_id="org_sec")
     dec_admin = PolicyEngine.evaluate(
@@ -169,7 +169,7 @@ def run_security_verification() -> bool:
     # -------------------------------------------------------------
     t0 = time.perf_counter()
     p_tenant_a = Principal(principal_id="user_a", role=PrincipalRole.REVIEWER, organization_id="org_alpha")
-    
+
     # Cross-tenant review submission
     dec_cross = PolicyEngine.evaluate(
         principal=p_tenant_a,
@@ -183,7 +183,7 @@ def run_security_verification() -> bool:
             "organization_id": "org_beta",  # Tenant mismatch!
             "repository_id": "repo_alpha_1",
             "head_sha": "abc1234",
-            "expires_at": (datetime.now(timezone.utc) + timedelta(hours=1)).isoformat()
+            "expires_at": (datetime.now(UTC) + timedelta(hours=1)).isoformat()
         },
         findings_metadata=[{"id": "f1", "status": "PUBLISHABLE", "severity": "HIGH"}]
     )
@@ -201,7 +201,7 @@ def run_security_verification() -> bool:
     body = b'{"action":"opened","pull_request":{"id":42}}'
     valid_sig = "sha256=" + hmac.new(secret, body, hashlib.sha256).hexdigest()
     invalid_sig = "sha256=" + "0" * 64
-    
+
     v_valid = verify_github_signature(body, valid_sig)
     v_invalid = verify_github_signature(body, invalid_sig)
     t1 = time.perf_counter()
@@ -215,11 +215,11 @@ def run_security_verification() -> bool:
     # -------------------------------------------------------------
     seen_deliveries = set()
     delivery_id = "7b23-replay-check-001"
-    
+
     first_seen = delivery_id not in seen_deliveries
     seen_deliveries.add(delivery_id)
     replay_seen = delivery_id in seen_deliveries
-    
+
     g5_pass = (first_seen and replay_seen)
     report.record_gate(5, "Webhook replay controlled", g5_pass, "Delivery ID tracking rejects duplicated webhooks")
 
@@ -328,7 +328,7 @@ def run_security_verification() -> bool:
         "organization_id": "org_alpha",
         "repository_id": "repo_alpha_1",
         "head_sha": "target_sha_123",
-        "expires_at": (datetime.now(timezone.utc) + timedelta(hours=1)).isoformat()
+        "expires_at": (datetime.now(UTC) + timedelta(hours=1)).isoformat()
     }
     dec_bound = PolicyEngine.evaluate(
         principal=p_tenant_a,
@@ -352,7 +352,7 @@ def run_security_verification() -> bool:
         "organization_id": "org_alpha",
         "repository_id": "repo_alpha_1",
         "head_sha": "target_sha_123",  # Stale SHA
-        "expires_at": (datetime.now(timezone.utc) + timedelta(hours=1)).isoformat()
+        "expires_at": (datetime.now(UTC) + timedelta(hours=1)).isoformat()
     }
     dec_stale = PolicyEngine.evaluate(
         principal=p_tenant_a,
@@ -446,7 +446,7 @@ def run_security_verification() -> bool:
         "event_type": "SECURITY_POLICY_VIOLATION",
         "actor": p_tenant_a.principal_id,
         "reason": dec_cross.reason,
-        "timestamp": datetime.now(timezone.utc).isoformat()
+        "timestamp": datetime.now(UTC).isoformat()
     }
     t1 = time.perf_counter()
     report.record_timing("Structured audit event emission", (t1 - t0) * 1000)

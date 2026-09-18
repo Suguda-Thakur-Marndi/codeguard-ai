@@ -1,14 +1,14 @@
 {
   "scenario_id": "AC-005",
   "name": "Missing Test/Contract",
-  "timestamp": "2026-09-16T20:00:35.789405+00:00",
+  "timestamp": "2026-09-18T13:32:40.738933+00:00",
   "expected": "Flags breaking return type contract change",
   "actual": "Flagged CONTRACT contract break at line 53",
   "status": "PASS",
   "telemetry": {
     "findings": [
       {
-        "finding_id": "8a09ff8c-b99e-4191-b92b-f89a90c2f763",
+        "finding_id": "81ee44b0-219c-45f5-8523-7ca7a44d7bf2",
         "file_path": "src/services/payment_service.py",
         "line_number": 53,
         "side": "RIGHT",

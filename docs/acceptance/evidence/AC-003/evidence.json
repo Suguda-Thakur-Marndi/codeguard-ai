@@ -1,14 +1,14 @@
 {
   "scenario_id": "AC-003",
   "name": "Error Handling Bug",
-  "timestamp": "2026-09-16T20:00:35.617815+00:00",
+  "timestamp": "2026-09-18T13:32:40.230346+00:00",
   "expected": "Flags None dereference on line 40-43, severity HIGH",
   "actual": "Flagged BUG at line 40",
   "status": "PASS",
   "telemetry": {
     "findings": [
       {
-        "finding_id": "354fceed-7ac1-4a87-9f57-dd9cf8e5afed",
+        "finding_id": "6573d6b3-f55e-47ff-9e1a-64ef5a59abc5",
         "file_path": "src/services/payment_service.py",
         "line_number": 40,
         "side": "RIGHT",

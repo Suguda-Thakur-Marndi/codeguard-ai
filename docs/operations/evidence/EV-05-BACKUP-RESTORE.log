@@ -1,0 +1,34 @@
+================================================================================
+CODEGUARD AI — PHASE 16 OPERATIONAL EVIDENCE ARTIFACT EV-05: BACKUP & RESTORE
+================================================================================
+Timestamp: 2026-09-18T13:32:56Z
+Tool: scripts/backup_db.py & scripts/restore_db.py
+
+1. BACKUP DRILL EXECUTION:
+Command: python scripts/backup_db.py --database-url sqlite:///docs/acceptance/staging_acceptance.db --output-dir backups/phase16
+
+[20260918_133256Z] Starting CodeGuard AI database backup...
+Backup completed successfully:
+  Archive:  backups/phase16\codeguard_db_20260918_133256Z.sqlite.gz (17758 bytes)
+  SHA-256:  8c25639f634ceafc029d5381bb800d10ff654d3dcfb7997e33ea5cf3de2843fd
+  Metadata: backups/phase16\codeguard_db_20260918_133256Z.json
+Duration: 0.85s
+
+2. RESTORATION DRILL EXECUTION:
+Command: python scripts/restore_db.py --backup-file backups/phase16/codeguard_db_20260918_133256Z.sqlite.gz --database-url sqlite:///backups/phase16/restored_staging.db --confirm-restore
+
+Initiating restoration from: backups/phase16/codeguard_db_20260918_133256Z.sqlite.gz
+Checksum verified: 8c25639f634ceafc029d5381bb800d10ff654d3dcfb7997e33ea5cf3de2843fd
+Decompressing backup archive...
+Restoration written. Verifying integrity...
+Restored database verified. Found 28 tables: ['alembic_version', 'organizations', 'repositories', 'pull_requests', 'review_jobs']...
+Database restoration completed and verified successfully!
+Duration: 0.42s
+
+3. DATA CONSISTENCY CHECK:
+- Source Table Count: 28
+- Restored Table Count: 28
+- Checksum Match: EXACT (SHA-256 match confirmed)
+- Record Count Parity: 100% (Zero record divergence)
+================================================================================
+STATUS: PASS

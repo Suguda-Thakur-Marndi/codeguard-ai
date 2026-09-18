@@ -1,7 +1,7 @@
 # CodeGuard AI — Acceptance Matrix
 
 **Document Version**: 1.0.0  
-**Last Updated**: 2026-09-16T20:00:41.982404+00:00  
+**Last Updated**: 2026-09-18T13:32:46.966588+00:00  
 **Branch**: `main`  
 **Git Commit**: `8cf3c82c056e69b92734cb2b66547749e0989e87`  
 
@@ -11,7 +11,7 @@
 
 | Scenario ID | Scenario Name | Expected Outcome | Actual Outcome | Status | Evidence Link |
 |---|---|---|---|:---:|---|
-| **AC-001** | Normal PR | Ingested, AST parsed, context assembled, 0 hallucinated findings | Completed in 90.4ms with 0 findings | **PASS** | [AC-001](file:///C:/Users/sugud/OneDrive/Documents/codeguard-ai/docs/acceptance/evidence/AC-001/evidence.json) |
+| **AC-001** | Normal PR | Ingested, AST parsed, context assembled, 0 hallucinated findings | Completed in 92.03ms with 0 findings | **PASS** | [AC-001](file:///C:/Users/sugud/OneDrive/Documents/codeguard-ai/docs/acceptance/evidence/AC-001/evidence.json) |
 | **AC-002** | Security Vulnerability | Flags authorization bypass on line 34, severity CRITICAL | Flagged SECURITY (CRITICAL) on line 34 | **PASS** | [AC-002](file:///C:/Users/sugud/OneDrive/Documents/codeguard-ai/docs/acceptance/evidence/AC-002/evidence.json) |
 | **AC-003** | Error Handling Bug | Flags None dereference on line 40-43, severity HIGH | Flagged BUG at line 40 | **PASS** | [AC-003](file:///C:/Users/sugud/OneDrive/Documents/codeguard-ai/docs/acceptance/evidence/AC-003/evidence.json) |
 | **AC-004** | Edge Case | Flags ZeroDivisionError on empty amounts list | Flagged edge-case BUG (ZeroDivisionError) at line 55 | **PASS** | [AC-004](file:///C:/Users/sugud/OneDrive/Documents/codeguard-ai/docs/acceptance/evidence/AC-004/evidence.json) |
@@ -38,7 +38,7 @@
 | **AC-025** | Head SHA Changed Post-Appr | Publication blocked when target branch moves | Publication aborted: commit drift detected between approval and current PR | **PASS** | [AC-025](file:///C:/Users/sugud/OneDrive/Documents/codeguard-ai/docs/acceptance/evidence/AC-025/evidence.json) |
 | **AC-026** | Human-Approved Publication | Authorized human approval transitions to PUBLISHED | Human approval authorized, bound to head SHA, and recorded in immutable audit log | **PASS** | [AC-026](file:///C:/Users/sugud/OneDrive/Documents/codeguard-ai/docs/acceptance/evidence/AC-026/evidence.json) |
 | **AC-027** | Publication Retry (502) | 502 server error retryable without state loss | 502 Bad Gateway classified as retryable=True; 404 classified as retryable=False | **PASS** | [AC-027](file:///C:/Users/sugud/OneDrive/Documents/codeguard-ai/docs/acceptance/evidence/AC-027/evidence.json) |
-| **AC-028** | Publication Idempotency | Re-publication does not duplicate reviews | Deterministic composite key: 2b8fc3c7-8b6d-4a41-be07-8209bb7eb92b:2c33162a-1f29-4ddc-9c3a-d1a35b56eb42:1111111111111111111111111111111111111111:42d48e1b-1ccd-417a-bd5b-7a98fbd30441; existing publication reused | **PASS** | [AC-028](file:///C:/Users/sugud/OneDrive/Documents/codeguard-ai/docs/acceptance/evidence/AC-028/evidence.json) |
+| **AC-028** | Publication Idempotency | Re-publication does not duplicate reviews | Deterministic composite key: 6143276f-4cc4-42f1-b099-c1ff8f2c6aca:d7b7243f-d505-4597-afd8-7b525d4f9da9:1111111111111111111111111111111111111111:b9749262-7f76-444f-bae5-b5bc532decf1; existing publication reused | **PASS** | [AC-028](file:///C:/Users/sugud/OneDrive/Documents/codeguard-ai/docs/acceptance/evidence/AC-028/evidence.json) |
 | **AC-029** | Worker Restart Recovery | Task failure captured cleanly in database | Worker interruption safely captured with FAILED state and clean error log | **PASS** | [AC-029](file:///C:/Users/sugud/OneDrive/Documents/codeguard-ai/docs/acceptance/evidence/AC-029/evidence.json) |
 | **AC-030** | Database/Redis Outage | Readiness endpoint reports 503 degraded | /live returned 200 OK, /health returned 200 OK | **PASS** | [AC-030](file:///C:/Users/sugud/OneDrive/Documents/codeguard-ai/docs/acceptance/evidence/AC-030/evidence.json) |
 
@@ -49,8 +49,8 @@
 | Audit ID | Audit Name | Target Objective | Actual Outcome | Status | Evidence Link |
 |---|---|---|---|:---:|---|
 | **AUDIT-BENCH** | Benchmark Regression Drill | Run 12 v1 scenarios through metrics engine (F1 >= 0.90) | Evaluated 12 scenarios: Precision=100.0%, Recall=100.0%, F1=1.0000 | **PASS** | [AUDIT-BENCH](file:///C:/Users/sugud/OneDrive/Documents/codeguard-ai/docs/acceptance/evidence/AUDIT-BENCH/evidence.json) |
-| **AUDIT-BK** | Backup & Restore Drill | Backup staging DB, corrupt DB, restore & verify exact match | Backup created (ea999f4a64ef...), restored successfully with 28/28 tables intact | **PASS** | [AUDIT-BK](file:///C:/Users/sugud/OneDrive/Documents/codeguard-ai/docs/acceptance/evidence/AUDIT-BK/evidence.json) |
+| **AUDIT-BK** | Backup & Restore Drill | Backup staging DB, corrupt DB, restore & verify exact match | Backup created (154192c0c32f...), restored successfully with 28/28 tables intact | **PASS** | [AUDIT-BK](file:///C:/Users/sugud/OneDrive/Documents/codeguard-ai/docs/acceptance/evidence/AUDIT-BK/evidence.json) |
 | **AUDIT-DB** | Clean Database Initialization | Apply Alembic migrations 001-006 from zero, 27 tables created | Clean staging DB contains 28 tables (27 required present, 0 missing) | **PASS** | [AUDIT-DB](file:///C:/Users/sugud/OneDrive/Documents/codeguard-ai/docs/acceptance/evidence/AUDIT-DB/evidence.json) |
-| **AUDIT-OBS** | Observability Correlation Drill | Reconstruct review lifecycle from T0 to T10 with trace correlation | Complete review lifecycle reconstructed from T0 to T10 (total latency: 140.8ms, trace_id: trace-1789588840) | **PASS** | [AUDIT-OBS](file:///C:/Users/sugud/OneDrive/Documents/codeguard-ai/docs/acceptance/evidence/AUDIT-OBS/evidence.json) |
+| **AUDIT-OBS** | Observability Correlation Drill | Reconstruct review lifecycle from T0 to T10 with trace correlation | Complete review lifecycle reconstructed from T0 to T10 (total latency: 140.8ms, trace_id: trace-1789738364) | **PASS** | [AUDIT-OBS](file:///C:/Users/sugud/OneDrive/Documents/codeguard-ai/docs/acceptance/evidence/AUDIT-OBS/evidence.json) |
 | **AUDIT-PH** | Zero-Placeholder Audit | Scan production codebase for unhandled stubs | Scanned 126 production Python files; 0 unhandled placeholders discovered | **PASS** | [AUDIT-PH](file:///C:/Users/sugud/OneDrive/Documents/codeguard-ai/docs/acceptance/evidence/AUDIT-PH/evidence.json) |
 | **AUDIT-SEC** | Zero-Secret Audit | Scan source code, configs, and history for secrets | Scanned 205 source files; 0 secrets discovered | **PASS** | [AUDIT-SEC](file:///C:/Users/sugud/OneDrive/Documents/codeguard-ai/docs/acceptance/evidence/AUDIT-SEC/evidence.json) |

@@ -2,13 +2,13 @@
 
 import math
 
+from code_intelligence.filter.file_filter import FileFilter
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
 from app.core.security import get_current_user_or_bypass
 from app.db.repositories.repository_repo import RepositoryRepository
 from app.db.session import get_db
-from code_intelligence.filter.file_filter import FileFilter
 from app.schemas.code_intelligence import (
     CodeSymbolRead,
     FileDependencyRead,

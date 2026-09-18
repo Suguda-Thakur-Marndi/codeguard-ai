@@ -80,7 +80,7 @@ class PolicyEngine:
                 principal=principal,
                 organization_id=organization_id,
                 repository_id=repository_id,
-                parameters=parameters,
+                parameters=parameters or {},
                 org_policy=org_policy or {},
                 approval_record=approval_record,
                 findings_metadata=findings_metadata or [],
@@ -183,9 +183,10 @@ class PolicyEngine:
             )
 
         if approval_record.get("head_sha") != head_sha:
+            appr_sha = str(approval_record.get("head_sha") or "")[:8]
             return AuthorizationResult(
                 decision=PolicyDecision.DENY,
-                reason=f"Approval is bound to head SHA {approval_record.get('head_sha')[:8]}, but current PR head SHA is {head_sha[:8]}. Approval is STALE.",
+                reason=f"Approval is bound to head SHA {appr_sha}, but current PR head SHA is {head_sha[:8]}. Approval is STALE.",
                 risk_level=effective_risk,
                 requires_approval=True,
             )

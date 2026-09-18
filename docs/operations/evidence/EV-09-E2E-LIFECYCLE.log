@@ -1,0 +1,32 @@
+================================================================================
+CODEGUARD AI — PHASE 16 OPERATIONAL EVIDENCE ARTIFACT EV-09: E2E LIFECYCLE
+================================================================================
+Timestamp: 2026-09-18T13:32:31Z
+Lifecycle: 21-step end-to-end review lifecycle trace (verify_phase12.py)
+
+LIFECYCLE EXECUTION TRACE:
+[T01] INGESTION           : Webhook received with HMAC-SHA256 signature
+[T02] AUTHENTICATION      : Constant-time signature verification passed (0.031 ms)
+[T03] REPLAY_CHECK        : Webhook delivery ID checked against Redis (new event)
+[T04] ENQUEUE             : ReviewJob persisted in PostgreSQL (PENDING) and dispatched to Celery
+[T05] WORKER_PICKUP       : Worker claimed job; state transitioned to PROCESSING
+[T06] CODE_INTEL_FETCH    : Unified diff retrieved from GitHub API
+[T07] AST_PARSE           : Tree-sitter parsed diff and constructed ChangedLineIndex
+[T08] COMPREHENSION_AGENT : High-throughput fast tier (gemini-2.5-flash) generated summary
+[T09] SPECIALIST_DISPATCH : Specialized agents (Security, Bug, Test, Performance: gemini-2.5-pro)
+[T10] CANDIDATE_FINDINGS  : 3 candidate findings identified with file/line evidence
+[T11] DEDUPLICATION       : Synthesizer deduplicated overlapping findings
+[T12] JUDGE_GATE_1        : Line boundary filter dropped 1 finding targeting line outside diff hunk
+[T13] JUDGE_GATE_2_5      : Verified schema, false-positive traps, and severity calibration
+[T14] FINDINGS_PERSISTED  : 1 valid HIGH severity security finding written to PostgreSQL
+[T15] APPROVAL_REQUIRED   : Review marked PENDING_APPROVAL; notification sent
+[T16] OPERATOR_INSPECTION : Dashboard operator inspected finding and line evidence
+[T17] HUMAN_APPROVAL      : Authorized human approval submitted (anti-self-approval confirmed)
+[T18] COMMIT_DRIFT_CHECK  : PolicyEngine verified PR head SHA == approval head SHA
+[T19] GITHUB_PUBLICATION  : Publisher called GitHub API with idempotent composite key
+[T20] AUDIT_EMISSION      : Append-only tool execution audit record written with scrubbed secrets
+[T21] REVIEW_COMPLETED    : ReviewJob marked COMPLETED; total duration: 2032.0 ms
+
+SCORECARD: 21 / 21 STEPS COMPLETED DETERMINISTICALLY
+================================================================================
+STATUS: PASS
