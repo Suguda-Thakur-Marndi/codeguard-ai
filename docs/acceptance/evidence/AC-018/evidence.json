@@ -1,12 +1,12 @@
 {
   "scenario_id": "AC-018",
   "name": "Duplicate Review Request",
-  "timestamp": "2026-09-18T13:32:42.159092+00:00",
+  "timestamp": "2026-09-28T13:32:16.278828+00:00",
   "expected": "Completed review job skips duplicate execution",
   "actual": "Idempotency guard skipped execution: completed job returned unchanged",
   "status": "PASS",
   "telemetry": {
-    "job_id": "4a8fe8c4-564a-4a37-9a63-f04b48bd69af",
+    "job_id": "89835bbe-1f92-4417-bf86-3479d9ae9fcf",
     "status": "COMPLETED"
   }
 }

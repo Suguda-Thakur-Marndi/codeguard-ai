@@ -1,7 +1,7 @@
 {
   "scenario_id": "AC-015",
   "name": "Stale Context",
-  "timestamp": "2026-09-18T13:32:42.003645+00:00",
+  "timestamp": "2026-09-28T13:32:16.143015+00:00",
   "expected": "Head SHA mismatch invalidates review context",
   "actual": "Head SHA divergence detected; review marked STALE and aborted",
   "status": "PASS",

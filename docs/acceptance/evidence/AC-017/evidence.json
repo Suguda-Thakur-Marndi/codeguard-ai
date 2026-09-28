@@ -1,7 +1,7 @@
 {
   "scenario_id": "AC-017",
   "name": "Duplicate Webhook",
-  "timestamp": "2026-09-18T13:32:42.121197+00:00",
+  "timestamp": "2026-09-28T13:32:16.241827+00:00",
   "expected": "Replay dropped via constant-time cache",
   "actual": "HMAC-SHA256 signature verified; duplicate delivery rejected via replay cache",
   "status": "PASS",

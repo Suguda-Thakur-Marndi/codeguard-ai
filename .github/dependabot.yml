@@ -1,0 +1,98 @@
+version: 2
+updates:
+  # Python Dependencies: Backend API & Worker
+  - package-ecosystem: "pip"
+    directory: "/apps/api"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "04:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "CodeGuard-Maintainers"
+    commit-message:
+      prefix: "deps(api)"
+      include: "scope"
+
+  # Python Dependencies: Dedicated MCP Server
+  - package-ecosystem: "pip"
+    directory: "/apps/mcp-server"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "04:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 3
+    reviewers:
+      - "CodeGuard-Maintainers"
+    commit-message:
+      prefix: "deps(mcp)"
+      include: "scope"
+
+  # Python Dependencies: Code Intelligence Package
+  - package-ecosystem: "pip"
+    directory: "/packages/code-intelligence"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "04:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 3
+    reviewers:
+      - "CodeGuard-Maintainers"
+    commit-message:
+      prefix: "deps(code-intel)"
+      include: "scope"
+
+  # Node.js Dependencies: Web Dashboard
+  - package-ecosystem: "npm"
+    directory: "/apps/web"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "04:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "CodeGuard-Maintainers"
+    commit-message:
+      prefix: "deps(web)"
+      include: "scope"
+
+  # Docker Base Images
+  - package-ecosystem: "docker"
+    directory: "/apps/api"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 2
+    commit-message:
+      prefix: "deps(docker-api)"
+
+  - package-ecosystem: "docker"
+    directory: "/apps/web"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 2
+    commit-message:
+      prefix: "deps(docker-web)"
+
+  - package-ecosystem: "docker"
+    directory: "/apps/mcp-server"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 2
+    commit-message:
+      prefix: "deps(docker-mcp)"
+
+  # GitHub Actions Workflows
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+    open-pull-requests-limit: 3
+    commit-message:
+      prefix: "deps(ci)"

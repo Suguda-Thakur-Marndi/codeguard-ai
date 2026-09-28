@@ -1,7 +1,7 @@
 {
   "scenario_id": "AC-020",
   "name": "Failed Gemini Request",
-  "timestamp": "2026-09-18T13:32:42.173899+00:00",
+  "timestamp": "2026-09-28T13:32:16.296401+00:00",
   "expected": "Exponential backoff retries transient failures",
   "actual": "Bounded retry with exponential backoff succeeded after transient failure",
   "status": "PASS",

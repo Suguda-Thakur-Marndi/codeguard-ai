@@ -1,7 +1,7 @@
 {
   "scenario_id": "AC-011",
   "name": "Large Diff",
-  "timestamp": "2026-09-18T13:32:41.665765+00:00",
+  "timestamp": "2026-09-28T13:32:15.827248+00:00",
   "expected": "Line limit and token budgeting enforced",
   "actual": "Large diff processed (1500 lines parsed within memory)",
   "status": "PASS",

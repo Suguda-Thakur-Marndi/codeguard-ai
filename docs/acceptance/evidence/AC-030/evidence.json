@@ -1,7 +1,7 @@
 {
   "scenario_id": "AC-030",
   "name": "Database/Redis Outage",
-  "timestamp": "2026-09-18T13:32:42.602303+00:00",
+  "timestamp": "2026-09-28T13:32:16.685273+00:00",
   "expected": "Readiness endpoint reports 503 degraded",
   "actual": "/live returned 200 OK, /health returned 200 OK",
   "status": "PASS",

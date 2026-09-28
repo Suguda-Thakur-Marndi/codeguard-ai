@@ -1,7 +1,7 @@
 {
   "scenario_id": "AC-024",
   "name": "Approval Expiry",
-  "timestamp": "2026-09-18T13:32:42.236094+00:00",
+  "timestamp": "2026-09-28T13:32:16.357557+00:00",
   "expected": "Expired human approval rejected",
   "actual": "Expired approval rejected by approval service guard",
   "status": "PASS",
