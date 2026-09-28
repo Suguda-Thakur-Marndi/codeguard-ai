@@ -1,5 +1,6 @@
 """Alembic environment configuration."""
 
+import os
 from logging.config import fileConfig
 
 from sqlalchemy import engine_from_config, pool
@@ -15,8 +16,9 @@ if config.config_file_name is not None:
 
 target_metadata = Base.metadata
 
-# Override sqlalchemy.url with application settings
-config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)
+# Override sqlalchemy.url with application settings or environment override
+db_url = os.environ.get("DATABASE_URL") or config.get_main_option("sqlalchemy.url") or settings.DATABASE_URL
+config.set_main_option("sqlalchemy.url", db_url)
 
 
 def run_migrations_offline() -> None:

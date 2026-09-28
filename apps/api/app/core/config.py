@@ -1,6 +1,7 @@
 """Application configuration using Pydantic Settings."""
 
 from typing import Literal
+from urllib.parse import urlparse
 
 from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -119,11 +120,49 @@ class Settings(BaseSettings):
             return [str(i) for i in v]
         return ["http://localhost:3000"]
 
-    @field_validator("APP_ENV")
+    @field_validator("BACKEND_URL", "FRONTEND_URL", "MCP_SERVER_URL")
     @classmethod
-    def validate_production_config(cls, env: str, info: object) -> str:
-        # Note: Validation for strict production flags will run on instantiation
-        return env
+    def validate_service_urls(cls, v: str) -> str:
+        if not v:
+            raise ValueError("URL cannot be empty")
+        try:
+            parsed = urlparse(v)
+            if parsed.scheme not in ("http", "https"):
+                raise ValueError(f"Invalid URL scheme '{parsed.scheme}'; must be 'http' or 'https'")
+            if not parsed.netloc:
+                raise ValueError("URL must include a valid host/network location")
+            if parsed.port is not None and not (1 <= parsed.port <= 65535):
+                raise ValueError(f"Invalid port '{parsed.port}'; must be between 1 and 65535")
+        except ValueError:
+            raise
+        except Exception as e:
+            raise ValueError(f"Malformed URL: {e}") from e
+        return v
+
+    @field_validator("DATABASE_URL")
+    @classmethod
+    def validate_database_url(cls, v: str) -> str:
+        if not v:
+            raise ValueError("DATABASE_URL cannot be empty")
+        valid_prefixes = (
+            "postgresql://",
+            "postgresql+psycopg2://",
+            "postgresql+asyncpg://",
+            "sqlite://",
+            "sqlite+aiosqlite://",
+        )
+        if not any(v.startswith(prefix) for prefix in valid_prefixes):
+            raise ValueError("DATABASE_URL must start with a valid dialect prefix (e.g. postgresql://, sqlite://)")
+        return v
+
+    @field_validator("REDIS_URL")
+    @classmethod
+    def validate_redis_url(cls, v: str) -> str:
+        if not v:
+            raise ValueError("REDIS_URL cannot be empty")
+        if not (v.startswith("redis://") or v.startswith("rediss://") or v.startswith("memory://")):
+            raise ValueError("REDIS_URL must start with redis://, rediss://, or memory://")
+        return v
 
     def model_post_init(self, __context: object) -> None:
         """Validate production invariants."""
