@@ -1,14 +1,14 @@
 {
   "scenario_id": "AC-002",
   "name": "Security Vulnerability",
-  "timestamp": "2026-09-28T13:32:14.911971+00:00",
+  "timestamp": "2026-09-29T06:27:57.625914+00:00",
   "expected": "Flags authorization bypass on line 34, severity CRITICAL",
   "actual": "Flagged SECURITY (CRITICAL) on line 34",
   "status": "PASS",
   "telemetry": {
     "findings": [
       {
-        "finding_id": "b0d20a7a-e446-462c-9f16-10706eba44b7",
+        "finding_id": "f765aee5-d5ea-441b-bc1c-5fcdb341918a",
         "file_path": "src/services/payment_service.py",
         "line_number": 34,
         "side": "RIGHT",

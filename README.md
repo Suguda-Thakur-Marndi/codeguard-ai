@@ -1,263 +1,226 @@
 # CodeGuard AI — Agentic GitHub Pull Request Review Platform
 
-> **Production Release — Phase 8 Verified**  
-> *Deterministic AST code intelligence, multi-agent LangGraph review engine, adversarial verification judge, MCP zero-trust governance, human authorization gates, and atomic GitHub publication.*
+> **Version**: `1.0.0` | **Status**: Verified in Staging & Local Runtimes (Limited Continuation)  
+> *Deterministic Tree-sitter AST code intelligence, multi-agent LangGraph review engine, 5-gate adversarial verification judge, MCP zero-trust governance, human authorization gates, and atomic GitHub publication.*
 
-CodeGuard AI is an enterprise-grade agentic platform that automates GitHub Pull Request security, correctness, and contract reviews with mathematical precision and zero hallucinations.
-
----
-
-## Production System Architecture
-
-```
-                    GitHub
-                       │
-                       ▼
-                GitHub Webhook (HMAC-SHA256)
-                       │
-                       ▼
-                 FastAPI Backend
-                       │
-          ┌────────────┼─────────────┐
-          ▼            ▼             ▼
-      PostgreSQL     Redis       MCP Server
-          │            │
-          └────── Worker Queue ────┐
-                       │           │
-                       ▼           │
-                Review Pipeline    │
-                       │           │
-                       ▼           │
-               Code Intelligence   │
-              (Tree-sitter & AST)  │
-                       │           │
-                       ▼           │
-                  LangGraph        │
-                       │           │
-          ┌────────────┼───────────┴─┐
-          ▼            ▼             ▼
-      Security     Bug/Error   Test/Contract
-        Agent        Agent         Agent
-          \            │            /
-           \           │           /
-            └──────────┼──────────┘
-                       │
-                       ▼
-                Adversarial Judge
-                (4-Gate Verification)
-                       │
-                       ▼
-              Execution Validation
-                (Docker Sandbox)
-                       │
-                       ▼
-               Governance Policy
-                       │
-                ┌──────┴──────┐
-                ▼             ▼
-          Human Approval   Read-only
-                │
-                ▼
-          GitHub Review (Atomic Inline Comments)
-                │
-                ▼
-            Audit Log (Immutable Append-Only)
-```
+CodeGuard AI is an automated, adversarial-resistant GitHub Pull Request code review platform designed to detect security vulnerabilities, logic bugs, contract shifts, and performance bottlenecks with mathematical line precision and zero hallucinations.
 
 ---
 
-## Key Subsystems
+## 1. Problem Statement & Solution
 
-### 1. Code Intelligence Engine (`packages/code-intelligence`)
-- **Tree-sitter AST Parsing**: Python, JavaScript, and TypeScript language adapters.
-- **Unified Diff Parser**: Deterministic hunk parsing with line classification (`LEFT` base vs `RIGHT` head).
-- **Enclosing Entity Resolution**: Maps added/modified lines to enclosing function, method, or class AST chunks.
-- **Repository Dependency Graph**: Cross-file caller-callee and inheritance graphs stored in PostgreSQL.
-- **Context Ranking**: Deterministic token-budgeted context ranking (1.00 for target AST, 0.95 for sibling symbols, 0.85 for direct callers).
+Traditional automated code review tools suffer from three fundamental problems:
+1. **High False-Positive Noise**: Static analyzers emit cosmetic nitpicks and fail to detect whether an existing caller or decorator already mitigates the issue.
+2. **LLM Hallucinations**: Standard AI review bots hallucinate non-existent line numbers, critique unchanged code outside the diff, or recommend unviable code snippets.
+3. **Prompt Injection & Autonomous Tool Escapes**: Malicious pull requests containing adversarial comments or indirect prompt injections can compromise reviewer bots that lack zero-trust boundaries.
 
-### 2. Agentic Multi-Agent Review Pipeline (`apps/api/app/agents`)
-- **LangGraph StateGraph**: Orchestrates comprehension, risk-based routing, parallel specialist dispatch, and aggregation.
-- **Specialist Agents**:
-  - `SecurityAgent`: OWASP Top 10, auth bypass, injection, hardcoded secrets.
-  - `BugAgent`: Null dereference, unhandled exceptions, logic drift, off-by-one errors.
-  - `TestAgent`: Test contract compliance, regression risk, missing edge-case test coverage.
-  - `PerformanceAgent`: Algorithmic complexity, N+1 database queries, resource leaks.
-- **Strict Structured Outputs**: JSON schema-validated Pydantic models with token and cost tracking.
-
-### 3. Adversarial Verification & Execution Sandbox (`apps/api/app/agents/judge`, `validation`)
-- **4-Gate Adversarial Judge**:
-  - *Gate 1*: Diff Boundary Conformity (rejects line hallucinations outside diff hunks).
-  - *Gate 2*: Contextual Factuality (detects existing guards/callers mitigating the issue).
-  - *Gate 3*: Actionability Heuristics (rejects vague suggestions without concrete resolutions).
-  - *Gate 4*: Severity Penalty Audit (downgrades over-inflated severity ratings).
-- **Root-Cause Deduplication**: Merges multi-agent duplicate findings into canonical findings.
-- **Execution Sandbox**: Isolated ephemeral container execution (`network_mode="none"`, non-root user, CPU/memory limits, 30s timeout, command allowlist).
-
-### 4. Zero-Trust MCP Governance & Human Authorization (`apps/mcp-server`, `apps/api/app/mcp`)
-- **Model Context Protocol (MCP)** gateway exposing strictly typed tool definitions.
-- **Anti-Self-Approval Enforcement**: AI agents are strictly prohibited from approving their own reviews.
-- **Role-Based Authorization**: Only users with `REVIEWER` or `ADMIN` roles can authorize consequential publications.
-- **SHA-Bound Approvals & Commit Drift Protection**: Approvals are cryptographically bound to the PR head commit SHA. If a developer pushes new commits, existing approvals are automatically marked `STALE` and rejected.
-
-### 5. Atomic GitHub Publication (`apps/api/app/github`)
-- Idempotent review publication with inline comment coordinates strictly validated against diff hunks.
-- Automatic secret scrubbers redact bearer tokens, private keys, and API credentials from comment bodies.
-
-### 6. Empirical Benchmarking & Regression Detection (`evaluation`)
-- 12 real-world multi-language evaluation scenarios across Security, Bugs, and Contract compliance.
-- Automated calculation of Precision, Recall, F1 score, Line Accuracy, and Latency percentiles (P50/P95).
-- Regression detector flags performance degradations before deployments.
+**CodeGuard AI solves these challenges by combining:**
+- **Deterministic AST Context Extraction**: Uses Tree-sitter parsers to bound reviews strictly to modified hunks and enclosing functions.
+- **5-Gate Adversarial Judge**: A dedicated verification funnel that checks diff boundaries, caller factuality, actionability, severity calibration, and execution sandbox syntax.
+- **Zero-Trust MCP Sentinel**: Hardcoded tool blocklists (`execute_shell`, `eval_code`, etc.) and mandatory human operator approval for consequential actions.
+- **Commit Drift Protection**: Approvals are cryptographically bound to the PR head commit SHA; pushing new commits automatically invalidates stale approvals.
 
 ---
 
-## Monorepo Layout
+## 2. Implemented vs. Planned / Pilot-Pending Capabilities
+
+To maintain strict scientific and engineering honesty, CodeGuard AI clearly distinguishes between what is implemented and verified versus what is pending:
+
+| System Dimension | Capability | Status | Evidence / Verification |
+| :--- | :--- | :---: | :--- |
+| **Code Intelligence** | Tree-sitter AST parsing for Python, TypeScript, JavaScript | **IMPLEMENTED** | `test_tree_sitter_parsers.py` |
+| **Code Intelligence** | Language grammars for Go, Rust, Java | **PLANNED** | Scheduled for future milestones |
+| **Multi-Agent Review**| LangGraph StateGraph with Comprehension, Bug, Security, Perf, Test, Contract | **IMPLEMENTED** | `test_orchestrator.py`, `test_agents.py` |
+| **Adversarial Judge** | 5-Gate filter (Diff boundary, Factuality, Actionability, Severity, Sandbox) | **IMPLEMENTED** | `test_judge.py`, AC-008 |
+| **Zero-Trust MCP** | Standalone MCP Sentinel server with forbidden action blocklists & audit logging | **IMPLEMENTED** | `apps/mcp-server/tests/`, AC-022 |
+| **Governance & Auth** | Cryptographic human approval gate with commit-drift invalidation (`COMMIT_DRIFT`) | **IMPLEMENTED** | `test_approvals.py`, AC-016 |
+| **GitHub Publishing** | Idempotent multi-line PR review comments with automatic secret scrubbing | **IMPLEMENTED** | `test_github_publisher.py`, AC-028 |
+| **Acceptance Suite** | 30 end-to-end PR review scenarios + 6 specialized system audits | **IMPLEMENTED** | `scripts/run_acceptance_suite.py` (36/36 PASS) |
+| **Operational SRE** | 27 operational release gates (Clean build, Pydantic, Alembic 001-006, Redis fallback)| **IMPLEMENTED** | `verify_phase16.py` (27/27 PASS) |
+| **Unit Test Coverage** | 244 automated unit and integration tests | **IMPLEMENTED** | Pytest (244/244 PASS) |
+| **Customer Pilot** | Production deployment across external customer repositories | **PILOT PENDING** | Held in `docs/post-pilot/RELEASE_DECISION.md` |
+| **Cloud Autoscaling** | Remote Kubernetes / ECS cluster orchestration under live burst traffic | **PILOT PENDING** | Local tests validated; cloud cluster pending |
+
+---
+
+## 3. High-Level System Architecture
 
 ```
-codeguard-ai/
-├── apps/
-│   ├── api/                      # FastAPI REST API, Celery worker, Alembic migrations
-│   │   ├── app/
-│   │   │   ├── agents/           # LangGraph orchestrator, specialists, judge, sandbox
-│   │   │   ├── api/v1/endpoints/ # Protected REST endpoints (reviews, approvals, audit, etc.)
-│   │   │   ├── core/             # Configuration, security, logging
-│   │   │   ├── db/               # PostgreSQL connection pooling and ORM repositories
-│   │   │   ├── github/           # GitHub App client, JWT auth, review publisher
-│   │   │   ├── mcp/              # MCP policy engine and risk classification
-│   │   │   ├── models/           # SQLAlchemy 2.0 ORM models (27 tables)
-│   │   │   ├── schemas/          # Pydantic v2 schemas
-│   │   │   ├── services/         # Domain services (approval, publication, review jobs)
-│   │   │   └── workers/          # Celery asynchronous task definitions
-│   │   ├── alembic/              # Database schema migrations (001 through 006)
-│   │   ├── tests/                # 163 unit and integration tests
-│   │   └── Dockerfile            # Production hardened non-root container image
-│   │
-│   ├── mcp-server/               # Standalone Model Context Protocol gateway
-│   │   ├── app/                  # MCP server tools, policies, audit logger, service auth
-│   │   ├── tests/                # 9 policy and tool execution tests
-│   │   └── Dockerfile            # Hardened non-root MCP container image
-│   │
-│   └── web/                      # Next.js 15 App Router engineering dashboard
-│       ├── app/                  # Dashboard, PR list, Review details, Approvals, Policies
-│       ├── components/           # UI components
-│       ├── lib/                  # Typed API client
-│       └── Dockerfile            # Multi-stage standalone Next.js image
-│
-├── packages/
-│   └── code-intelligence/        # Tree-sitter AST & Context Ranking engine
-│
-├── evaluation/                   # Empirical benchmarking subsystem & datasets
-├── fixtures/                     # Test repositories (Python, JavaScript, TypeScript)
-├── scripts/                      # Database backup & restore utilities
-├── docs/                         # Runbooks & Disaster Recovery guides
-│   ├── RUNBOOK.md                # Operations incident response procedures
-│   ├── SECURITY_RUNBOOK.md       # Security incident & secret rotation runbook
-│   └── DISASTER_RECOVERY.md      # RPO/RTO & recovery verification procedures
-│
-├── docker-compose.yml            # Local development orchestration
-├── docker-compose.prod.yml       # Production container orchestration
-├── Makefile                      # Standardized developer & release commands
-└── benchmark.py                  # Benchmarking CLI
+                    GitHub Pull Request Webhook Event
+                                   │
+                                   ▼ HMAC-SHA256
+                           +───────────────+
+                           |  FastAPI API  | <---> [ PostgreSQL 16 ]
+                           |  (Port 8000)  |       (27 Relational Tables)
+                           +───────┬───────+
+                                   │
+                         Enqueues  │
+                                   ▼
+                           +───────────────+
+                           |    Redis 7    |
+                           |  Task Queue   |
+                           +───────┬───────+
+                                   │
+                        Pulls Task │
+                                   ▼
+                           +───────────────+
+                           | Celery Worker |
+                           +───────┬───────+
+                                   │
+        ┌──────────────────────────┴──────────────────────────┐
+        ▼                                                     ▼
+┌─────────────────────────────┐             ┌──────────────────────────────────┐
+│  packages/code-intelligence │             │    apps/api/app/agents/          │
+│  - Tree-sitter AST Parsers  │             │    - LangGraph StateGraph        │
+│  - Unified Diff Indexer     │ ──────────> │    - 6 Domain Specialists        │
+│  - Context Token Ranker     │             │    - 5-Gate Adversarial Judge    │
+└─────────────────────────────┘             └─────────────────┬────────────────┘
+                                                              │
+                                       Calls Tools over MCP   │
+                                                              ▼
+                                            ┌──────────────────────────────────┐
+                                            │      apps/mcp-server/ (:8001)    │
+                                            │      - Zero-Trust Sentinel       │
+                                            │      - Forbidden Tools Blocklist │
+                                            │      - Append-Only Audit Log     │
+                                            └─────────────────┬────────────────┘
+                                                              │
+                                     Consequential Tools Gate │
+                                                              ▼
+                                            ┌──────────────────────────────────┐
+                                            │      apps/web/ (:3000)           │
+                                            │      - Next.js 15 SSR Dashboard  │
+                                            │      - Human Approval Gate       │
+                                            └─────────────────┬────────────────┘
+                                                              │
+                                            Publishes Review  │ (If Head SHA Valid)
+                                                              ▼
+                                            ┌──────────────────────────────────┐
+                                            │   GitHub Pull Request Review     │
+                                            │   (Idempotent Inline Comments)   │
+                                            └──────────────────────────────────┘
 ```
 
 ---
 
-## Getting Started
+## 4. Technologies Actually Used
 
-### Prerequisites
-- Python 3.11+ (Python 3.12 recommended)
-- Node.js 20+ / 22
-- Docker & Docker Compose
-- PostgreSQL 16 & Redis 7
+- **Backend REST API**: Python 3.11+, FastAPI 0.111, Pydantic v2, Uvicorn.
+- **Asynchronous Task Queue**: Celery 5.4, Redis 7.
+- **Relational Database**: PostgreSQL 16, SQLAlchemy 2.0 (ORM), Alembic (Migrations).
+- **Code Intelligence**: Tree-sitter 0.24 (Python, JavaScript, TypeScript grammars), `unidiff`.
+- **AI Agent Orchestration**: LangGraph 0.2, Google GenAI SDK (`gemini-2.5-flash`, `gemini-2.5-pro`).
+- **Security Gateway**: Model Context Protocol (MCP) Sentinel tool server, `pyjwt[crypto]`, `cryptography`.
+- **Frontend Dashboard**: Next.js 15 (App Router), React 19, Tailwind CSS, Lucide Icons.
+- **Testing & Quality**: Pytest 8.2, Ruff 0.4.5 (Linter/Formatter), Pyright (Static Type Checker).
 
-### Local Installation
+---
+
+## 5. Quick Start (Local Setup)
+
+### Prerequisites:
+- Python 3.11+ (Python 3.12 or 3.13 recommended)
+- Node.js 20+ (Node.js 22 LTS recommended)
+- Git
+
+### Installation Commands:
 ```bash
 # 1. Clone repository
-git clone https://github.com/your-org/codeguard-ai.git
+git clone https://github.com/Suguda-Thakur-Marndi/codeguard-ai.git
 cd codeguard-ai
 
-# 2. Install dependencies
-make install
+# 2. Set up Python virtual environment
+python -m venv .venv
+# On Windows: .\.venv\Scripts\Activate.ps1
+# On Linux/macOS: source .venv/bin/activate
 
-# 3. Configure environment
+# 3. Install Python monorepo packages in editable mode
+pip install -e "./packages/code-intelligence" -e "./apps/api[dev]" -e "./apps/mcp-server"
+
+# 4. Install Next.js frontend dependencies
+cd apps/web && npm install && cd ../..
+
+# 5. Configure local environment variables
 cp .env.example .env
 
-# 4. Apply database migrations
-make migrate
-
-# 5. Run development servers
-make dev
+# 6. Apply database migrations to head (SQLite by default for local dev)
+alembic -c apps/api/alembic.ini upgrade head
 ```
 
-### Running Test Suites
-```bash
-# Run all backend and MCP tests
-make test
-# or:
-pytest apps/api/tests
-pytest apps/mcp-server/tests
+For complete environment variable documentation and service startup commands, see [`docs/SETUP.md`](file:///c:/Users/sugud/OneDrive/Documents/codeguard-ai/docs/SETUP.md).
 
-# Run code linter
-make lint
-# or:
+---
+
+## 6. Running the Application Locally
+
+Open separate terminal windows with your virtual environment active:
+
+1. **Backend API (`:8000`)**:
+   ```bash
+   uvicorn app.main:app --app-dir apps/api --port 8000 --reload
+   ```
+   *Health probe: `curl http://localhost:8000/api/v1/live`*
+2. **MCP Sentinel Server (`:8001`)**:
+   ```bash
+   python -m uvicorn app.server.main:app --app-dir apps/mcp-server --port 8001 --reload
+   ```
+   *Health probe: `curl http://localhost:8001/health`*
+3. **Celery Worker (Asynchronous mode)**:
+   ```bash
+   celery -A app.workers.celery_app worker --pool=solo -l info
+   ```
+4. **Next.js Frontend Dashboard (`:3000`)**:
+   ```bash
+   cd apps/web && npm run dev
+   ```
+
+---
+
+## 7. Running the Automated Test Suites
+
+CodeGuard AI includes 244 automated unit tests, 27 operational release gates, and 36 master acceptance scenarios:
+
+```bash
+# 1. Run all Unit & Integration tests (244 tests)
+pytest apps/api/tests apps/mcp-server/tests -q
+
+# 2. Run Ruff code style & syntax linter
 ruff check .
 
-# Validate benchmark dataset integrity
-python benchmark.py validate
+# 3. Run Master SRE Operational Verification Suite (27 gates)
+python verify_phase16.py
 
-# Run benchmark suite and check for performance/quality regressions
+# 4. Run Master Acceptance Suite (36 scenarios)
+python scripts/run_acceptance_suite.py
+
+# 5. Run Empirical Benchmark Suite (12 scenarios)
 python benchmark.py run --dataset v1
-python benchmark.py regression
-
-# Run Phase 8 Master 20-Criteria Production Verification
-python verify_phase8.py
 ```
+
+For the comprehensive testing guide, see [`docs/TESTING.md`](file:///c:/Users/sugud/OneDrive/Documents/codeguard-ai/docs/TESTING.md).
 
 ---
 
-## Production Deployment & CI/CD
+## 8. Documentation Index
 
-### CI/CD Pipeline
-The repository includes an enterprise-grade GitHub Actions workflow (`.github/workflows/ci.yml`) featuring:
-1. **Linting & Code Quality**: `ruff check .` with zero-tolerance rules.
-2. **Unit & Integration Test Matrix**: Full API (163 tests) and MCP Server (9 tests) suites with coverage enforcement.
-3. **Empirical Benchmark Regression Gate**: Runs the 12-scenario benchmark and asserts 0 precision/recall/latency regressions against baseline.
-4. **Frontend Production Build**: Compiles Next.js 15 App Router into standalone production bundle with strict TypeScript verification.
-5. **Container Image Build & Security Scan**: Builds multi-stage Docker images and executes Trivy vulnerability scanning.
-6. **Automated Staging & Human-Gated Production Deployments**: Deploys to staging with post-deploy HTTP smoke tests (`/live`, `/health`, `/ready`), followed by manual approval gate for production releases.
+All technical documentation is organized by domain under `docs/`:
 
-### 1. Configure Environment
-Create `.env` based on `.env.production.example` or `.env.staging.example`:
-```bash
-cp .env.production.example .env.production
-# Populate all required production secrets:
-# - GITHUB_APP_ID, GITHUB_PRIVATE_KEY, GITHUB_WEBHOOK_SECRET
-# - DATABASE_URL, REDIS_URL, REDIS_PASSWORD
-# - GEMINI_API_KEY, SECRET_KEY, MCP_SERVICE_TOKEN
-```
-
-### 2. Deploy with Docker Compose
-```bash
-docker compose -f docker-compose.prod.yml up --build -d
-```
-
-### 3. Verify Deployment
-```bash
-# Check process liveness
-curl -f http://localhost:8000/api/v1/live
-
-# Check database and Redis readiness
-curl -f http://localhost:8000/api/v1/ready
-
-# Check MCP gateway health
-curl -f http://localhost:8001/health
-```
+- **Developer Setup**: [`docs/SETUP.md`](file:///c:/Users/sugud/OneDrive/Documents/codeguard-ai/docs/SETUP.md)
+- **Architecture Overview**: [`docs/architecture/SYSTEM_OVERVIEW.md`](file:///c:/Users/sugud/OneDrive/Documents/codeguard-ai/docs/architecture/SYSTEM_OVERVIEW.md)
+- **Relational Data Model (27 Tables)**: [`docs/architecture/DATA_MODEL.md`](file:///c:/Users/sugud/OneDrive/Documents/codeguard-ai/docs/architecture/DATA_MODEL.md)
+- **Agent Orchestration & MCP Flow**: [`docs/architecture/AGENT_AND_MCP_FLOW.md`](file:///c:/Users/sugud/OneDrive/Documents/codeguard-ai/docs/architecture/AGENT_AND_MCP_FLOW.md)
+- **REST API & Integrations**: [`docs/API_AND_INTEGRATIONS.md`](file:///c:/Users/sugud/OneDrive/Documents/codeguard-ai/docs/API_AND_INTEGRATIONS.md)
+- **Production Operations Runbook**: [`docs/operations/RUNBOOK.md`](file:///c:/Users/sugud/OneDrive/Documents/codeguard-ai/docs/operations/RUNBOOK.md)
+- **Maintenance Ownership Matrix**: [`docs/operations/OWNERSHIP.md`](file:///c:/Users/sugud/OneDrive/Documents/codeguard-ai/docs/operations/OWNERSHIP.md)
+- **Testing Pyramid & Verification**: [`docs/TESTING.md`](file:///c:/Users/sugud/OneDrive/Documents/codeguard-ai/docs/TESTING.md)
+- **Maintainer Onboarding Checklist**: [`docs/MAINTAINER_ONBOARDING.md`](file:///c:/Users/sugud/OneDrive/Documents/codeguard-ai/docs/MAINTAINER_ONBOARDING.md)
+- **Phase 19 Post-Pilot Evaluation**: [`docs/post-pilot/FINAL_REPORT.md`](file:///c:/Users/sugud/OneDrive/Documents/codeguard-ai/docs/post-pilot/FINAL_REPORT.md)
+- **Technical Handover Certification**: [`docs/HANDOVER_REPORT.md`](file:///c:/Users/sugud/OneDrive/Documents/codeguard-ai/docs/HANDOVER_REPORT.md)
 
 ---
 
-## Operations & Disaster Recovery
+## 9. Current Operational Status & License
 
-- **Operations Runbook**: [docs/RUNBOOK.md](file:///c:/Users/sugud/OneDrive/Documents/codeguard-ai/docs/RUNBOOK.md)
-- **Security Runbook & Secret Rotation**: [docs/SECURITY_RUNBOOK.md](file:///c:/Users/sugud/OneDrive/Documents/codeguard-ai/docs/SECURITY_RUNBOOK.md)
-- **Disaster Recovery Plan (RPO/RTO)**: [docs/DISASTER_RECOVERY.md](file:///c:/Users/sugud/OneDrive/Documents/codeguard-ai/docs/DISASTER_RECOVERY.md)
-- **Automated Backup**: `python scripts/backup_db.py --output-dir /var/backups`
-- **Automated Restore Drill**: `python scripts/restore_db.py --backup-file /var/backups/<backup>.gz --confirm-restore`
+- **Operational Status**: `ACCEPTED (STAGING & LOCAL RUNTIME)`
+- **Deployment Status**: `LIMITED CONTINUATION (PENDING AUTHORIZED CUSTOMER PILOT)`
+- **License**: Proprietary / Enterprise Evaluation License

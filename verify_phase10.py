@@ -13,6 +13,7 @@ Executes and verifies:
 10. Final 17-Category Production Scorecard Evaluation
 """
 
+import ast
 import hashlib
 import hmac
 import os
@@ -78,6 +79,53 @@ from evaluation.metrics.regression import RegressionDetector  # noqa: E402
 from evaluation.scenarios.loader import ScenarioLoader  # noqa: E402
 
 
+def scan_file_for_placeholders(filepath: str, content: str) -> list[tuple[int, str]]:
+    """Scan file content for genuine placeholders (TODO, FIXME, or NotImplementedError stubs).
+
+    Distinguishes genuine implementation stubs from harmless text, regex patterns,
+    and audit documentation strings without broadly skipping files.
+    """
+    issues: list[tuple[int, str]] = []
+    is_python = filepath.endswith(".py")
+
+    # 1. Detect genuine NotImplementedError stubs in Python using AST
+    if is_python:
+        try:
+            tree = ast.parse(content, filename=filepath)
+            for node in ast.walk(tree):
+                if isinstance(node, ast.Raise) and node.exc is not None:
+                    exc = node.exc
+                    if isinstance(exc, ast.Name) and exc.id == "NotImplementedError":
+                        issues.append((node.lineno, "NotImplementedError stub found"))
+                    elif isinstance(exc, ast.Call):
+                        func = exc.func
+                        if (isinstance(func, ast.Name) and func.id == "NotImplementedError") or (
+                            isinstance(func, ast.Attribute) and func.attr == "NotImplementedError"
+                        ):
+                            issues.append((node.lineno, "NotImplementedError stub found"))
+        except SyntaxError:
+            pass
+
+    # 2. Check line-by-line for TODO / FIXME and non-python stubs
+    lines = content.splitlines()
+    todo_pat = re.compile(r"\bTODO\b")
+    fixme_pat = re.compile(r"\bFIXME\b")
+    non_py_stub_pat = re.compile(r"^\s*raise\s+NotImplementedError\b")
+
+    for idx, line in enumerate(lines, start=1):
+        # Ignore lines defining scanner patterns or regular expressions themselves
+        if "re.compile" in line or 'r"\\bTODO\\b"' in line or "r'\\bTODO\\b'" in line:
+            continue
+        if todo_pat.search(line):
+            issues.append((idx, "Unresolved TODO found"))
+        if fixme_pat.search(line):
+            issues.append((idx, "Unresolved FIXME found"))
+        if not is_python and non_py_stub_pat.search(line):
+            issues.append((idx, "NotImplementedError stub found"))
+
+    return issues
+
+
 class Phase10VerificationSuite:
     """Master Verification Suite for CodeGuard AI Phase 10."""
 
@@ -109,12 +157,6 @@ class Phase10VerificationSuite:
         scan_extensions = (".py", ".ts", ".tsx", ".js", ".json", ".yaml", ".yml")
         exclude_dirs = {".git", ".venv", ".pytest_cache", ".ruff_cache", "node_modules", ".next", "__pycache__"}
 
-        forbidden_patterns = [
-            (re.compile(r"\bTODO\b"), "Unresolved TODO found"),
-            (re.compile(r"\bFIXME\b"), "Unresolved FIXME found"),
-            (re.compile(r"\bNotImplementedError\b"), "NotImplementedError stub found"),
-        ]
-
         for root_dir, dirs, files in os.walk(_root):
             dirs[:] = [d for d in dirs if d not in exclude_dirs]
             for file in files:
@@ -125,10 +167,10 @@ class Phase10VerificationSuite:
                         continue
                     try:
                         with open(filepath, encoding="utf-8", errors="ignore") as f:
-                            for idx, line in enumerate(f, start=1):
-                                for pattern, desc in forbidden_patterns:
-                                    if pattern.search(line):
-                                        issues.append(f"{rel_path}:{idx}: {desc}")
+                            content = f.read()
+                        file_issues = scan_file_for_placeholders(filepath, content)
+                        for line_idx, desc in file_issues:
+                            issues.append(f"{rel_path}:{line_idx}: {desc}")
                     except Exception as err:
                         issues.append(f"Failed to read {rel_path}: {err}")
 

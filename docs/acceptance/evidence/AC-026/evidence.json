@@ -1,7 +1,7 @@
 {
   "scenario_id": "AC-026",
   "name": "Human-Approved Publication",
-  "timestamp": "2026-09-28T13:32:16.429846+00:00",
+  "timestamp": "2026-09-29T06:27:58.300917+00:00",
   "expected": "Authorized human approval transitions to PUBLISHED",
   "actual": "Human approval authorized, bound to head SHA, and recorded in immutable audit log",
   "status": "PASS",

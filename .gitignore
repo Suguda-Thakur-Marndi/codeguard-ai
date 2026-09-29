@@ -35,6 +35,14 @@ yarn-error.log*
 !.env.staging.example
 !.env.production.example
 
+# Secrets & Credentials
+client_secret*.json
+credentials*.json
+*.key
+*.pem
+*.p8
+
+
 # Databases, Backups & Cache
 *.db
 *.sqlite

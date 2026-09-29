@@ -48,27 +48,28 @@ async def get_current_user_or_bypass(
     Production must use verified JWT tokens or session cookies.
     """
     x_org_id = request.headers.get("X-Organization-Id")
-    # 1. Dev auth bypass if explicitly enabled and not in production
-    if settings.DEV_AUTH_BYPASS and settings.APP_ENV != "production":
-        role_header = request.headers.get("X-User-Role")
-        user_id_header = request.headers.get("X-User-Id")
-        return {
-            "id": user_id_header or "dev-user-001",
-            "login": "developer",
-            "email": "dev@codeguard.local",
-            "role": role_header.lower() if role_header else "admin",
-            "organization_id": x_org_id,
-            "is_dev": True,
-        }
 
-    # 2. Token / Session authentication check
+    # 1. Token / Session authentication check
     token = None
     if auth_header and auth_header.credentials:
         token = auth_header.credentials
     elif x_dev_token:
         token = x_dev_token
 
+    # 2. Dev auth bypass if no token provided and explicitly enabled in non-production
     if not token:
+        if settings.DEV_AUTH_BYPASS and settings.APP_ENV != "production":
+            role_header = request.headers.get("X-User-Role")
+            user_id_header = request.headers.get("X-User-Id")
+            return {
+                "id": user_id_header or "dev-user-001",
+                "login": "developer",
+                "email": "dev@codeguard.local",
+                "role": role_header.lower() if role_header else "admin",
+                "organization_id": x_org_id,
+                "is_dev": True,
+            }
+
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Authentication credentials required",
@@ -98,9 +99,10 @@ async def get_current_user_or_bypass(
         )
         return {
             "id": payload.get("sub"),
-            "login": payload.get("login", "unknown"),
+            "login": payload.get("name") or payload.get("login", "unknown"),
             "email": payload.get("email"),
             "role": payload.get("role", "user"),
+            "picture": payload.get("picture"),
             "organization_id": payload.get("organization_id") or payload.get("org_id") or x_org_id,
         }
     except Exception as e:

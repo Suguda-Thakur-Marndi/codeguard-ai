@@ -4,6 +4,7 @@ from fastapi import APIRouter
 
 from app.api.v1.endpoints.approvals import router as approvals_router
 from app.api.v1.endpoints.audit import router as audit_router
+from app.api.v1.endpoints.auth import router as auth_router
 from app.api.v1.endpoints.benchmarks import router as benchmarks_router
 from app.api.v1.endpoints.code_intelligence import router as code_intelligence_router
 from app.api.v1.endpoints.findings import router as findings_router
@@ -20,6 +21,7 @@ api_v1_router = APIRouter(prefix="/api/v1")
 
 # Mount sub-routers
 api_v1_router.include_router(health_router)
+api_v1_router.include_router(auth_router)
 api_v1_router.include_router(webhooks_router)
 api_v1_router.include_router(organizations_router)
 api_v1_router.include_router(repositories_router)

@@ -1,12 +1,12 @@
 {
   "scenario_id": "AC-028",
   "name": "Publication Idempotency",
-  "timestamp": "2026-09-28T13:32:16.555320+00:00",
+  "timestamp": "2026-09-29T06:27:58.332832+00:00",
   "expected": "Re-publication does not duplicate reviews",
-  "actual": "Deterministic composite key: 0f192717-1418-44bc-8efc-dfea62d20141:8173c7f1-de07-41bd-917c-9d98ed22b80a:1111111111111111111111111111111111111111:7feed825-3099-4536-837b-2940177b7ae0; existing publication reused",
+  "actual": "Deterministic composite key: cdc62003-b4cf-4bd1-be61-6e161de59118:1c7eddeb-6138-4d65-8db9-d9ff0797c878:1111111111111111111111111111111111111111:349d2e75-ad95-409c-a472-56a54c82ebe9; existing publication reused",
   "status": "PASS",
   "telemetry": {
-    "publication_key": "0f192717-1418-44bc-8efc-dfea62d20141:8173c7f1-de07-41bd-917c-9d98ed22b80a:1111111111111111111111111111111111111111:7feed825-3099-4536-837b-2940177b7ae0",
+    "publication_key": "cdc62003-b4cf-4bd1-be61-6e161de59118:1c7eddeb-6138-4d65-8db9-d9ff0797c878:1111111111111111111111111111111111111111:349d2e75-ad95-409c-a472-56a54c82ebe9",
     "idempotent_match": true
   }
 }

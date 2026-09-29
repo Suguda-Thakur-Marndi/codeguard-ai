@@ -11,14 +11,36 @@ import {
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
 
+export const authStorage = {
+  getToken: (): string | null => {
+    if (typeof window === "undefined") return null;
+    return localStorage.getItem("codeguard_auth_token");
+  },
+  setToken: (token: string) => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("codeguard_auth_token", token);
+    }
+  },
+  removeToken: () => {
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("codeguard_auth_token");
+    }
+  },
+};
+
 async function request<T>(endpoint: string, options?: RequestInit): Promise<T> {
   const url = `${API_BASE}${endpoint.startsWith("/") ? endpoint : `/${endpoint}`}`;
+  const token = authStorage.getToken();
+  const authHeaders: Record<string, string> = token
+    ? { Authorization: `Bearer ${token}` }
+    : { "X-Dev-Token": "codeguard-dev-token" };
+
   try {
     const res = await fetch(url, {
       ...options,
       headers: {
         "Content-Type": "application/json",
-        "X-Dev-Token": "codeguard-dev-token",
+        ...authHeaders,
         ...(options?.headers || {}),
       },
       cache: "no-store",
@@ -244,5 +266,13 @@ export const api = {
       method: "PATCH",
       body: JSON.stringify(update),
     }),
+
+  getAuthMe: () =>
+    request<{ authenticated: boolean; user: { id: string; login: string; email?: string; role: string; picture?: string } }>("/auth/me"),
+
+  logout: () => {
+    authStorage.removeToken();
+    return request<{ success: boolean; message: string }>("/auth/logout", { method: "POST" });
+  },
 };
 

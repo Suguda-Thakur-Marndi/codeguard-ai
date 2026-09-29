@@ -37,10 +37,17 @@ class ReviewAgentState(TypedDict, total=False):
     test_findings: list[ReviewFinding]
     performance_findings: list[ReviewFinding]
 
-    # Aggregated findings
+    # Aggregated & deduplicated findings
     raw_candidate_findings: list[ReviewFinding]
+    deduplicated_findings: list[ReviewFinding]
+    duplicate_findings: list[ReviewFinding]
     validated_findings: list[ReviewFinding]
     invalid_findings: list[ReviewFinding]
+
+    # Flow control & conditional routing flags
+    is_terminal_failure: bool
+    is_empty_diff: bool
+    final_review_output: dict[str, Any]
 
     # Operational metrics & telemetry
     agent_runs: list[dict[str, Any]]

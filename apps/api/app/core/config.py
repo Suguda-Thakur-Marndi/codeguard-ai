@@ -45,6 +45,11 @@ class Settings(BaseSettings):
     GITHUB_CLIENT_ID: str = "dev-client-id"
     GITHUB_CLIENT_SECRET: str = "dev-client-secret"
 
+    # Google OAuth 2.0 Credentials
+    GOOGLE_CLIENT_ID: str = ""
+    GOOGLE_CLIENT_SECRET: str = ""
+    GOOGLE_OAUTH_REDIRECT_URI: str = "http://localhost:8000/api/v1/auth/google/callback"
+
     # Review Job & Webhook Settings
     IGNORE_DRAFT_PRS: bool = False
     CELERY_TASK_ALWAYS_EAGER: bool = False  # Set to True for synchronous testing
