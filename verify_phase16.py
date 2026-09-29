@@ -39,6 +39,7 @@ import sys
 import tempfile
 import time
 from datetime import UTC, datetime, timedelta
+from typing import Any, cast
 
 # Monorepo Path Setup
 _root = os.path.abspath(os.path.dirname(__file__))
@@ -104,7 +105,7 @@ def main():
     def gate_02():
         # Verify fail-fast validation rejects invalid environment
         try:
-            Settings(APP_ENV="invalid_env")
+            Settings(APP_ENV=cast(Any, "invalid_env"))
             raise AssertionError("Settings did not fail on invalid APP_ENV")
         except ValidationError:
             pass

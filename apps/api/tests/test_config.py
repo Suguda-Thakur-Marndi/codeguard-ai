@@ -1,5 +1,7 @@
 """Unit tests for CodeGuard AI Configuration Validation (Phase 16 - Section 5)."""
 
+from typing import Any, cast
+
 import pytest
 from pydantic import ValidationError
 
@@ -24,14 +26,14 @@ def test_config_1_all_required_variables_present():
 def test_config_2_invalid_app_env():
     """Verify invalid literal value is rejected."""
     with pytest.raises(ValidationError) as exc:
-        Settings(APP_ENV="invalid_env")
+        Settings(APP_ENV=cast(Any, "invalid_env"))
     assert "Input should be 'development', 'staging', 'production' or 'test'" in str(exc.value)
 
 
 def test_config_3_invalid_log_level():
     """Verify invalid log level is rejected."""
     with pytest.raises(ValidationError) as exc:
-        Settings(LOG_LEVEL="TRACE")
+        Settings(LOG_LEVEL=cast(Any, "TRACE"))
     assert "Input should be 'DEBUG', 'INFO', 'WARNING', 'ERROR' or 'CRITICAL'" in str(exc.value)
 
 
