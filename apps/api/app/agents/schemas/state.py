@@ -1,6 +1,8 @@
 """LangGraph typed agent state model for review orchestration."""
 
-from typing import Any, TypedDict
+from typing import Any
+
+from typing_extensions import TypedDict
 
 from app.agents.schemas.comprehension import ComprehensionResult
 from app.agents.schemas.finding import ReviewFinding

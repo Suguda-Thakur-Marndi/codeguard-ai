@@ -30,7 +30,7 @@ class ReviewWorkflowBuilder:
         self.provider = provider
 
     def build(self) -> Any:
-        workflow = StateGraph(ReviewAgentState)
+        workflow = StateGraph(ReviewAgentState)  # type: ignore[arg-type]
 
         # -----------------------------------------------------------------
         # Node 1: Request & Diff Ingestion Validation
