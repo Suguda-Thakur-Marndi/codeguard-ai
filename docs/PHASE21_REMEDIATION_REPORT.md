@@ -98,11 +98,12 @@ All verification suites, unit tests, integration tests, and SRE checks were exec
 
 ## 5. Remaining Blockers & Next Operational Steps
 
+### 5.1 Technical, Infrastructure, and Pilot Requirements
 The following non-code operational prerequisites must be completed before general production release:
 
 1. **Docker Runtime Verification (`Phase 18`)**:
-   * **Blocker**: Docker Desktop is not running on the local Windows workstation.
-   * **Required Action**: Start Docker Desktop (`"C:\Program Files\Docker\Docker\Docker Desktop.exe"`) and run:
+   * **Blocker**: Docker Desktop daemon is offline on the Windows workstation (`open //./pipe/dockerDesktopLinuxEngine: The system cannot find the file specified`).
+   * **Required Action**: Start Docker Desktop and run:
      ```powershell
      docker compose -f docker-compose.yml build
      docker compose -f docker-compose.yml up -d
@@ -114,15 +115,13 @@ The following non-code operational prerequisites must be completed before genera
      docker compose down
      ```
 2. **Authorized Customer Pilot Execution (`Phase 19`)**:
-   * **Blocker**: Under the Pilot Evidence Gate, CodeGuard AI has zero external customer PR reviews.
-   * **Required Action**: Execute a structured 3–4 week pilot following the checklist in Section 8 below.
+   * **Blocker**: Under the Pilot Evidence Gate, CodeGuard AI has zero external customer PR reviews (`NO PILOT EVIDENCE`).
+   * **Required Action**: Execute a structured 3–4 week pilot following the checklist below.
 3. **Production Cloud Secrets Provisioning**:
    * **Blocker**: Production `.env` requires valid live secrets (`GEMINI_API_KEY`, `GITHUB_APP_ID`, `GITHUB_PRIVATE_KEY`, PostgreSQL 16 connection string, Redis 7 password).
    * **Required Action**: Inject production secrets via environment variables or secret manager prior to cloud deployment.
 
----
-
-## 6. Pilot Execution Checklist (Phase 19 Requirement)
+### 5.2 Pilot Execution Checklist (Phase 19 Requirement)
 
 To advance CodeGuard AI from **LIMITED CONTINUATION** to **READY FOR RELEASE REVIEW**, an authorized pilot must satisfy the following criteria:
 
@@ -151,7 +150,7 @@ To advance CodeGuard AI from **LIMITED CONTINUATION** to **READY FOR RELEASE REV
 
 ---
 
-## 7. Production Decision
+## 6. Production Decision
 
 $$\mathbf{PRODUCTION\ DECISION:\ READY\ FOR\ CONTROLLED\ STAGING\ /\ PILOT\ ONLY}$$
 
@@ -172,14 +171,14 @@ $$\mathbf{GENERAL\ AVAILABILITY\ (GA)\ STATUS:\ MORE\ EVIDENCE\ REQUIRED}$$
 
 ---
 
-## 8. Git Summary & Working-Tree Integrity
+## 7. Git Summary & Working-Tree Integrity
 
 * **Files Modified by Phase 21**:
   * `apps/api/tests/test_auth_google.py`: Reordered and hoisted imports to module scope.
   * `verify_phase10.py`: Added AST-based `scan_file_for_placeholders` and updated `audit_zero_placeholders`.
+  * `docs/PHASE21_REMEDIATION_REPORT.md`: Updated comprehensive remediation report with full empirical test outputs.
 * **Files Created by Phase 21**:
   * `apps/api/tests/test_placeholder_scanner.py`: Added 6 regression tests for placeholder scanner.
-  * `docs/PHASE21_REMEDIATION_REPORT.md`: This comprehensive remediation report.
 * **Working Tree State**:
   * Clean verification across modified files.
   * No unrelated user changes or unstaged work in progress were overwritten.
