@@ -1,7 +1,7 @@
 {
   "scenario_id": "AC-027",
   "name": "Publication Retry (502)",
-  "timestamp": "2026-09-29T06:27:58.301620+00:00",
+  "timestamp": "2026-09-29T14:24:43.001376+00:00",
   "expected": "502 server error retryable without state loss",
   "actual": "502 Bad Gateway classified as retryable=True; 404 classified as retryable=False",
   "status": "PASS",

@@ -1,7 +1,7 @@
 {
   "scenario_id": "AC-022",
   "name": "MCP Unauthorized Tool",
-  "timestamp": "2026-09-29T06:27:58.268496+00:00",
+  "timestamp": "2026-09-29T14:24:42.853130+00:00",
   "expected": "Forbidden tools strictly blocked by Sentinel",
   "actual": "Sentinel policy strictly blocked 'execute_shell' from execution",
   "status": "PASS",

@@ -1,7 +1,7 @@
 {
   "scenario_id": "AUDIT-BENCH",
   "name": "Benchmark Regression Drill",
-  "timestamp": "2026-09-29T06:27:59.556827+00:00",
+  "timestamp": "2026-09-29T14:24:47.709769+00:00",
   "expected": "Run 12 v1 scenarios through metrics engine (F1 >= 0.90)",
   "actual": "Evaluated 12 scenarios: Precision=100.0%, Recall=100.0%, F1=1.0000",
   "status": "PASS",

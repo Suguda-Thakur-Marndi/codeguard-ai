@@ -32,7 +32,7 @@ $$\mathbf{FORMAL\ HANDOVER\ STATUS:\ TECHNICAL\ HANDOVER\ VERIFIED}$$
   4. [`docs/architecture/DATA_MODEL.md`](file:///c:/Users/sugud/OneDrive/Documents/codeguard-ai/docs/architecture/DATA_MODEL.md) — Complete 27-table relational catalog across 6 Alembic revisions.
   5. [`docs/API_AND_INTEGRATIONS.md`](file:///c:/Users/sugud/OneDrive/Documents/codeguard-ai/docs/API_AND_INTEGRATIONS.md) — REST API catalog, security schemes, and external contracts.
   6. [`docs/architecture/AGENT_AND_MCP_FLOW.md`](file:///c:/Users/sugud/OneDrive/Documents/codeguard-ai/docs/architecture/AGENT_AND_MCP_FLOW.md) — LangGraph review flow, 5-gate Adversarial Judge, and MCP Sentinel policies.
-  7. [`docs/operations/RUNBOOK.md`](file:///c:/Users/sugud/OneDrive/Documents/codeguard-ai/docs/operations/RUNBOOK.md) — Canonical master operations runbook.
+  7. [`docs/RUNBOOK.md`](file:///c:/Users/sugud/OneDrive/Documents/codeguard-ai/docs/RUNBOOK.md) — Canonical master operations runbook.
   8. [`docs/operations/OWNERSHIP.md`](file:///c:/Users/sugud/OneDrive/Documents/codeguard-ai/docs/operations/OWNERSHIP.md) — Maintenance responsibility matrix and owner authorization gates.
   9. [`docs/TESTING.md`](file:///c:/Users/sugud/OneDrive/Documents/codeguard-ai/docs/TESTING.md) — Complete testing pyramid guide and verification commands.
   10. [`docs/MAINTAINER_ONBOARDING.md`](file:///c:/Users/sugud/OneDrive/Documents/codeguard-ai/docs/MAINTAINER_ONBOARDING.md) — 12-step verified maintainer onboarding protocol.
@@ -81,7 +81,7 @@ For a live production cloud deployment, the following external assets must be pr
 1. **README Outdated Phase Tag**: `README.md` previously claimed *"Production Release — Phase 8 Verified"* and cited 163 tests. Corrected to reflect the complete modern platform, 244 unit tests, 27 SRE gates, and 36 acceptance scenarios.
 2. **Adversarial Judge Gate Count**: Corrected references from "4-gate judge" to the implemented 5-gate Adversarial Judge (including Gate 5 Execution Sandbox check).
 3. **Pilot Evidence Transparency**: Explicitly stated in `README.md` and `docs/post-pilot/` that the software is currently in **LIMITED CONTINUATION** pending an authorized customer pilot, preventing exaggerated claims of general production availability.
-4. **Runbook Unification**: Replaced fragmented operational notes with a single canonical runbook at `docs/operations/RUNBOOK.md` and linked `docs/RUNBOOK.md` directly to it.
+4. **Runbook Unification**: Replaced fragmented operational notes with a single canonical master runbook at `docs/RUNBOOK.md`.
 
 ---
 

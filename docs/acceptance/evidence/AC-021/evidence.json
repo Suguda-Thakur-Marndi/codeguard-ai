@@ -1,7 +1,7 @@
 {
   "scenario_id": "AC-021",
   "name": "Rate-Limited API (429)",
-  "timestamp": "2026-09-29T06:27:58.267907+00:00",
+  "timestamp": "2026-09-29T14:24:42.849711+00:00",
   "expected": "Backoff complies with Retry-After header",
   "actual": "429 rate limit backoff calculated as 4.0s adhering to Retry-After",
   "status": "PASS",

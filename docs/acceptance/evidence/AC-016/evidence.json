@@ -1,7 +1,7 @@
 {
   "scenario_id": "AC-016",
   "name": "Stale Approval",
-  "timestamp": "2026-09-29T06:27:58.254905+00:00",
+  "timestamp": "2026-09-29T14:24:42.787668+00:00",
   "expected": "Publication blocked if head SHA changed post-approval",
   "actual": "Approval blocked due to commit drift (PR head changed from 'a'*40 to 'b'*40)",
   "status": "PASS",

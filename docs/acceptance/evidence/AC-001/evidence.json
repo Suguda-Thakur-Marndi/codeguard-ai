@@ -1,12 +1,12 @@
 {
   "scenario_id": "AC-001",
   "name": "Normal PR",
-  "timestamp": "2026-09-29T06:27:57.533416+00:00",
+  "timestamp": "2026-09-29T14:24:41.727258+00:00",
   "expected": "Ingested, AST parsed, context assembled, 0 hallucinated findings",
-  "actual": "Completed in 104.2ms with 0 findings",
+  "actual": "Completed in 110.54ms with 0 findings",
   "status": "PASS",
   "telemetry": {
-    "execution_time_ms": 104.2,
+    "execution_time_ms": 110.54,
     "finding_count": 0
   }
 }

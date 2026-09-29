@@ -54,7 +54,7 @@ In the event of an operational degradation, security alert, or production outage
 1. **Severity 1 (Critical Outage / False Authorization / Data Breach)**:
    - *Escalation Time*: Immediate (< 15 minutes).
    - *Notified Roles*: Project Owner, Security Lead, DevOps / SRE Lead, Backend Lead.
-   - *Action*: Execute emergency review publication kill-switch (`docs/operations/RUNBOOK.md` Section 4.4).
+   - *Action*: Execute emergency review publication kill-switch ([`docs/RUNBOOK.md`](file:///c:/Users/sugud/OneDrive/Documents/codeguard-ai/docs/RUNBOOK.md) Section 4.4).
 2. **Severity 2 (Degraded Performance / Celery Queue Backlog / 429 Quota Alert)**:
    - *Escalation Time*: Within 1 hour.
    - *Notified Roles*: Backend Lead, DevOps / SRE Lead.

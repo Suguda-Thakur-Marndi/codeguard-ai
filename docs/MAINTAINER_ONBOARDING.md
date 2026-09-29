@@ -130,7 +130,7 @@ Every checklist item below is linked to empirical documentation and reproduction
 - **Key Actions**:
   - Emergency review disablement: Set `auto_publish_enabled=false` in organization policy.
   - Secret rotation: Follow documented procedures in Section 5 of the Runbook.
-- **Reference**: [`docs/operations/RUNBOOK.md`](file:///c:/Users/sugud/OneDrive/Documents/codeguard-ai/docs/operations/RUNBOOK.md), [`docs/post-pilot/SECURITY_REVIEW.md`](file:///c:/Users/sugud/OneDrive/Documents/codeguard-ai/docs/post-pilot/SECURITY_REVIEW.md).
+- **Reference**: [`docs/RUNBOOK.md`](file:///c:/Users/sugud/OneDrive/Documents/codeguard-ai/docs/RUNBOOK.md), [`docs/post-pilot/SECURITY_REVIEW.md`](file:///c:/Users/sugud/OneDrive/Documents/codeguard-ai/docs/post-pilot/SECURITY_REVIEW.md).
 
 ---
 
@@ -140,7 +140,7 @@ Every checklist item below is linked to empirical documentation and reproduction
   - Deploy stack: `docker compose -f docker-compose.prod.yml up -d --build`
   - Rollback code: `git checkout v1.0.0-stable && docker compose -f docker-compose.prod.yml up -d --build`
   - Rollback DB: `alembic -c apps/api/alembic.ini downgrade -1`
-- **Reference**: [`docs/operations/RUNBOOK.md`](file:///c:/Users/sugud/OneDrive/Documents/codeguard-ai/docs/operations/RUNBOOK.md) Section 7.
+- **Reference**: [`docs/RUNBOOK.md`](file:///c:/Users/sugud/OneDrive/Documents/codeguard-ai/docs/RUNBOOK.md) Section 7.
 
 ---
 

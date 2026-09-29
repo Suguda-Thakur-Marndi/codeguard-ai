@@ -184,7 +184,7 @@ CodeGuard AI operates as a resilient, modular multi-service system comprising:
 ## 25. Disaster Recovery
 - **RPO**: < 1 hour (verified via automated snapshots and WAL tracking).
 - **RTO**: < 30 minutes (verified via restore script completing in < 1 second).
-- **Playbooks**: Documented in `docs/operations/DISASTER_RECOVERY.md`.
+- **Playbooks**: Documented in [`docs/DISASTER_RECOVERY.md`](file:///c:/Users/sugud/OneDrive/Documents/codeguard-ai/docs/DISASTER_RECOVERY.md).
 
 ---
 
