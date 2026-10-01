@@ -7,6 +7,8 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.core.logging import logger
+from app.core.policy import PolicyDecision, PolicyEngine, Principal, PrincipalRole
+from app.github.publisher import GitHubReviewPublisher
 from app.models.approval_request import ApprovalRequest, ApprovalStatus
 from app.models.github_publication import (
     GitHubReviewComment,
@@ -20,16 +22,15 @@ from app.models.review_artifact import ArtifactType, ReviewArtifact
 from app.models.review_finding import FindingStatus, ReviewFindingModel
 from app.models.review_job import ReviewJob
 from app.services.approval_service import ApprovalService
-from app.services.mcp_client import MCPClient
 from app.services.policy_service import PolicyService
 
 
 class PublicationService:
-    """Service managing atomic GitHub review publication through the MCP gateway."""
+    """Service managing atomic GitHub review publication through direct internal services."""
 
-    def __init__(self, db: Session, mcp_client: MCPClient | None = None) -> None:
+    def __init__(self, db: Session, publisher: GitHubReviewPublisher | None = None, **kwargs: Any) -> None:
         self.db = db
-        self.mcp_client = mcp_client or MCPClient()
+        self.publisher = publisher or GitHubReviewPublisher()
         self.approval_service = ApprovalService(db)
         self.policy_service = PolicyService(db)
 
@@ -119,10 +120,7 @@ class PublicationService:
                 "requested_action": approval_req.requested_action,
             }
 
-        # Query MCP policy evaluation
-        from app.mcp.auth import Principal, PrincipalRole
-        from app.mcp.policy_engine import PolicyDecision, PolicyEngine
-
+        # Query policy evaluation
         agent_principal = Principal(
             principal_id=requested_by,
             role=PrincipalRole.AGENT,
@@ -186,11 +184,11 @@ class PublicationService:
         publisher: Any = None,
     ) -> GitHubReviewPublication:
         """
-        Executes publication through the MCP gateway:
+        Executes publication through direct review publisher:
         1. Checks Head SHA freshness (Stale SHA aborts).
         2. Verifies line boundaries against diff hunks.
         3. Enforces idempotency: if already PUBLISHED, returns immediately.
-        4. Invokes MCP submit_review tool.
+        4. Invokes direct review publisher.
         5. Persists GitHub identifiers and updates finding statuses to PUBLISHED.
         """
         pub = self.db.scalar(select(GitHubReviewPublication).where(GitHubReviewPublication.id == publication_id))
@@ -280,24 +278,22 @@ class PublicationService:
         )
         valid_lines_by_file = line_idx_art.metadata_json if line_idx_art and line_idx_art.metadata_json else None
 
-        # Build context for MCP submit_review tool
-        context = {
-            "findings": findings_data,
-            "valid_lines_by_file": valid_lines_by_file,
-            "current_head_sha": effective_current_sha,
-            "owner": repo.full_name.split("/")[0] if "/" in repo.full_name else "org",
-            "repo": repo.name,
-            "publisher": publisher,
-        }
-
         # Mark PUBLISHING
         pub.status = PublicationStatus.PUBLISHING
         self.db.commit()
 
-        # Execute submit_review tool via MCP Client
+        # Evaluate authorization policy directly
         org_policy = PolicyService.to_dict(self.policy_service.get_or_create_policy(repo.organization_id))
-
-        mcp_res = await self.mcp_client.execute_tool(
+        principal = Principal(
+            principal_id="publication-worker",
+            role=PrincipalRole.SERVICE,
+            organization_id=repo.organization_id,
+            is_ai_agent=False,
+        )
+        authz = PolicyEngine.evaluate(
+            principal=principal,
+            organization_id=repo.organization_id,
+            repository_id=repo.id,
             tool_name="submit_review",
             parameters={
                 "repository_id": repo.id,
@@ -307,34 +303,47 @@ class PublicationService:
                 "action": pub.event,
                 "approval_id": approval_req.id if approval_req else None,
             },
-            organization_id=repo.organization_id,
-            principal_id="publication-worker",
-            principal_role="SERVICE",
-            is_ai_agent=False,
-            repository_id=repo.id,
             org_policy=org_policy,
             approval_record=approval_record,
             findings_metadata=findings_data,
-            context=context,
         )
 
-        if not mcp_res.get("success"):
-            err_data = mcp_res.get("error", {})
-            err_msg = err_data.get("message", "MCP review publication rejected.")
-            pub.status = PublicationStatus.STALE if "STALE" in err_msg else PublicationStatus.FAILED
-            pub.error_message = err_msg
+        if authz.decision != PolicyDecision.ALLOW:
+            pub.status = PublicationStatus.FAILED
+            pub.error_message = authz.reason
             self.db.commit()
-            raise RuntimeError(f"Review publication failed: {err_msg}")
+            raise RuntimeError(f"Review publication failed: {authz.reason}")
+
+        # Execute direct GitHub review publication
+        pub_instance = publisher or self.publisher
+        owner = repo.full_name.split("/")[0] if "/" in repo.full_name else "org"
+        repo_name = repo.name
+
+        res = await pub_instance.publish_atomic_review(
+            owner=owner,
+            repo=repo_name,
+            pull_number=pr.number,
+            verified_head_sha=pub.head_sha,
+            current_head_sha=effective_current_sha,
+            findings=findings_data,
+            action=pub.event,
+            valid_lines_by_file=valid_lines_by_file,
+        )
+
+        if not res.success:
+            pub.status = PublicationStatus.STALE if res.status == "STALE" else PublicationStatus.FAILED
+            pub.error_message = res.error_message or "Review publication rejected."
+            self.db.commit()
+            raise RuntimeError(f"Review publication failed: {pub.error_message}")
 
         # Success! Persist GitHub review and inline comment records
-        result_data = mcp_res.get("data", {})
-        pub.github_review_id = result_data.get("github_review_id")
-        pub.comment_count = result_data.get("comment_count", len(findings))
+        pub.github_review_id = res.github_review_id
+        pub.comment_count = res.comment_count
         pub.published_at = datetime.now(UTC)
         pub.status = PublicationStatus.PUBLISHED
         pub.error_message = None
 
-        created_comment_ids = result_data.get("created_comment_ids", [])
+        created_comment_ids = res.created_comment_ids
         for i, finding in enumerate(findings):
             gh_comment_id = created_comment_ids[i] if i < len(created_comment_ids) else None
             comment_record = GitHubReviewComment(

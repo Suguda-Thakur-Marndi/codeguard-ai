@@ -70,20 +70,7 @@ CodeGuard AI strictly segregates **Liveness** from **Readiness** to prevent casc
 
 ---
 
-## 3. MCP Server Probes (`codeguard-mcp` :8001)
-
-### Liveness Probe: `GET /live`
-- **Response**: `{"status": "ok", "service": "mcp-server"}` (HTTP 200)
-
-### Readiness Probe: `GET /ready`
-- **Response**: `{"status": "ready", "service": "mcp-server"}` (HTTP 200)
-
-### General Probe: `GET /health`
-- **Response**: `{"status": "ok", "service": "mcp-server"}` (HTTP 200)
-
----
-
-## 4. Celery Worker Probes (`codeguard-worker`)
+## 3. Celery Worker Probes (`codeguard-worker`)
 
 The worker does not expose an HTTP socket. Health is monitored via Celery inspect commands against Redis:
 
@@ -135,13 +122,6 @@ From `docker-compose.prod.yml`:
   # API
   healthcheck:
     test: ["CMD-SHELL", "curl -f http://localhost:8000/api/v1/health || exit 1"]
-    interval: 15s
-    timeout: 5s
-    retries: 3
-
-  # MCP Server
-  healthcheck:
-    test: ["CMD-SHELL", "curl -f http://localhost:8001/health || exit 1"]
     interval: 15s
     timeout: 5s
     retries: 3

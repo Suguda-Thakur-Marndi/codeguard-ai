@@ -8,12 +8,12 @@ This document defines the official release lifecycle, semantic versioning policy
 
 CodeGuard AI follows **Semantic Versioning 2.0.0** (`vMAJOR.MINOR.PATCH`):
 - **MAJOR**: Breaking API schema changes, fundamental architectural shifts, or backward-incompatible database migrations.
-- **MINOR**: New specialized agents, new safe MCP tool integrations, or operational feature enhancements.
+- **MINOR**: New specialized agents, safe tool integrations, or operational feature enhancements.
 - **PATCH**: Bug fixes, security patches, performance tuning, or documentation updates.
 
 ### Release Artifact Tags
 - Git Tag: `v1.0.0-release`
-- Docker Images: `codeguard/api:1.0.0`, `codeguard/worker:1.0.0`, `codeguard/web:1.0.0`, `codeguard/mcp:1.0.0`
+- Docker Images: `codeguard/api:1.0.0`, `codeguard/worker:1.0.0`, `codeguard/web:1.0.0`
 - Companion SHA: Exact git commit hash recorded in build metadata.
 
 ---
@@ -33,7 +33,7 @@ Before any production release can be approved or deployed, all **27 Release Gate
 | **GATE 7** | Worker Crash Recovery | Worker interrupt and restart leaves jobs in consistent state | **PASS** |
 | **GATE 8** | GitHub Webhook Security | HMAC-SHA256 constant-time verification & replay protection | **PASS** |
 | **GATE 9** | Gemini Provider Routing | Fast and reasoning model tiers routed with token pricing calculations | **PASS** |
-| **GATE 10** | MCP Zero-Trust Gateway | Sentinel Policy Engine blocks dangerous actions, schemas strictly enforced | **PASS** |
+| **GATE 10** | Zero-Trust Policy Engine | PolicyEngine blocks dangerous actions, schemas strictly enforced | **PASS** |
 | **GATE 11** | Human Approval Gate | Consequential operations require valid human approval record | **PASS** |
 | **GATE 12** | Stale Approval Block | Commit drift (changed head SHA) invalidates approval | **PASS** |
 | **GATE 13** | GitHub Publication Safety | Out-of-hunk line numbers rejected; valid comments posted | **PASS** |

@@ -1,15 +1,183 @@
-"""Deterministic Tool Authorization Policy Engine."""
+"""Deterministic Tool & Operation Authorization Policy Engine for CodeGuard AI."""
 
+import enum
 from datetime import UTC, datetime
-from typing import Any, NamedTuple
+from typing import Any, Literal, NamedTuple
 
-from app.mcp.auth import Principal
-from app.mcp.classification import (
-    FORBIDDEN_TOOL_ACTIONS,
-    TOOL_RISK_MAP,
-    PolicyDecision,
-    ToolRiskLevel,
-)
+from pydantic import BaseModel, Field
+
+
+class PrincipalRole(enum.StrEnum):
+    MEMBER = "MEMBER"
+    REVIEWER = "REVIEWER"
+    ADMIN = "ADMIN"
+    AGENT = "AGENT"
+    SERVICE = "SERVICE"
+
+
+class Principal(BaseModel):
+    """Authenticated caller principal representation."""
+
+    principal_id: str
+    role: PrincipalRole
+    organization_id: str
+    is_ai_agent: bool = False
+    metadata: dict[str, str] = {}
+
+
+class ToolRiskLevel(enum.StrEnum):
+    READ_ONLY = "READ_ONLY"
+    LOW_RISK = "LOW_RISK"
+    CONSEQUENTIAL = "CONSEQUENTIAL"
+    HIGH_RISK = "HIGH_RISK"
+
+
+ActionRiskLevel = ToolRiskLevel
+ToolRiskClassification = ToolRiskLevel
+
+
+class PolicyDecision(enum.StrEnum):
+    ALLOW = "ALLOW"
+    DENY = "DENY"
+    REQUIRE_APPROVAL = "REQUIRE_APPROVAL"
+
+
+class ToolAction(enum.StrEnum):
+    COMMENT = "COMMENT"
+    REQUEST_CHANGES = "REQUEST_CHANGES"
+
+
+FORBIDDEN_TOOL_ACTIONS = {
+    "merge_pull_request": "Automatic PR merge is strictly forbidden in CodeGuard AI.",
+    "branch_delete": "Automatic branch deletion is strictly forbidden.",
+    "repository_delete": "Automatic repository deletion is strictly forbidden.",
+    "repo_delete": "Automatic repository deletion is strictly forbidden.",
+    "secret_access": "Automatic secret or credential access is strictly forbidden.",
+    "arbitrary_shell": "Arbitrary shell execution is strictly forbidden outside sandboxed validation.",
+    "source_modify": "Direct source code modification is strictly forbidden.",
+    "force_push": "Force push operations are strictly forbidden.",
+    "admin_operations": "Arbitrary GitHub administrative operations are strictly forbidden.",
+}
+
+FORBIDDEN_OPERATIONS = FORBIDDEN_TOOL_ACTIONS
+
+TOOL_RISK_MAP: dict[str, ToolRiskLevel] = {
+    # Read-only operations
+    "get_pull_request": ToolRiskLevel.READ_ONLY,
+    "get_pull_request_diff": ToolRiskLevel.READ_ONLY,
+    "get_pull_request_files": ToolRiskLevel.READ_ONLY,
+    "get_repository": ToolRiskLevel.READ_ONLY,
+    "get_file": ToolRiskLevel.READ_ONLY,
+    "get_symbol": ToolRiskLevel.READ_ONLY,
+    "find_references": ToolRiskLevel.READ_ONLY,
+    "get_dependencies": ToolRiskLevel.READ_ONLY,
+    "get_tests": ToolRiskLevel.READ_ONLY,
+    "get_review_findings": ToolRiskLevel.READ_ONLY,
+    "get_review_evidence": ToolRiskLevel.READ_ONLY,
+    # Controlled operational actions
+    "run_validation": ToolRiskLevel.LOW_RISK,
+    "submit_review": ToolRiskLevel.CONSEQUENTIAL,
+}
+
+
+def classify_tool_risk(tool_name: str, parameters: dict | None = None) -> ToolRiskLevel:
+    """Classifies an action risk level dynamically based on action and parameters."""
+    if tool_name == "submit_review" and parameters and parameters.get("action") == "REQUEST_CHANGES":
+        return ToolRiskLevel.HIGH_RISK
+    return TOOL_RISK_MAP.get(tool_name, ToolRiskLevel.HIGH_RISK)
+
+
+class GetPullRequestInput(BaseModel):
+    repository_id: str = Field(..., description="Internal repository UUID")
+    pull_request_number: int = Field(..., ge=1, description="GitHub Pull Request number")
+
+
+class GetPullRequestDiffInput(BaseModel):
+    repository_id: str = Field(..., description="Internal repository UUID")
+    pull_request_number: int = Field(..., ge=1, description="GitHub Pull Request number")
+
+
+class GetPullRequestFilesInput(BaseModel):
+    repository_id: str = Field(..., description="Internal repository UUID")
+    pull_request_number: int = Field(..., ge=1, description="GitHub Pull Request number")
+
+
+class GetRepositoryInput(BaseModel):
+    repository_id: str = Field(..., description="Internal repository UUID")
+
+
+class GetFileInput(BaseModel):
+    repository_id: str = Field(..., description="Internal repository UUID")
+    commit_sha: str = Field(..., min_length=7, max_length=40, description="Commit SHA")
+    file_path: str = Field(..., description="Relative path to file in repo")
+
+
+class GetSymbolInput(BaseModel):
+    repository_id: str = Field(..., description="Internal repository UUID")
+    commit_sha: str = Field(..., min_length=7, max_length=40, description="Commit SHA")
+    symbol_name: str = Field(..., description="Fully qualified symbol name")
+
+
+class FindReferencesInput(BaseModel):
+    repository_id: str = Field(..., description="Internal repository UUID")
+    commit_sha: str = Field(..., min_length=7, max_length=40, description="Commit SHA")
+    symbol_name: str = Field(..., description="Target symbol name")
+
+
+class GetDependenciesInput(BaseModel):
+    repository_id: str = Field(..., description="Internal repository UUID")
+    commit_sha: str = Field(..., min_length=7, max_length=40, description="Commit SHA")
+    file_path: str = Field(..., description="Target file path")
+
+
+class GetTestsInput(BaseModel):
+    repository_id: str = Field(..., description="Internal repository UUID")
+    commit_sha: str = Field(..., min_length=7, max_length=40, description="Commit SHA")
+    target_file: str = Field(..., description="Source code file path to query associated tests for")
+
+
+class GetReviewFindingsInput(BaseModel):
+    review_job_id: str = Field(..., description="Review job UUID")
+
+
+class GetReviewEvidenceInput(BaseModel):
+    finding_id: str = Field(..., description="Finding UUID")
+
+
+class RunValidationInput(BaseModel):
+    review_job_id: str = Field(..., description="Review job UUID")
+    finding_id: str = Field(..., description="Candidate finding UUID")
+    scenario_id: str = Field(..., description="Validation scenario identifier")
+
+
+class SubmitReviewInput(BaseModel):
+    repository_id: str = Field(..., description="Internal repository UUID")
+    pull_request_number: int = Field(..., ge=1, description="GitHub Pull Request number")
+    head_sha: str = Field(..., min_length=7, max_length=40, description="Target PR HEAD SHA")
+    review_job_id: str = Field(..., description="Review job UUID containing verified findings")
+    action: Literal["COMMENT", "REQUEST_CHANGES"] = Field(
+        default="COMMENT", description="Review action: COMMENT or REQUEST_CHANGES"
+    )
+    approval_id: str | None = Field(
+        default=None, description="Approval request ID if action required human authorization"
+    )
+
+
+TOOL_SCHEMAS: dict[str, type[BaseModel]] = {
+    "get_pull_request": GetPullRequestInput,
+    "get_pull_request_diff": GetPullRequestDiffInput,
+    "get_pull_request_files": GetPullRequestFilesInput,
+    "get_repository": GetRepositoryInput,
+    "get_file": GetFileInput,
+    "get_symbol": GetSymbolInput,
+    "find_references": FindReferencesInput,
+    "get_dependencies": GetDependenciesInput,
+    "get_tests": GetTestsInput,
+    "get_review_findings": GetReviewFindingsInput,
+    "get_review_evidence": GetReviewEvidenceInput,
+    "run_validation": RunValidationInput,
+    "submit_review": SubmitReviewInput,
+}
 
 
 class AuthorizationResult(NamedTuple):
@@ -21,7 +189,7 @@ class AuthorizationResult(NamedTuple):
 
 class PolicyEngine:
     """
-    Deterministic authorization engine enforcing zero-trust boundaries over AI agent tool access.
+    Deterministic authorization engine enforcing zero-trust boundaries over AI agent operations.
     The LLM is untrusted. Authorization is strictly decided by application code.
     """
 
@@ -51,7 +219,7 @@ class PolicyEngine:
         if risk_level is None:
             return AuthorizationResult(
                 decision=PolicyDecision.DENY,
-                reason=f"Tool '{tool_name}' is not registered in the MCP Tool Registry.",
+                reason=f"Action '{tool_name}' is not registered in the Security Policy Registry.",
                 risk_level=ToolRiskLevel.HIGH_RISK,
                 requires_approval=False,
             )
@@ -60,7 +228,7 @@ class PolicyEngine:
         if risk_level == ToolRiskLevel.READ_ONLY:
             return AuthorizationResult(
                 decision=PolicyDecision.ALLOW,
-                reason="Read-only tool access permitted for authenticated principal.",
+                reason="Read-only operation permitted for authenticated principal.",
                 risk_level=ToolRiskLevel.READ_ONLY,
                 requires_approval=False,
             )
@@ -89,7 +257,7 @@ class PolicyEngine:
         # Default fallback
         return AuthorizationResult(
             decision=PolicyDecision.DENY,
-            reason=f"No authorization policy configured for tool '{tool_name}'.",
+            reason=f"No authorization policy configured for action '{tool_name}'.",
             risk_level=risk_level,
             requires_approval=False,
         )

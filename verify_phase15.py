@@ -59,10 +59,8 @@ from app.agents.schemas.finding import (
     ReviewFinding,
 )
 from app.core.config import settings
+from app.core.policy import PolicyDecision, PolicyEngine, Principal, PrincipalRole
 from app.core.security import verify_github_signature
-from app.mcp.auth import Principal, PrincipalRole
-from app.mcp.classification import PolicyDecision
-from app.mcp.policy_engine import PolicyEngine
 from code_intelligence.filter.file_filter import FileFilter
 
 

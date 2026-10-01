@@ -9,7 +9,7 @@ This checklist must be executed by release engineers and SREs during every deplo
 | Item | Requirement | Verification Command / Check | Sign-Off |
 |---|---|---|---|
 | **PRE-01** | Clean Codebase Checkout | `git status` shows clean working tree with no untracked secrets. | [x] PASSED |
-| **PRE-02** | Unit & Integration Tests | `pytest apps/api/tests apps/mcp-server/tests` (221 tests pass). | [x] PASSED |
+| **PRE-02** | Unit & Integration Tests | `pytest apps/api/tests` (253 tests pass). | [x] PASSED |
 | **PRE-03** | Code Style & Linting | `ruff check` reports zero linting or formatting errors. | [x] PASSED |
 | **PRE-04** | Frontend Production Build | `npm run build` in `apps/web` generates standalone Next.js bundle. | [x] PASSED |
 | **PRE-05** | Master Security Gate Suite | `python verify_phase15.py` (all 23 security gates pass). | [x] PASSED |
@@ -27,12 +27,11 @@ This checklist must be executed by release engineers and SREs during every deplo
 | **DEP-01** | Database Migration to HEAD | `alembic upgrade head` completes with exit code 0. | [x] PASSED |
 | **DEP-02** | Database Relational Integrity | Confirm all 27 tables exist and foreign keys are active. | [x] PASSED |
 | **DEP-03** | Redis Cluster Ready | `redis-cli ping` returns `PONG`; memory limit active. | [x] PASSED |
-| **DEP-04** | MCP Gateway Started | `curl -f http://localhost:8001/ready` returns HTTP 200. | [x] PASSED |
-| **DEP-05** | API Server Started | `curl -f http://localhost:8000/api/v1/ready` returns HTTP 200. | [x] PASSED |
-| **DEP-06** | Worker Processes Started | `celery inspect ping` returns `OK` across all worker nodes. | [x] PASSED |
-| **DEP-07** | Frontend Dashboard Running | HTTP GET `/` returns HTTP 200 with SSR HTML. | [x] PASSED |
-| **DEP-08** | Non-Root User Execution | Container processes run as `codeguard` (1000) / `nextjs` (1001). | [x] PASSED |
-| **DEP-09** | Cgroup Resource Limits | CPU and memory constraints enforced in Docker daemon. | [x] PASSED |
+| **DEP-04** | API Server Started | `curl -f http://localhost:8000/api/v1/ready` returns HTTP 200. | [x] PASSED |
+| **DEP-05** | Worker Processes Started | `celery inspect ping` returns `OK` across all worker nodes. | [x] PASSED |
+| **DEP-06** | Frontend Dashboard Running | HTTP GET `/` returns HTTP 200 with SSR HTML. | [x] PASSED |
+| **DEP-07** | Non-Root User Execution | Container processes run as `codeguard` (1000) / `nextjs` (1001). | [x] PASSED |
+| **DEP-08** | Cgroup Resource Limits | CPU and memory constraints enforced in Docker daemon. | [x] PASSED |
 
 ---
 
@@ -56,7 +55,7 @@ This checklist must be executed by release engineers and SREs during every deplo
 If any Post-Deployment verification item fails:
 1. **Trigger Rollback**: SRE Lead issues rollback command:
    ```bash
-   docker compose -f docker-compose.prod.yml up -d --no-deps api worker web mcp-server
+   docker compose -f docker-compose.prod.yml up -d --no-deps api worker web
    ```
 2. **Database Verification**: If migration was additive, leave schema as-is; if non-additive, run `alembic downgrade -1`.
 3. **Verify Restored Health**: Confirm prior version responds on `/api/v1/live` and `/api/v1/ready`.

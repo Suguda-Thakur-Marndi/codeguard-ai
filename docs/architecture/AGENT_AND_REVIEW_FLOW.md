@@ -1,11 +1,11 @@
-# CodeGuard AI — Agent Orchestration, Adversarial Judge & MCP Governance Flow
+# CodeGuard AI — Agent Orchestration, Adversarial Judge & Review Publication Flow
 
 **Document ID**: `DOC-ARCH-AGENT-01`  
 **Application Version**: `1.0.0`  
 **Orchestration Engine**: LangGraph `StateGraph`  
 **AI Models**: Google Gemini 2.5 Flash / Pro (or deterministic mock in tests)  
-**Governance Gateway**: Zero-Trust Model Context Protocol (MCP) Sentinel  
-**Last Verified**: 2026-09-29  
+**Governance Gateway**: Zero-Trust Deterministic Policy Engine (`app.core.policy`)  
+**Last Verified**: 2026-10-02  
 
 ---
 
@@ -53,7 +53,7 @@
        ▼ (7. Deduplication & Consolidation)
 [ Deduplication Engine ] ──(Consolidates overlapping findings into root causes)
        │
-       ▼ (8. Policy Evaluation & MCP Sentinel Check)
+       ▼ (8. Policy Evaluation & Approval Check)
 [ Organization Policy Engine ]
    ├── Read-Only / Low-Risk Findings ────────────┐
    │                                             ▼
@@ -64,7 +64,7 @@
                                                  └──(Commit Drifted)─────┼──> [ ABORT ]
                                                                          │
        ┌─────────────────────────────────────────────────────────────────┘
-       ▼ (9. Review Publication)
+       ▼ (9. Direct Review Publication)
 [ GitHub Review Publisher ] ──(Redacts secrets & posts atomic inline comments)
        │
        ▼ (10. Audit Logging)
@@ -185,7 +185,6 @@ graph TD
 - **Strict Pydantic Output**: All agents output strictly typed Pydantic models with `category`, `severity`, `line_number`, `side`, `title`, `description`, `impact`, `recommendation`, `evidence`, and `confidence`.
 - **Decoupled Publication**: Specialist agents and the LangGraph workflow never publish comments directly to GitHub. Publication is strictly handled by the downstream authorized `PublicationService`.
 
-
 ---
 
 ## 4. The 5-Gate Adversarial Judge
@@ -202,26 +201,29 @@ Candidate findings emitted by specialist agents must pass through the **Adversar
 
 ---
 
-## 5. Zero-Trust MCP Sentinel Gateway
+## 5. Zero-Trust Deterministic Policy Engine
 
-The standalone MCP Server (`:8001`) acts as an unbypassable security perimeter between the AI engine and the external world.
+CodeGuard AI operates completely without external protocol layers (such as MCP). Instead, deterministic zero-trust security policies are evaluated in-process via `PolicyEngine` (`apps/api/app/core/policy.py`) before any consequential action (such as GitHub PR review publication) can be executed.
 
 ### 5.1 Hardcoded Forbidden Operations Blocklist
-The Sentinel policy engine unconditionally blocks the following operations, regardless of prompt instructions or user permissions:
-- `execute_shell` / `execute_terminal`
-- `eval_code` / `dynamic_eval`
+The policy engine unconditionally blocks the following 9 dangerous operations, regardless of prompt instructions or user permissions:
+- `merge_pull_request`
+- `delete_repository` / `repo_delete`
+- `arbitrary_shell` / `execute_shell` / `execute_terminal`
+- `arbitrary_eval` / `eval_code` / `dynamic_eval`
 - `write_filesystem` / `delete_file`
 - `access_secrets` / `read_env`
 - `modify_git_history` / `force_push`
 - `bypass_auth` / `disable_policies`
+- `grant_admin` / `elevate_privileges`
 
-### 5.2 Tool Risk Classification & Governance
+### 5.2 Tool & Action Risk Classification
 
 | Risk Level | Operations | Approval Requirement | Audit Action |
 | :--- | :--- | :--- | :--- |
-| **READ_ONLY** | `read_ast`, `search_symbols`, `get_diff`, `list_files` | Automated execution allowed | Logged to `tool_execution_audits` |
+| **READ_ONLY** | `read_ast`, `search_symbols`, `get_diff`, `list_files`, `get_pull_request` | Automated execution allowed | Logged to `tool_execution_audits` |
 | **CONSEQUENTIAL** | `submit_review`, `post_comment`, `approve_pr` | Mandatory Human Operator Approval | Cryptographically signed & logged |
-| **FORBIDDEN** | `execute_shell`, `eval_code`, `delete_repo` | **BLOCKED UNCONDITIONALLY** | Security Alert Triggered & Logged |
+| **FORBIDDEN** | `execute_shell`, `eval_code`, `delete_repo`, `merge_pull_request` | **BLOCKED UNCONDITIONALLY** | Security Alert Triggered & Logged |
 
 ---
 

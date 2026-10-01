@@ -1,7 +1,7 @@
 {
   "scenario_id": "AC-023",
   "name": "MCP Approval Operation",
-  "timestamp": "2026-09-29T14:24:42.856644+00:00",
+  "timestamp": "2026-10-01T19:46:28.309062+00:00",
   "expected": "Consequential tools routed to approval gate",
   "actual": "Consequential tool 'submit_review' classified as CONSEQUENTIAL and routed to approval gate",
   "status": "PASS",

@@ -48,18 +48,21 @@ os.environ["DEV_AUTH_BYPASS"] = "true"
 os.environ["LLM_PROVIDER"] = "mock"
 
 # DB & Models
-from app.db.base import Base
-from app.github.publisher import GitHubReviewPublisher, ReviewPublicationResult
-
-# MCP & Services
-from app.mcp.auth import Principal, PrincipalRole
-from app.mcp.classification import (
+# Policy & Governance
+from app.core.policy import (
     FORBIDDEN_OPERATIONS,
+    TOOL_SCHEMAS,
+    GetPullRequestInput,
+    PolicyDecision,
+    PolicyEngine,
+    Principal,
+    PrincipalRole,
+    SubmitReviewInput,
     ToolRiskClassification,
     classify_tool_risk,
 )
-from app.mcp.policy_engine import PolicyDecision, PolicyEngine
-from app.mcp.schemas import TOOL_SCHEMAS, GetPullRequestInput, SubmitReviewInput
+from app.db.base import Base
+from app.github.publisher import GitHubReviewPublisher, ReviewPublicationResult
 from app.models.approval_request import ApprovalStatus
 from app.models.github_publication import (
     GitHubReviewPublication,
@@ -72,7 +75,6 @@ from app.models.review_finding import ReviewFindingModel
 from app.models.review_job import ReviewJob
 from app.models.tool_audit import ToolExecutionAudit
 from app.services.approval_service import ApprovalService
-from app.services.mcp_client import MCPClient
 from app.services.publication_service import PublicationService
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -593,7 +595,7 @@ async def run_phase5_verification():
         status="PUBLISHED",
         error_message=None,
     ))
-    pub_service = PublicationService(db=db, mcp_client=MCPClient())
+    pub_service = PublicationService(db=db, publisher=mock_publisher)
 
     # Step 1: Publication service evaluates policy -> creates approval request
     pub_rec1, approval_req1 = pub_service.prepare_publication(
@@ -772,8 +774,15 @@ async def run_phase5_verification():
     # SUITE 14: END-TO-END WORKFLOW 5 — Direct Agent Bypass Rejection
     # =========================================================================
     print("\n[TEST 14] E2E Workflow 5: Direct Agent submit_review() Attempt Without Approval...")
-    mcp_client = MCPClient()
-    unauthorized_attempt = await mcp_client.execute_tool(
+    auth_eval = PolicyEngine.evaluate(
+        principal=Principal(
+            principal_id="untrusted-agent",
+            role=PrincipalRole.AGENT,
+            organization_id=org.id,
+            is_ai_agent=True,
+        ),
+        organization_id=org.id,
+        repository_id=repo.id,
         tool_name="submit_review",
         parameters={
             "repository_id": repo.id,
@@ -782,17 +791,11 @@ async def run_phase5_verification():
             "review_job_id": job_e2e1.id,
             "action": "REQUEST_CHANGES",
         },
-        organization_id=org.id,
-        principal_id="untrusted-agent",
-        principal_role="AGENT",
-        is_ai_agent=True,
-        repository_id=repo.id,
         org_policy={"allow_request_changes": True, "require_approval_for_high": True},
         findings_metadata=[{"severity": "HIGH", "status": "PUBLISHABLE"}],
     )
-    assert not unauthorized_attempt["success"]
-    assert unauthorized_attempt["error"]["code"] in ["APPROVAL_REQUIRED", "ACCESS_DENIED"]
-    print(f"  -> Untrusted agent call blocked at MCP boundary [{unauthorized_attempt['error']['code']}]: {unauthorized_attempt['error']['message']}")
+    assert auth_eval.decision == PolicyDecision.REQUIRE_APPROVAL
+    print(f"  -> Untrusted agent call blocked at policy boundary [{auth_eval.decision}]: {auth_eval.reason}")
     print("  [PASS] E2E Workflow 5 (Agent Bypass Rejection) Verified.")
 
     # =========================================================================

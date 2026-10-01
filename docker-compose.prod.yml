@@ -44,30 +44,6 @@ services:
           cpus: "1.0"
           memory: 1024M
 
-  mcp-server:
-    build:
-      context: ./apps/mcp-server
-      dockerfile: Dockerfile
-    container_name: codeguard-mcp-prod
-    restart: always
-    ports:
-      - "127.0.0.1:8001:8001"
-    environment:
-      - APP_ENV=production
-      - LOG_LEVEL=${LOG_LEVEL:-INFO}
-      - MCP_SERVICE_TOKEN=${MCP_SERVICE_TOKEN}
-      - MCP_CORS_ORIGINS=${MCP_CORS_ORIGINS:-http://api:8000,http://localhost:8000}
-    healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:8001/health || exit 1"]
-      interval: 15s
-      timeout: 5s
-      retries: 3
-    deploy:
-      resources:
-        limits:
-          cpus: "1.0"
-          memory: 512M
-
   api:
     build:
       context: .
@@ -89,8 +65,6 @@ services:
       - GEMINI_API_KEY=${GEMINI_API_KEY}
       - LLM_PROVIDER=gemini
       - DEV_AUTH_BYPASS=false
-      - MCP_SERVER_URL=http://mcp-server:8001
-      - MCP_SERVICE_TOKEN=${MCP_SERVICE_TOKEN}
       - FRONTEND_URL=${FRONTEND_URL}
       - BACKEND_URL=${BACKEND_URL}
       - CORS_ORIGINS=${CORS_ORIGINS}
@@ -100,8 +74,6 @@ services:
       postgres:
         condition: service_healthy
       redis:
-        condition: service_healthy
-      mcp-server:
         condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:8000/api/v1/health || exit 1"]
@@ -133,14 +105,10 @@ services:
       - GEMINI_API_KEY=${GEMINI_API_KEY}
       - LLM_PROVIDER=gemini
       - DEV_AUTH_BYPASS=false
-      - MCP_SERVER_URL=http://mcp-server:8001
-      - MCP_SERVICE_TOKEN=${MCP_SERVICE_TOKEN}
     depends_on:
       postgres:
         condition: service_healthy
       redis:
-        condition: service_healthy
-      mcp-server:
         condition: service_healthy
     deploy:
       resources:

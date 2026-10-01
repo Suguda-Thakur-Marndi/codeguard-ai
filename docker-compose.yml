@@ -53,8 +53,6 @@ services:
       - FRONTEND_URL=http://localhost:3000
       - BACKEND_URL=http://localhost:8000
       - DEV_AUTH_BYPASS=true
-      - MCP_SERVER_URL=http://mcp-server:8001
-      - MCP_SERVICE_TOKEN=${MCP_SERVICE_TOKEN:-dev-mcp-service-token}
     ports:
       - "8000:8000"
     depends_on:
@@ -62,28 +60,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-      mcp-server:
-        condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:8000/api/v1/health || exit 1"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  mcp-server:
-    build:
-      context: ./apps/mcp-server
-      dockerfile: Dockerfile
-    container_name: codeguard-mcp
-    restart: unless-stopped
-    ports:
-      - "8001:8001"
-    environment:
-      - APP_ENV=${APP_ENV:-development}
-      - LOG_LEVEL=${LOG_LEVEL:-INFO}
-      - MCP_SERVICE_TOKEN=${MCP_SERVICE_TOKEN:-dev-mcp-service-token}
-    healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:8001/health || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -103,14 +81,10 @@ services:
       - GITHUB_APP_ID=${GITHUB_APP_ID:-dev-app-id}
       - GITHUB_PRIVATE_KEY=${GITHUB_PRIVATE_KEY:-}
       - GITHUB_WEBHOOK_SECRET=${GITHUB_WEBHOOK_SECRET:-dev-webhook-secret}
-      - MCP_SERVER_URL=http://mcp-server:8001
-      - MCP_SERVICE_TOKEN=${MCP_SERVICE_TOKEN:-dev-mcp-service-token}
     depends_on:
       postgres:
         condition: service_healthy
       redis:
-        condition: service_healthy
-      mcp-server:
         condition: service_healthy
 
   web:

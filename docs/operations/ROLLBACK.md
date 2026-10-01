@@ -22,7 +22,7 @@ CodeGuard AI uses immutable, semantic-versioned container images in production. 
 3. **Deploy Previous Application Version**:
    Restart the application containers using the target release:
    ```bash
-   docker compose -f docker-compose.prod.yml up -d --no-deps api worker web mcp-server
+   docker compose -f docker-compose.prod.yml up -d --no-deps api worker web
    ```
 
 4. **Verify Health Probes**:

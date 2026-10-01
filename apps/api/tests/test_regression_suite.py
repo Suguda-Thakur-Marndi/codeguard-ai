@@ -8,7 +8,7 @@ Provides permanent, high-value automated regression guards protecting:
  5. GitHub Webhook HMAC-SHA256 Signature Verification
  6. Adversarial Judge 5-Gate Deterministic Candidate Filtering
  7. Execution Sandbox Command Allowlist & Shell Operator Defense
- 8. MCP Sentinel Governance & Forbidden Operation Interception
+ 8. Policy Sentinel Governance & Forbidden Operation Interception
 """
 
 import hashlib
@@ -33,10 +33,10 @@ from app.agents.schemas.finding import (
 )
 from app.agents.validation.sandbox import ExecutionSandbox
 from app.core.config import settings
-from app.core.security import verify_github_signature
-from app.mcp.classification import (
+from app.core.policy import (
     FORBIDDEN_TOOL_ACTIONS,
 )
+from app.core.security import verify_github_signature
 from app.models.approval_request import ApprovalStatus
 from app.models.organization import Organization
 from app.models.pull_request import PullRequest
@@ -378,7 +378,7 @@ def test_regression_sandbox_blocks_dangerous_operators() -> None:
 
 
 # =========================================================================
-# 8. MCP SENTINEL GOVERNANCE & FORBIDDEN ACTIONS
+# 8. POLICY SENTINEL GOVERNANCE & FORBIDDEN ACTIONS
 # =========================================================================
 
 def test_regression_sentinel_blocks_all_forbidden_tools() -> None:

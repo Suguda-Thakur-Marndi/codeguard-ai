@@ -23,7 +23,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -e "./packages/code-intelligence" -e "./apps/api[dev]" -e "./apps/mcp-server"
+          pip install -e "./packages/code-intelligence" -e "./apps/api[dev]"
 
       - name: Run Ruff Lint (Entire Workspace)
         run: |
@@ -57,7 +57,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -e "./packages/code-intelligence" -e "./apps/api[dev]" -e "./apps/mcp-server"
+          pip install -e "./packages/code-intelligence" -e "./apps/api[dev]"
 
       - name: Run Backend Pytest Suite (Unit & Integration)
         env:
@@ -68,12 +68,6 @@ jobs:
           CELERY_TASK_ALWAYS_EAGER: true
         run: |
           pytest apps/api/tests -v
-
-      - name: Run MCP Server Pytest Suite
-        env:
-          APP_ENV: test
-        run: |
-          pytest apps/mcp-server/tests -o pythonpath=apps/mcp-server -v
 
       - name: Validate Benchmark Dataset Integrity
         run: |
@@ -131,14 +125,6 @@ jobs:
           load: true
           tags: codeguard-api:${{ github.sha }}
 
-      - name: Build MCP Server Image
-        uses: docker/build-push-action@v5
-        with:
-          context: ./apps/mcp-server
-          file: ./apps/mcp-server/Dockerfile
-          load: true
-          tags: codeguard-mcp:${{ github.sha }}
-
       - name: Build Web Dashboard Image
         uses: docker/build-push-action@v5
         with:
@@ -194,7 +180,7 @@ jobs:
         run: |
           echo "Production deployment approved. Deploying release ${{ github.sha }} to Production..."
           echo "Applying database migrations: alembic upgrade head"
-          echo "Reloading api, worker, mcp-server services gracefully..."
+          echo "Reloading api, worker services gracefully..."
 
       - name: Run Production Smoke Tests
         run: |

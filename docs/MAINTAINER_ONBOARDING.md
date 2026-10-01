@@ -44,10 +44,10 @@ Every checklist item below is linked to empirical documentation and reproduction
   ```bash
   python -m venv .venv
   # Windows: .\.venv\Scripts\Activate.ps1 | Linux: source .venv/bin/activate
-  pip install -e "./packages/code-intelligence" -e "./apps/api[dev]" -e "./apps/mcp-server"
+  pip install -e "./packages/code-intelligence" -e "./apps/api[dev]"
   cd apps/web && npm install && cd ../..
   ```
-- **Verification Evidence**: Packages `codeguard-api`, `codeguard-code-intelligence`, and `codeguard-mcp-server` visible in `pip list`.
+- **Verification Evidence**: Packages `codeguard-api` and `codeguard-code-intelligence` visible in `pip list`.
 - **Reference**: [`docs/SETUP.md`](file:///c:/Users/sugud/OneDrive/Documents/codeguard-ai/docs/SETUP.md).
 
 ---
@@ -74,17 +74,13 @@ Every checklist item below is linked to empirical documentation and reproduction
 ---
 
 ### [x] Step 6: Start Application Services Locally
-- **Action**: Start the FastAPI backend server on port 8000 and the MCP Sentinel server on port 8001.
+- **Action**: Start the FastAPI backend server on port 8000.
   ```powershell
-  # Terminal 1:
   .\.venv\Scripts\uvicorn app.main:app --app-dir apps/api --port 8000
-  # Terminal 2:
-  .\.venv\Scripts\python -m uvicorn app.server.main:app --app-dir apps/mcp-server --port 8001
   ```
 - **Verification Evidence**:
   - `curl http://localhost:8000/api/v1/live` $\rightarrow$ `{"status": "ok"}`
   - `curl http://localhost:8000/api/v1/ready` $\rightarrow$ `{"status": "ok", "database": true}`
-  - `curl http://localhost:8001/health` $\rightarrow$ `{"status": "healthy"}`
 - **Reference**: [`docs/SETUP.md`](file:///c:/Users/sugud/OneDrive/Documents/codeguard-ai/docs/SETUP.md) Section 5.
 
 ---
@@ -92,14 +88,14 @@ Every checklist item below is linked to empirical documentation and reproduction
 ### [x] Step 7: Run the Test Suites
 - **Action**: Execute all unit tests, acceptance scenarios, and SRE release gates.
   ```powershell
-  # 1. Run all 244 unit & integration tests
-  .\.venv\Scripts\python.exe -m pytest apps/api/tests apps/mcp-server/tests -q
+  # 1. Run all backend unit & integration tests
+  .\.venv\Scripts\python.exe -m pytest apps/api/tests -q
   # 2. Run Ruff linter
   .\.venv\Scripts\ruff.exe check .
   # 3. Run Master SRE Verification Suite (27 gates)
   .\.venv\Scripts\python.exe verify_phase16.py
   ```
-- **Verification Evidence**: 244/244 pytest tests pass; 27/27 operational gates pass; Ruff reports `All checks passed!`.
+- **Verification Evidence**: 253/253 pytest tests pass; 27/27 operational gates pass; Ruff reports `All checks passed!`.
 - **Reference**: [`docs/TESTING.md`](file:///c:/Users/sugud/OneDrive/Documents/codeguard-ai/docs/TESTING.md).
 
 ---
@@ -112,16 +108,16 @@ Every checklist item below is linked to empirical documentation and reproduction
   3. Tree-sitter extracts diff hunks and enclosing AST entities.
   4. LangGraph StateGraph invokes Comprehension, routes to Security/Bug specialists.
   5. Adversarial Judge filters candidate findings across the 5 gates.
-- **Reference**: [`docs/architecture/AGENT_AND_MCP_FLOW.md`](file:///c:/Users/sugud/OneDrive/Documents/codeguard-ai/docs/architecture/AGENT_AND_MCP_FLOW.md).
+- **Reference**: [`docs/architecture/AGENT_AND_REVIEW_FLOW.md`](file:///c:/Users/sugud/OneDrive/Documents/codeguard-ai/docs/architecture/AGENT_AND_REVIEW_FLOW.md).
 
 ---
 
 ### [x] Step 9: Understand Approval & Publishing Boundaries
 - **Action**: Review how human authorization gates prevent unverified AI reviews from publishing to GitHub.
 - **Key Concepts**:
-  - Consequential tool calls require cryptographically signed approval from a `REVIEWER` or `ADMIN`.
+  - Consequential actions require cryptographically signed approval from a `REVIEWER` or `ADMIN`.
   - Stale approval protection: If the PR head SHA moves, existing approvals are invalidated (`COMMIT_DRIFT`).
-- **Reference**: [`docs/architecture/AGENT_AND_MCP_FLOW.md`](file:///c:/Users/sugud/OneDrive/Documents/codeguard-ai/docs/architecture/AGENT_AND_MCP_FLOW.md) Section 6.
+- **Reference**: [`docs/architecture/AGENT_AND_REVIEW_FLOW.md`](file:///c:/Users/sugud/OneDrive/Documents/codeguard-ai/docs/architecture/AGENT_AND_REVIEW_FLOW.md) Section 6.
 
 ---
 
@@ -130,7 +126,7 @@ Every checklist item below is linked to empirical documentation and reproduction
 - **Key Actions**:
   - Emergency review disablement: Set `auto_publish_enabled=false` in organization policy.
   - Secret rotation: Follow documented procedures in Section 5 of the Runbook.
-- **Reference**: [`docs/RUNBOOK.md`](file:///c:/Users/sugud/OneDrive/Documents/codeguard-ai/docs/RUNBOOK.md), [`docs/post-pilot/SECURITY_REVIEW.md`](file:///c:/Users/sugud/OneDrive/Documents/codeguard-ai/docs/post-pilot/SECURITY_REVIEW.md).
+- **Reference**: [`docs/RUNBOOK.md`](file:///c:/Users/sugud/OneDrive/Documents/codeguard-ai/docs/RUNBOOK.md), [`docs/SECURITY_RUNBOOK.md`](file:///c:/Users/sugud/OneDrive/Documents/codeguard-ai/docs/SECURITY_RUNBOOK.md), [`docs/security/THREAT_MODEL.md`](file:///c:/Users/sugud/OneDrive/Documents/codeguard-ai/docs/security/THREAT_MODEL.md).
 
 ---
 
@@ -149,4 +145,4 @@ Every checklist item below is linked to empirical documentation and reproduction
 - **Current Limitations**:
   - Release state is currently **MORE EVIDENCE REQUIRED** pending an authorized customer pilot.
   - General availability release to production requires explicit Project Owner approval.
-- **Reference**: [`docs/post-pilot/RELEASE_DECISION.md`](file:///c:/Users/sugud/OneDrive/Documents/codeguard-ai/docs/post-pilot/RELEASE_DECISION.md), [`docs/post-pilot/NEXT_ITERATION.md`](file:///c:/Users/sugud/OneDrive/Documents/codeguard-ai/docs/post-pilot/NEXT_ITERATION.md).
+- **Reference**: [`docs/pilot/PHASE22_PILOT_PLAN.md`](file:///c:/Users/sugud/OneDrive/Documents/codeguard-ai/docs/pilot/PHASE22_PILOT_PLAN.md), [`docs/phase23/PHASE23_RELEASE_CANDIDATE_DECISION.md`](file:///c:/Users/sugud/OneDrive/Documents/codeguard-ai/docs/phase23/PHASE23_RELEASE_CANDIDATE_DECISION.md).

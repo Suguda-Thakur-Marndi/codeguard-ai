@@ -80,7 +80,7 @@ In strict accordance with Phase 23 guidelines:
 ---
 
 ### Finding FND-23-04: Lack of Customer Pilot Evidence & Authorization
-- **Source Phase & Artifact**: Phase 19 & Phase 22 (`docs/post-pilot/RELEASE_DECISION.md`, `docs/pilot/PHASE22_EVIDENCE_REPORT.md`)
+- **Source Phase & Artifact**: Pilot Governance Framework (`docs/pilot/PHASE22_PILOT_PLAN.md`, `docs/pilot/PHASE22_FINAL_DECISION.md`)
 - **Affected Component**: Pilot Evaluation Gate / External Repository Ingestion
 - **Reproduction Steps**: Inspect `docs/pilot/` and repository documentation for customer pilot agreements or external PR review telemetry.
 - **Expected Behavior**: Real-world evaluation data from 3–5 representative repositories with developer acceptance rates and noise metrics.

@@ -99,15 +99,3 @@ In Phase 16, an exhaustive automated regex audit was executed across the entire 
    docker compose -f docker-compose.prod.yml restart api
    ```
 4. Confirm existing expired tokens are rejected with HTTP 401.
-
-### Runbook E: `MCP_SERVICE_TOKEN` Rotation
-1. Generate 32-byte token:
-   ```bash
-   openssl rand -hex 32
-   ```
-2. Update `MCP_SERVICE_TOKEN` across both `codeguard-api` and `codeguard-mcp` service configurations.
-3. Simultaneously restart both services:
-   ```bash
-   docker compose -f docker-compose.prod.yml restart api mcp-server worker
-   ```
-4. Verify MCP health and tool execution with new token.

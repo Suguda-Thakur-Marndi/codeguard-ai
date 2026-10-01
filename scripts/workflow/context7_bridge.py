@@ -266,11 +266,8 @@ class Context7Bridge:
 
 if __name__ == "__main__":
     c7 = Context7Bridge()
-    if len(sys.argv) > 1 and sys.argv[1] == "--mcp-mode":
-        print(json.dumps({"status": "context7_mcp_ready", "tools": ["query_documentation", "validate_compatibility", "check_hierarchy"]}))
-    else:
-        doc = c7.query_documentation("pydantic")
-        print(f"Context7 Docs for {doc.library} (Installed: {doc.installed_version}):")
-        print(f"  Signature: {doc.authoritative_signature}")
-        print(f"  Deprecated: {doc.deprecated_patterns}")
-        print(f"  Recommended: {doc.recommended_patterns}")
+    doc = c7.query_documentation("pydantic")
+    print(f"Context7 Docs for {doc.library} (Installed: {doc.installed_version}):")
+    print(f"  Signature: {doc.authoritative_signature}")
+    print(f"  Deprecated: {doc.deprecated_patterns}")
+    print(f"  Recommended: {doc.recommended_patterns}")

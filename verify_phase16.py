@@ -58,9 +58,13 @@ os.environ["DEV_AUTH_BYPASS"] = "false"
 import jwt
 from app.core.config import Settings
 from app.core.logging import redact_sensitive_data
-from app.mcp.auth import Principal, PrincipalRole
-from app.mcp.classification import FORBIDDEN_TOOL_ACTIONS, PolicyDecision
-from app.mcp.policy_engine import PolicyEngine
+from app.core.policy import (
+    FORBIDDEN_TOOL_ACTIONS,
+    PolicyDecision,
+    PolicyEngine,
+    Principal,
+    PrincipalRole,
+)
 from app.models.review_job import ReviewJobStatus
 from pydantic import ValidationError
 

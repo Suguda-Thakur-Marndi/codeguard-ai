@@ -68,7 +68,7 @@ export default function AuditLogPage() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800 pb-6">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold tracking-tight text-white">MCP Tool Execution Audit</h1>
+            <h1 className="text-2xl font-bold tracking-tight text-white">Tool & Action Execution Audit</h1>
             <span className="px-2 py-0.5 rounded text-xs font-mono bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
               Immutable & Append-Only
             </span>

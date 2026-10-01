@@ -14,7 +14,6 @@
 | :--- | :---: | :--- | :--- | :---: |
 | **API Server (FastAPI)** | `8000` | `GET /api/v1/live`, `GET /api/v1/ready` | `event="http_request_completed"` | **VERIFIED** |
 | **Review Worker (Celery)** | — | Celery ping / Redis heartbeat | `event="review_job_started"` | **VERIFIED** |
-| **MCP Sentinel Server** | `8001` | `GET /health` | `event="mcp_tool_execution"` | **VERIFIED** |
 | **Frontend Dashboard** | `3000` | `GET /` (HTTP 200) | Next.js server access logs | **VERIFIED** |
 | **PostgreSQL Database** | `5432` | `pg_isready -U codeguard` | PostgreSQL transaction logs | **VERIFIED** |
 | **Redis Broker & Cache** | `6379` | `redis-cli ping` $\rightarrow$ `PONG` | Redis persistence logs | **VERIFIED** |
@@ -27,7 +26,7 @@
 
 #### Production Stack (Docker Compose):
 ```bash
-# Start all 6 containerized services in background
+# Start all containerized services in background
 docker compose -f docker-compose.prod.yml up -d --build
 
 # Verify all containers are healthy
@@ -40,13 +39,10 @@ docker compose -f docker-compose.prod.yml ps
 # 1. Start API (Terminal 1)
 .\.venv\Scripts\uvicorn app.main:app --app-dir apps/api --port 8000
 
-# 2. Start MCP Server (Terminal 2)
-.\.venv\Scripts\python -m uvicorn app.server.main:app --app-dir apps/mcp-server --port 8001
-
-# 3. Start Celery Worker (Terminal 3, Windows solo pool)
+# 2. Start Celery Worker (Terminal 2, Windows solo pool)
 .\.venv\Scripts\celery -A app.workers.celery_app worker --pool=solo -l info
 
-# 4. Start Next.js Web (Terminal 4)
+# 3. Start Next.js Web (Terminal 3)
 cd apps/web && npm run dev
 ```
 *Status*: **VERIFIED ON LOCAL HOST**.
@@ -71,9 +67,6 @@ curl -i http://localhost:8000/api/v1/live
 
 # 2. Dependency Readiness Check (Validates DB pool and Redis connectivity)
 curl -i http://localhost:8000/api/v1/ready
-
-# 3. MCP Gateway Health Check
-curl -i http://localhost:8001/health
 ```
 
 ### 3.2 Inspecting Structured Logs & Traces

@@ -8,9 +8,9 @@ endif
 
 help:
 	@echo "CodeGuard AI - Production Release & Developer Commands"
-	@echo "  make install            Install backend, MCP server, and frontend dependencies"
+	@echo "  make install            Install backend and frontend dependencies"
 	@echo "  make dev                Start development servers (API & Web)"
-	@echo "  make test               Run backend and MCP test suites with pytest"
+	@echo "  make test               Run backend test suite with pytest"
 	@echo "  make lint               Run Ruff linter and TypeScript type check"
 	@echo "  make format             Format codebase using Ruff"
 	@echo "  make validate-benchmark Validate empirical benchmarking scenarios"
@@ -23,7 +23,7 @@ help:
 install:
 	$(PYTHON) -m venv .venv
 	$(VENV_BIN)/pip install --upgrade pip
-	$(VENV_BIN)/pip install -e "./packages/code-intelligence" -e "./apps/api[dev]" -e "./apps/mcp-server"
+	$(VENV_BIN)/pip install -e "./packages/code-intelligence" -e "./apps/api[dev]"
 	cd apps/web && npm install
 
 dev:
@@ -32,14 +32,13 @@ dev:
 
 test:
 	$(VENV_BIN)/pytest apps/api/tests -v
-	$(VENV_BIN)/pytest apps/mcp-server/tests -o pythonpath=apps/mcp-server -v
 
 lint:
-	$(VENV_BIN)/ruff check apps/api apps/mcp-server packages/code-intelligence scripts
+	$(VENV_BIN)/ruff check apps/api packages/code-intelligence scripts
 	cd apps/web && npm run lint
 
 format:
-	$(VENV_BIN)/ruff check --fix apps/api apps/mcp-server packages/code-intelligence scripts
+	$(VENV_BIN)/ruff check --fix apps/api packages/code-intelligence scripts
 
 validate-benchmark:
 	$(VENV_BIN)/python benchmark.py validate

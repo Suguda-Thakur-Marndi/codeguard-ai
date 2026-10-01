@@ -35,7 +35,7 @@ All application services emit single-line, structured JSON logs to standard outp
 - `adversarial_judge_gate_evaluated` / `candidate_finding_rejected`
 - `approval_requested` / `approval_granted` / `approval_rejected` / `approval_stale`
 - `github_review_published` / `github_publication_failed`
-- `mcp_tool_execution` / `mcp_policy_denied`
+- `policy_evaluated` / `policy_action_denied`
 
 ---
 
@@ -129,5 +129,5 @@ Every Gemini LLM call records prompt and completion token counts and computes fi
 | HMAC-SHA256 Signature Verify | < 1 ms | 0.031 ms | 5 ms |
 | Tree-sitter Unified Diff Indexing | < 30 ms | 18.40 ms | 200 ms |
 | Adversarial Judge 5-Gate Filter | < 50 ms | 22.10 ms | 150 ms |
-| MCP Sentinel Tool Authorization | < 5 ms | 0.002 ms | 20 ms |
+| Zero-Trust Policy Authorization | < 5 ms | 0.002 ms | 20 ms |
 | Full End-to-End Review (Mock/Cached) | < 3000 ms | 2032.0 ms | 10,000 ms |

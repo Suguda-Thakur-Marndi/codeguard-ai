@@ -1,7 +1,7 @@
 {
   "scenario_id": "AUDIT-DB",
   "name": "Clean Database Initialization",
-  "timestamp": "2026-09-29T14:24:43.278035+00:00",
+  "timestamp": "2026-10-01T19:46:28.597474+00:00",
   "expected": "Apply Alembic migrations 001-006 from zero, 27 tables created",
   "actual": "Clean staging DB contains 28 tables (27 required present, 0 missing)",
   "status": "PASS",

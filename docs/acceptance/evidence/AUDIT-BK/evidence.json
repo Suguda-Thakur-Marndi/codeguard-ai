@@ -1,12 +1,12 @@
 {
   "scenario_id": "AUDIT-BK",
   "name": "Backup & Restore Drill",
-  "timestamp": "2026-09-29T14:24:43.333819+00:00",
+  "timestamp": "2026-10-01T19:46:28.633657+00:00",
   "expected": "Backup staging DB, corrupt DB, restore & verify exact match",
-  "actual": "Backup created (8d63da6eedd5...), restored successfully with 28/28 tables intact",
+  "actual": "Backup created (0cd496afded6...), restored successfully with 28/28 tables intact",
   "status": "PASS",
   "telemetry": {
-    "backup_sha256": "8d63da6eedd5bd25b104d382a9d1c67a33fd630d5a2da2b81240465f947e67f6",
+    "backup_sha256": "0cd496afded6cd7c76c6f7bd013d250516d84a48d31c72a79c4ffca4aca47cde",
     "tables_restored": 28
   }
 }

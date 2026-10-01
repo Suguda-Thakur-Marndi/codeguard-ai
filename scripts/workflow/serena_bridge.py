@@ -1,7 +1,6 @@
 """Serena Codebase Navigator: AST-aware symbol discovery, caller tracing, and dependency mapping."""
 
 import ast
-import json
 import os
 import sys
 from typing import Any
@@ -60,7 +59,6 @@ class SerenaNavigator:
         collected: list[str] = []
         target_dirs = [
             os.path.join(self.workspace_root, "apps", "api"),
-            os.path.join(self.workspace_root, "apps", "mcp-server"),
             os.path.join(self.workspace_root, "packages", "code-intelligence"),
             os.path.join(self.workspace_root, "packages", "shared"),
             os.path.join(self.workspace_root, "scripts"),
@@ -265,7 +263,5 @@ if __name__ == "__main__":
         print(f"Found {len(found)} symbol locations for '{sym}':")
         for s in found:
             print(f"  - {s.symbol_type} {s.name} at {s.file_path}:{s.line_number}")
-    elif len(sys.argv) > 1 and sys.argv[1] == "--mcp-mode":
-        print(json.dumps({"status": "serena_mcp_ready", "tools": ["find_symbol", "inspect_definition", "get_callers", "get_dependencies"]}))
     else:
         print("Serena Navigator initialized. Use --find <symbol> or import as module.")

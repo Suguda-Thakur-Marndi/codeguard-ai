@@ -56,11 +56,10 @@ from app.agents.schemas.finding import (  # noqa: E402
 from app.agents.validation.sandbox import ExecutionSandbox  # noqa: E402
 from app.core.config import Settings, settings  # noqa: E402
 from app.core.logging import redact_sensitive_data  # noqa: E402
+from app.core.policy import FORBIDDEN_OPERATIONS, SubmitReviewInput  # noqa: E402
 from app.core.security import verify_github_signature  # noqa: E402
 from app.db.base import Base  # noqa: E402
 from app.main import app  # noqa: E402
-from app.mcp.classification import FORBIDDEN_OPERATIONS  # noqa: E402
-from app.mcp.schemas import SubmitReviewInput  # noqa: E402
 from app.models.approval_request import ApprovalStatus  # noqa: E402
 from app.models.organization import Organization  # noqa: E402
 from app.models.pull_request import PullRequest  # noqa: E402
@@ -99,12 +98,12 @@ class ProductionVerificationRunner:
 
     def verify_architecture(self) -> None:
         """1. Architecture Conformity."""
-        req_dirs = ["apps/api", "apps/mcp-server", "apps/web", "packages/code-intelligence", "docker", "docs"]
+        req_dirs = ["apps/api", "apps/web", "packages/code-intelligence", "docker", "docs"]
         missing = [d for d in req_dirs if not os.path.isdir(os.path.join(_root, d))]
         if missing:
             self.record("Architecture", False, f"Missing directories: {missing}")
             return
-        self.record("Architecture", True, "Modular architecture confirmed (API, MCP, Web, Packages, Docker, Docs).")
+        self.record("Architecture", True, "Modular architecture confirmed (API, Web, Packages, Docker, Docs).")
 
     def verify_backend(self) -> None:
         """2. Backend REST APIs & Health Probes."""

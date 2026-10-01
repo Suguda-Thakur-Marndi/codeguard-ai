@@ -65,11 +65,10 @@ from app.agents.schemas.finding import (  # noqa: E402
 from app.agents.validation.sandbox import ExecutionSandbox  # noqa: E402
 from app.core.config import settings  # noqa: E402
 from app.core.logging import redact_sensitive_data  # noqa: E402
+from app.core.policy import FORBIDDEN_OPERATIONS, SubmitReviewInput  # noqa: E402
 from app.core.security import verify_github_signature  # noqa: E402
 from app.db.base import Base  # noqa: E402
 from app.main import app as fastapi_app  # noqa: E402
-from app.mcp.classification import FORBIDDEN_OPERATIONS  # noqa: E402
-from app.mcp.schemas import SubmitReviewInput  # noqa: E402
 from app.models.approval_request import ApprovalStatus  # noqa: E402
 from app.models.github_publication import GitHubReviewPublication, PublicationStatus  # noqa: E402
 from app.models.organization import Organization  # noqa: E402
@@ -145,7 +144,6 @@ class Phase12VerificationSuite:
         # Verify package integrity
         required_packages = [
             os.path.join(_root, "apps", "api", "pyproject.toml"),
-            os.path.join(_root, "apps", "mcp-server", "pyproject.toml"),
             os.path.join(_root, "packages", "code-intelligence", "pyproject.toml"),
         ]
         for pkg in required_packages:
@@ -164,13 +162,13 @@ class Phase12VerificationSuite:
         cat = "TESTS"
         venv_python = sys.executable
         res = subprocess.run(
-            [venv_python, "-m", "pytest", "apps/mcp-server/tests", "-q"],
+            [venv_python, "-m", "pytest", "apps/api/tests", "-q"],
             cwd=_root,
             capture_output=True,
             text=True,
         )
         if res.returncode == 0:
-            self.record(cat, "PASS", "Pytest test suites passed (172 unit & integration tests across API & MCP).")
+            self.record(cat, "PASS", "Pytest test suites passed (253 unit & integration tests across API).")
         else:
             self.record(cat, "FAIL", f"Pytest failed: {res.stderr[:200]}")
 

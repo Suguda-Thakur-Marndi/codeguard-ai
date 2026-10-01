@@ -52,11 +52,10 @@ from app.agents.schemas.finding import (  # noqa: E402
 from app.agents.validation.sandbox import ExecutionSandbox  # noqa: E402
 from app.core.config import Settings, settings  # noqa: E402
 from app.core.logging import redact_sensitive_data  # noqa: E402
+from app.core.policy import FORBIDDEN_OPERATIONS, SubmitReviewInput  # noqa: E402
 from app.core.security import verify_github_signature  # noqa: E402
 from app.db.base import Base  # noqa: E402
 from app.main import app  # noqa: E402
-from app.mcp.classification import FORBIDDEN_OPERATIONS  # noqa: E402
-from app.mcp.schemas import SubmitReviewInput  # noqa: E402
 from app.models.approval_request import ApprovalStatus  # noqa: E402
 from app.models.github_publication import GitHubReviewPublication, PublicationStatus  # noqa: E402
 from app.models.organization import Organization  # noqa: E402

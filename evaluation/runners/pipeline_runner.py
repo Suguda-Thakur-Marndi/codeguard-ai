@@ -19,10 +19,9 @@ from app.agents.schemas.finding import (
     ReviewFinding,
     SpecialistFindingsOutput,
 )
+from app.core.policy import PolicyEngine, Principal, PrincipalRole
 from app.db.base import Base
 from app.github.publisher import ReviewPublishResult
-from app.mcp.auth import Principal, PrincipalRole
-from app.mcp.policy_engine import PolicyEngine
 from app.models.organization import Organization
 from app.models.pull_request import PullRequest
 from app.models.repository import Repository
@@ -60,6 +59,7 @@ class ScenarioExecutionResult:
     rejected_findings: list[ReviewFinding] = field(default_factory=list)
     agent_runs: list[dict[str, Any]] = field(default_factory=list)
     verification_record: dict[str, Any] = field(default_factory=dict)
+    policy_decision: str = ""
     mcp_policy_decision: str = ""
     github_publication_result: ReviewPublishResult | None = None
     error_message: str | None = None
@@ -609,7 +609,7 @@ class PipelineRunner:
                 repo_dir=target_repo_dir,
             )
 
-            # 5. Phase 5: MCP Governance Policy Check (Isolated)
+            # 5. Zero-Trust Policy Governance Check (Isolated)
             agent_principal = Principal(
                 principal_id="codeguard-agent",
                 role=PrincipalRole.AGENT,
@@ -698,6 +698,7 @@ class PipelineRunner:
                 rejected_findings=rejected_findings,
                 agent_runs=final_state.get("agent_runs", []),
                 verification_record=verification_record,
+                policy_decision=policy_decision.decision.value if hasattr(policy_decision.decision, "value") else str(policy_decision.decision),
                 mcp_policy_decision=policy_decision.decision.value if hasattr(policy_decision.decision, "value") else str(policy_decision.decision),
                 github_publication_result=pub_result,
             )

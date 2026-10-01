@@ -71,7 +71,7 @@ export const Header: React.FC = () => {
                 <span className="font-bold text-base tracking-tight text-white group-hover:text-indigo-400 transition-colors">
                   CodeGuard <span className="text-indigo-400 font-mono text-sm">AI</span>
                 </span>
-                <span className="text-[10px] text-slate-400 -mt-1 font-mono">Phase 5 MCP Governance</span>
+                <span className="text-[10px] text-slate-400 -mt-1 font-mono">Policy Governance</span>
               </div>
             </Link>
 

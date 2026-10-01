@@ -22,8 +22,8 @@
                   │
         ┌─────────┼─────────────────────────┬─────────────────────────┐
         ▼         ▼                         ▼                         ▼
-   [PostgreSQL] [Redis]             [Celery Worker]           [MCP Server]
-   Port: 5432   Port: 6379          (Review Pipeline)         Port: 8001 (Policy Engine)
+   [PostgreSQL] [Redis]             [Celery Worker]           [Policy Engine]
+   Port: 5432   Port: 6379          (Review Pipeline)         (app.core.policy)
                                             │                         │
                                    ┌────────┴────────┐                │
                                    ▼                 ▼                ▼
@@ -161,13 +161,13 @@
 
 ---
 
-### 11. Model Context Protocol (MCP) Server & Gateway (`apps/mcp-server/`)
-- **Technology**: FastMCP / FastAPI JSON-RPC service.
-- **Exposure**: Internal microservice network (Port 8001).
-- **Threats**: Tool confusion, privilege escalation from low-risk to destructive tools, unapproved publication.
+### 11. Zero-Trust Deterministic Policy Engine (`apps/api/app/core/policy.py`)
+- **Technology**: In-process Python security policy engine with Pydantic validation.
+- **Exposure**: Internal service boundary before GitHub review publication.
+- **Threats**: Tool confusion, privilege escalation from low-risk to destructive actions, unapproved publication.
 - **Controls & Hardening**:
-  - Explicit tool risk classification: `READ_ONLY`, `LOW_RISK`, `CONSEQUENTIAL`, `HIGH_RISK`.
-  - Absolute forbidden tools blocklist: `merge_pull_request`, `branch_delete`, `repo_delete`, `arbitrary_shell`, `secret_access` unconditionally return `PolicyDecision.DENY`.
+  - Explicit action risk classification: `READ_ONLY`, `LOW_RISK`, `CONSEQUENTIAL`, `HIGH_RISK`.
+  - Absolute forbidden operations blocklist: `merge_pull_request`, `repo_delete`, `arbitrary_shell`, `secret_access`, etc. unconditionally return `PolicyDecision.DENY`.
   - Human approval mandatory for all `CONSEQUENTIAL` and `HIGH_RISK` actions.
   - Strict validation that approval records match target repository and tenant organization.
 

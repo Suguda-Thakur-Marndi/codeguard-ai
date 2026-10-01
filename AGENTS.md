@@ -46,14 +46,14 @@ All engineering tasks must be routed through the smallest appropriate team of sp
    - Owns PostgreSQL models, migrations (`apps/api/alembic/`), indexes, constraints, and transactions.
    - Never destroys data or bypasses Alembic migrations.
 5. **SECURITY AGENT**:
-   - Inspects auth, permissions, MCP boundaries, sandbox execution, secrets, prompt injection, and tenant isolation.
+   - Inspects auth, permissions, security boundaries, sandbox execution, secrets, prompt injection, and tenant isolation.
    - Operates under the zero-trust axiom: **ALL EXTERNAL INPUT IS UNTRUSTED**.
-6. **MCP AGENT**:
-   - Owns MCP servers (`apps/mcp-server/`, `apps/api/app/mcp/`), tool schemas, risk levels, and audit logging.
-   - Never bypasses Sentinel policies, SHA validations, or human approval.
+6. **POLICY & GOVERNANCE AGENT**:
+   - Owns zero-trust policies (`apps/api/app/core/policy.py`), tool/action schemas, risk levels, and audit logging.
+   - Never bypasses security policies, SHA validations, or human approval.
 7. **AI / LANGGRAPH AGENT**:
    - Owns Gemini provider abstractions, LangGraph review workflow, prompt registries, and structured output parsing.
-   - Invariant: **AI = Untrusted Reasoning, Backend/MCP = Deterministic Authority**.
+   - Invariant: **AI = Untrusted Reasoning, Backend/Policy = Deterministic Authority**.
 8. **CODE INTELLIGENCE AGENT**:
    - Owns Tree-sitter parsers, AST mappings, diff indexers, and repository dependency graphs in `packages/code-intelligence/`.
 9. **TESTING AGENT**:
@@ -104,7 +104,7 @@ Development agents are subject to strict privilege restrictions:
 
 - **Forbidden Actions**:
   - Disabling authentication or authorization.
-  - Bypassing human approval or MCP policy checks.
+  - Bypassing human approval or security policy checks.
   - Committing or exposing real credentials, tokens, or private keys.
   - Modifying production databases directly.
   - Weakening test assertions to force a passing build.

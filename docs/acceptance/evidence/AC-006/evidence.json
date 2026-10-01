@@ -1,14 +1,14 @@
 {
   "scenario_id": "AC-006",
   "name": "Performance Issue",
-  "timestamp": "2026-09-29T14:24:42.174466+00:00",
+  "timestamp": "2026-10-01T19:46:27.504392+00:00",
   "expected": "Flags N+1 database query loop",
   "actual": "Flagged PERFORMANCE N+1 at line 26",
   "status": "PASS",
   "telemetry": {
     "findings": [
       {
-        "finding_id": "50ab9885-fb1e-4b2f-bc2d-82a73d6f1570",
+        "finding_id": "f050757c-5933-42c0-8b0d-230e997bf1ae",
         "file_path": "src/services/payment_service.py",
         "line_number": 26,
         "side": "RIGHT",

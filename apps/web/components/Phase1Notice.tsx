@@ -13,7 +13,7 @@ export const Phase1Notice: React.FC = () => {
               CodeGuard AI Autonomous Review Platform Active
             </h4>
             <p className="text-xs text-slate-400 mt-0.5">
-              Deterministic code intelligence, multi-agent AI review, adversarial verification, and zero-trust MCP governance are active.{" "}
+              Deterministic code intelligence, multi-agent AI review, adversarial verification, and zero-trust policy governance are active.{" "}
               <span className="text-emerald-400/90 font-medium">
                 End-to-end review automation enabled.
               </span>

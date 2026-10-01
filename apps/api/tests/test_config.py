@@ -17,7 +17,6 @@ def test_config_1_all_required_variables_present():
         FRONTEND_URL="http://localhost:3000",
         DATABASE_URL="postgresql://user:pass@localhost:5432/db",
         REDIS_URL="redis://localhost:6379/0",
-        MCP_SERVER_URL="http://localhost:8001",
     )
     assert cfg.APP_NAME == "CodeGuard AI"
     assert cfg.BACKEND_URL == "http://localhost:8000"
@@ -72,12 +71,10 @@ def test_config_7_invalid_gemini_configuration_production():
             REDIS_URL="redis://remote-redis.internal:6379/0",
             BACKEND_URL="https://api.codeguard.internal",
             FRONTEND_URL="https://app.codeguard.internal",
-            MCP_SERVER_URL="https://mcp.codeguard.internal:8001",
             GITHUB_PRIVATE_KEY="-----BEGIN RSA PRIVATE KEY-----\nMIIE...\n-----END RSA PRIVATE KEY-----",
             GITHUB_WEBHOOK_SECRET="secure_webhook_secret_32_bytes_long_here",
             SECRET_KEY="secure_session_secret_32_bytes_long_here",
             DEV_AUTH_BYPASS=False,
-            MCP_SERVICE_TOKEN="secure_mcp_token_32_bytes_long_here",
             LLM_PROVIDER="mock",
             GEMINI_API_KEY="AIzaSy_fake_test_key",
         )
@@ -91,12 +88,10 @@ def test_config_7_invalid_gemini_configuration_production():
             REDIS_URL="redis://remote-redis.internal:6379/0",
             BACKEND_URL="https://api.codeguard.internal",
             FRONTEND_URL="https://app.codeguard.internal",
-            MCP_SERVER_URL="https://mcp.codeguard.internal:8001",
             GITHUB_PRIVATE_KEY="-----BEGIN RSA PRIVATE KEY-----\nMIIE...\n-----END RSA PRIVATE KEY-----",
             GITHUB_WEBHOOK_SECRET="secure_webhook_secret_32_bytes_long_here",
             SECRET_KEY="secure_session_secret_32_bytes_long_here",
             DEV_AUTH_BYPASS=False,
-            MCP_SERVICE_TOKEN="secure_mcp_token_32_bytes_long_here",
             LLM_PROVIDER="gemini",
             GEMINI_API_KEY="",
         )
@@ -112,12 +107,10 @@ def test_config_8_invalid_github_configuration_production():
             REDIS_URL="redis://remote-redis.internal:6379/0",
             BACKEND_URL="https://api.codeguard.internal",
             FRONTEND_URL="https://app.codeguard.internal",
-            MCP_SERVER_URL="https://mcp.codeguard.internal:8001",
             GITHUB_PRIVATE_KEY="",
             GITHUB_WEBHOOK_SECRET="dev-webhook-secret",
             SECRET_KEY="secure_session_secret_32_bytes_long_here",
             DEV_AUTH_BYPASS=False,
-            MCP_SERVICE_TOKEN="secure_mcp_token_32_bytes_long_here",
             LLM_PROVIDER="gemini",
             GEMINI_API_KEY="AIzaSy_fake_test_key",
         )
@@ -125,22 +118,20 @@ def test_config_8_invalid_github_configuration_production():
     assert "Production GITHUB_WEBHOOK_SECRET must be configured" in str(exc.value)
 
 
-def test_config_9_invalid_mcp_configuration_production():
-    """Verify production rejects default MCP_SERVICE_TOKEN."""
+def test_config_9_invalid_database_credentials_production():
+    """Verify production rejects localhost or default credentials in DATABASE_URL."""
     with pytest.raises(ValueError) as exc:
         Settings(
             APP_ENV="production",
-            DATABASE_URL="postgresql://prod_user:prod_pass@remote-db.internal:5432/prod_db",
+            DATABASE_URL="postgresql://codeguard:codeguard_secret@localhost:5432/codeguard",
             REDIS_URL="redis://remote-redis.internal:6379/0",
             BACKEND_URL="https://api.codeguard.internal",
             FRONTEND_URL="https://app.codeguard.internal",
-            MCP_SERVER_URL="https://mcp.codeguard.internal:8001",
             GITHUB_PRIVATE_KEY="-----BEGIN RSA PRIVATE KEY-----\nMIIE...\n-----END RSA PRIVATE KEY-----",
             GITHUB_WEBHOOK_SECRET="secure_webhook_secret_32_bytes_long_here",
             SECRET_KEY="secure_session_secret_32_bytes_long_here",
             DEV_AUTH_BYPASS=False,
-            MCP_SERVICE_TOKEN="dev-mcp-service-token",
             LLM_PROVIDER="gemini",
             GEMINI_API_KEY="AIzaSy_fake_test_key",
         )
-    assert "Production MCP_SERVICE_TOKEN must be securely configured" in str(exc.value)
+    assert "Production DATABASE_URL must not use local default credentials" in str(exc.value)

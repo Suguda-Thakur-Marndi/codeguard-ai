@@ -43,19 +43,7 @@ This runbook specifies containment, remediation, and rotation procedures for sec
    ```
 5. Delete the old API key in Google Cloud Console.
 
-### D. MCP Service Token Rotation
-1. Generate a new secret:
-   ```bash
-   openssl rand -hex 32
-   ```
-2. Update `MCP_SERVICE_TOKEN` across `docker-compose.prod.yml` (API, Worker, and MCP server).
-3. Restart all three services:
-   ```bash
-   docker compose -f docker-compose.prod.yml up -d --no-deps api worker mcp-server
-   ```
-4. Verify MCP server logs show successful authenticated tool execution.
-
-### E. Database Password Rotation
+### D. Database Password Rotation
 1. Generate a new database password.
 2. Update PostgreSQL role password:
    ```sql

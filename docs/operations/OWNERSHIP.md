@@ -25,7 +25,7 @@
 | **Database & Schema Operations** | **Database Administrator** | Backend Lead Engineer | Alembic migrations, PostgreSQL connection tuning, backup verification, point-in-time recovery. |
 | **GitHub App & Webhook Ingress** | **Integration Specialist** | DevOps / SRE Lead | GitHub App registration, RSA private key management, webhook secret rotation, API permissions. |
 | **AI Provider & Model Operations** | **AI Engineering Lead** | Backend Lead Engineer | Gemini API budgeting, token monitoring, prompt registry optimization, specialist tuning. |
-| **MCP Sentinel Governance** | **Security Lead Engineer** | Architect Agent | Zero-trust Sentinel policies, forbidden tool blocklists, tool schema whitelisting, audit logs. |
+| **Zero-Trust Policy Governance** | **Security Lead Engineer** | Architect Agent | Zero-trust security policies, forbidden operations blocklists, tool schema validation, audit logs. |
 | **Security & Incident Response** | **Chief Information Security Officer** | Security Lead Engineer | Threat modeling, secret management, CVE patching, red-team drills, incident triage. |
 | **Dependency Health & Upgrades** | **Platform Maintainer** | QA / Testing Lead | Dependabot alerts review, package lockfile audits, breaking dependency migration testing. |
 | **Releases, Rollbacks & Deployment**| **Release Manager** | Project Owner | Release tagging, changelog publication, pre-release smoke tests, emergency rollbacks. |
@@ -42,7 +42,7 @@ The following actions have significant operational, financial, or security impac
 | **Customer Pilot Onboarding & Repo Access**| **Project Owner & Security Lead** | Signed Pilot Agreement, data processing addendum, repository scope boundaries verified. |
 | **Production Database Downgrade / Drop** | **Project Owner & DBA Lead** | Full verified database snapshot verified via SHA-256 integrity checksum. |
 | **Production Secret / RSA Key Revocation** | **Security Lead & DevOps Lead** | Staging validation of new key, coordinated zero-downtime rollover playbook executed. |
-| **Modifying MCP Sentinel Forbidden Blocklist**| **Project Owner & Security Lead** | Written security rationale, red-team penetration test of proposed exception. |
+| **Modifying Forbidden Operations Blocklist**| **Project Owner & Security Lead** | Written security rationale, red-team penetration test of proposed exception. |
 | **Gemini Daily Budget Expenditure Increase** | **Project Owner & AI Lead** | Business justification, token audit of preceding 30 days, billing alert thresholds updated. |
 
 ---

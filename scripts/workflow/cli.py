@@ -22,7 +22,7 @@ def main() -> None:
     # Command: run
     run_parser = subparsers.add_parser("run", help="Execute the 10-step multi-agent engineering workflow")
     run_parser.add_argument("--task", required=True, help="Engineering task description")
-    run_parser.add_argument("--target-area", default="backend", help="Target component (backend, frontend, mcp, db, ai, etc.)")
+    run_parser.add_argument("--target-area", default="backend", help="Target component (backend, frontend, policy, db, ai, etc.)")
     run_parser.add_argument("--symbols", nargs="*", default=["AdversarialJudge"], help="Relevant symbol names for Serena to inspect")
     run_parser.add_argument("--libs", nargs="*", default=["fastapi", "pydantic"], help="External libraries for Context7 docs")
     run_parser.add_argument("--simulate-bypass", action="store_true", help="Simulate a security bypass to test rejection gates")

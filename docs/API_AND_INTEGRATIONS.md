@@ -18,8 +18,6 @@ CodeGuard AI enforces four distinct security schemes across its API perimeter:
    - Roles Enforced: `MEMBER`, `REVIEWER`, `ADMIN`
 3. **GitHub Webhook Signature**: Cryptographically verified HMAC-SHA256 signature.
    - Header: `X-Hub-Signature-256: sha256=<hmac_hex>`
-4. **Internal MCP Service Token**: Inter-service authentication between API and MCP server.
-   - Header: `X-MCP-Service-Token: <token>`
 
 ---
 
@@ -106,11 +104,10 @@ CodeGuard AI enforces four distinct security schemes across its API perimeter:
 
 ---
 
-### 3.3 MCP Sentinel Gateway Integration (`:8001`)
-- **Protocol**: JSON-RPC over HTTP.
-- **Port**: 8001.
+### 3.3 Zero-Trust Policy Engine Integration (`app.core.policy`)
+- **Protocol**: Direct In-Process Python Service.
 - **Security Perimeter**:
-  - Requires `X-MCP-Service-Token`.
-  - Unconditionally blocks forbidden actions (`execute_shell`, `eval_code`, `write_filesystem`, `access_secrets`, `modify_git_history`).
-  - Audits 100% of tool calls to the immutable `tool_execution_audits` table.
-- **Failure Behavior**: Prohibited actions throw `PolicyViolationException` (HTTP 403); internal MCP crashes bubble up cleanly to the Celery worker task.
+  - Deterministic Zero-Trust Policy Engine (`apps/api/app/core/policy.py`).
+  - Unconditionally blocks 9 forbidden operations (`merge_pull_request`, `repo_delete`, `execute_shell`, `eval_code`, `write_filesystem`, `access_secrets`, `modify_git_history`, `bypass_auth`, `grant_admin`).
+  - Audits 100% of consequential tool calls to the immutable `tool_execution_audits` table.
+- **Failure Behavior**: Prohibited actions throw `PolicyViolationException` (HTTP 403); rejected policies return deterministic `PolicyDecision(allowed=False, reason=...)` before any GitHub API interaction.

@@ -52,9 +52,6 @@ This document provides a comprehensive audit of all configuration variables in C
 | `MAX_CONTEXT_CHARS` | PRIVATE | `int` | `16000` | `16000` | Maximum character budget per prompt |
 | `MAX_CONTEXT_FILES` | PRIVATE | `int` | `10` | `10` | Maximum files included in diff context |
 | `MAX_CONTEXT_SYMBOLS` | PRIVATE | `int` | `30` | `30` | Maximum AST symbol references included |
-| `MCP_SERVER_URL` | PRIVATE / ENV-SPECIFIC | `str` | `"http://localhost:8001"` | Internal container URL | Internal URL to MCP gateway |
-| `MCP_SERVICE_TOKEN` | SECRET | `str` | `"dev-mcp-service-token"` | Strong Bearer service token | Must not be empty or default in prod |
-| `MCP_CORS_ORIGINS` | PRIVATE / ENV-SPECIFIC | `str` | `"http://localhost:8000"` | Allowed API origins | Comma-separated origin list |
 | `APPROVAL_EXPIRY_MINUTES_DEFAULT`| PRIVATE | `int` | `60` | `60` | Window before human approval expires |
 | `DEV_AUTH_BYPASS` | PRIVATE / ENV-SPECIFIC | `bool` | `True` (dev only) | Must be `False` in prod | Fail-fast validation crashes if `True` in production |
 | `DEV_AUTH_TOKEN` | PRIVATE | `str` | `"codeguard-dev-token"` | Empty in prod | Bypass token for local tests |
@@ -84,8 +81,6 @@ if self.APP_ENV == "production":
         errors.append("LLM_PROVIDER cannot be 'mock' in production.")
     if not self.GEMINI_API_KEY:
         errors.append("GEMINI_API_KEY must be configured in production.")
-    if self.MCP_SERVICE_TOKEN in ("dev-mcp-service-token", ""):
-        errors.append("Production MCP_SERVICE_TOKEN must be securely configured.")
     if "localhost" in self.DATABASE_URL or "codeguard_secret" in self.DATABASE_URL:
         errors.append("Production DATABASE_URL must not use local default credentials or localhost.")
     if errors:

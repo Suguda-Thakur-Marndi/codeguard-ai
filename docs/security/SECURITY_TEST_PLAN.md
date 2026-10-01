@@ -23,8 +23,6 @@ All tests are executable via standard test runners without requiring external in
 - **Primary Test Suites**:
   - `apps/api/tests/test_security_resilience.py` (11 resilience tests)
   - `apps/api/tests/test_security_audit_phase15.py` (38 audit & adversarial tests)
-  - `apps/mcp-server/tests/test_mcp_policy.py` (6 MCP policy tests)
-  - `apps/mcp-server/tests/test_mcp_tools.py` (3 MCP tool schema tests)
   - `verify_phase15.py` (Master 23-gate security certification script)
 
 ---
@@ -83,14 +81,14 @@ All tests are executable via standard test runners without requiring external in
 | **INJ-10**  | Prompt Injection &rarr; MCP | Malicious code instructing agent to call `repo_delete` | PolicyEngine blocks forbidden tool (`DENY`) |
 | **INJ-11**  | Prompt Injection &rarr; Approval | Malicious code instructing agent to auto-approve | Anti-agent self-approval gate blocks action |
 
-### Category 6: MCP Governance & Tool Boundaries (Sections 18, 19, 20, 21)
+### Category 6: Zero-Trust Policy Governance & Action Boundaries (Sections 18, 19, 20, 21)
 | Test ID | Test Case | Payload / Procedure | Expected Result |
 | :--- | :--- | :--- | :--- |
-| **MCP-01**  | Forbidden Operations Blocked | Invocations of `merge_pull_request`, `arbitrary_shell`, `secret_access` | `PolicyDecision.DENY` |
-| **MCP-02**  | Cross-Repository Approval Reuse | Attaching approval for Repo A to submit review on Repo B | `PolicyDecision.DENY` (Repo mismatch) |
-| **MCP-03**  | Cross-Tenant Approval Reuse | Attaching approval for Org A to submit review on Org B | `PolicyDecision.DENY` (Org mismatch) |
-| **MCP-04**  | AI Agent Self-Approval | Attaching approval with `approved_by: "agent-01"` | `PolicyDecision.DENY` (Anti-agent gate) |
-| **MCP-05**  | Tool Schema Parameter Validation | Submitting negative PR number to MCP schema | Pydantic `ValidationError` raised |
+| **POL-01**  | Forbidden Operations Blocked | Invocations of `merge_pull_request`, `arbitrary_shell`, `secret_access` | `PolicyDecision.DENY` |
+| **POL-02**  | Cross-Repository Approval Reuse | Attaching approval for Repo A to submit review on Repo B | `PolicyDecision.DENY` (Repo mismatch) |
+| **POL-03**  | Cross-Tenant Approval Reuse | Attaching approval for Org A to submit review on Org B | `PolicyDecision.DENY` (Org mismatch) |
+| **POL-04**  | AI Agent Self-Approval | Attaching approval with `approved_by: "agent-01"` | `PolicyDecision.DENY` (Anti-agent gate) |
+| **POL-05**  | Action Schema Parameter Validation | Submitting negative PR number to review schema | Pydantic `ValidationError` raised |
 
 ### Category 7: Approval Lifecycle & Race Conditions (Sections 22, 23)
 | Test ID | Test Case | Payload / Procedure | Expected Result |
@@ -126,5 +124,5 @@ All tests are executable via standard test runners without requiring external in
 | **PROP-3**  | Stale approval cannot publish | `test_property_3_...` |
 | **PROP-4**  | Invalid diff line cannot publish | `test_property_4_...` |
 | **PROP-5**  | Malformed LLM output cannot bypass validation | `test_property_5_...` |
-| **PROP-6**  | MCP policy cannot be bypassed by agent | `test_property_6_...` |
+| **PROP-6**  | Security policy cannot be bypassed by agent | `test_property_6_...` |
 | **PROP-7**  | Duplicate events cannot create duplicate publication | `test_property_7_...` |

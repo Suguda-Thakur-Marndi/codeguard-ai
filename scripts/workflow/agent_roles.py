@@ -70,9 +70,9 @@ ROLE_REGISTRY: dict[AgentRole, RoleDefinition] = {
     ),
     AgentRole.MCP: RoleDefinition(
         role=AgentRole.MCP,
-        description="MCP servers, tool schemas, Sentinel policy validation, audit logging, approval integration.",
-        allowed_file_patterns=["apps/mcp-server/*", "apps/api/app/mcp/*"],
-        forbidden_actions=["bypass_sentinel_policy", "auto_execute_dangerous_tool", "skip_sha_check"],
+        description="Tool policy validation, security policies, audit logging, approval integration.",
+        allowed_file_patterns=["apps/api/app/core/policy.py", "apps/api/app/services/policy_service.py"],
+        forbidden_actions=["bypass_policy", "auto_execute_dangerous_tool", "skip_sha_check"],
     ),
     AgentRole.AI_LANGGRAPH: RoleDefinition(
         role=AgentRole.AI_LANGGRAPH,

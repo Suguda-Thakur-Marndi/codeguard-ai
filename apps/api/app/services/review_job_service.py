@@ -558,7 +558,7 @@ class ReviewJobService:
                     extra={"event": "review_job_completed", "extra_fields": {"job_id": job.id}},
                 )
 
-                # 16. Phase 5: MCP Governance & Publication Preparation
+                # 16. Policy Governance & Publication Preparation
                 try:
                     from app.services.publication_service import PublicationService
                     pub_service = PublicationService(self.db)

@@ -1,7 +1,7 @@
 {
   "scenario_id": "AC-029",
   "name": "Worker Restart Recovery",
-  "timestamp": "2026-09-29T14:24:43.181951+00:00",
+  "timestamp": "2026-10-01T19:46:28.516406+00:00",
   "expected": "Task failure captured cleanly in database",
   "actual": "Worker interruption safely captured with FAILED state and clean error log",
   "status": "PASS",

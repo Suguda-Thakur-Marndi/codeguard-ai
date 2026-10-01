@@ -5,7 +5,7 @@ Covers:
 2. Code Intelligence (Symbol boundary preservation, safe failure on invalid files, bounded context retrieval, stale index invalidation)
 3. AI Review (Schema validation, evidence requirement, invalid file/line rejection, bounded execution, failure non-fabrication)
 4. Adversarial Judge (Rejection of unsupported claims, root-cause preserving deduplication, traceable verification)
-5. MCP Governance (Server authority, untrusted agent restriction, tool argument validation, forbidden tool blocking)
+5. Policy & Security Governance (Zero-trust authority, untrusted agent restriction, tool argument validation, forbidden tool blocking)
 6. Approval & Publication (Context binding, stale head SHA rejection, unauthorized approval blocking, duplicate publication block, audit logging)
 """
 
@@ -29,10 +29,14 @@ from app.agents.schemas.finding import (
     FindingStatus,
     ReviewFinding,
 )
+from app.core.policy import (
+    FORBIDDEN_TOOL_ACTIONS,
+    PolicyDecision,
+    PolicyEngine,
+    Principal,
+    PrincipalRole,
+)
 from app.github.publisher import GitHubReviewPublisher
-from app.mcp.auth import Principal, PrincipalRole
-from app.mcp.classification import FORBIDDEN_TOOL_ACTIONS, PolicyDecision
-from app.mcp.policy_engine import PolicyEngine
 from app.models.approval_request import ApprovalStatus
 from app.models.organization import Organization
 from app.models.pull_request import PullRequest
@@ -346,11 +350,11 @@ def test_invariant_judge_rejects_unsupported_findings_despite_high_confidence():
 
 
 # ==============================================================================
-# 5. MCP GOVERNANCE INVARIANTS
+# 5. POLICY & SECURITY GOVERNANCE INVARIANTS
 # ==============================================================================
 
 
-def test_invariant_mcp_forbidden_tools_always_rejected():
+def test_invariant_forbidden_tools_always_rejected():
     """Invariant: All 9 forbidden tool actions are strictly blocked by PolicyEngine."""
     admin_principal = Principal(
         principal_id="admin-01",
@@ -370,7 +374,7 @@ def test_invariant_mcp_forbidden_tools_always_rejected():
         assert result.requires_approval is False
 
 
-def test_invariant_mcp_untrusted_agent_cannot_authorize_consequential_actions():
+def test_invariant_untrusted_agent_cannot_authorize_consequential_actions():
     """Invariant: Untrusted agent principal cannot authorize consequential tools."""
     agent_principal = Principal(
         principal_id="agent-01",

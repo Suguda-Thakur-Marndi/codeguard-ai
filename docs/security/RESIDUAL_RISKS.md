@@ -12,7 +12,7 @@ No security status may claim "100% secure" or hide residual risks.
 - **Risk**: Advanced semantic adversarial jailbreaks (e.g., recursive encoding, multi-lingual token splitting) might bypass raw system prompt framing.
 - **Affected Component**: `apps/api/app/agents/llm/gemini.py`, `apps/api/app/agents/orchestrator/`
 - **Reason Unresolved**: LLM reasoning is fundamentally stochastic and non-deterministic; prompt boundaries alone cannot mathematically prevent all novel jailbreaks.
-- **Current Mitigation**: Strict separation of concerns. AI reasoning is strictly treated as untrusted draft generation. Deterministic post-LLM validation layers (Adversarial Judge 5-Gate filter, Pydantic schema validation, and MCP Sentinel policy engine) independently enforce all security boundaries. Even if an LLM is completely jailbroken, it cannot publish reviews or invoke high-risk tools without valid, human-signed approval records.
+- **Current Mitigation**: Strict separation of concerns. AI reasoning is strictly treated as untrusted draft generation. Deterministic post-LLM validation layers (Adversarial Judge 5-Gate filter, Pydantic schema validation, and deterministic policy engine) independently enforce all security boundaries. Even if an LLM is completely jailbroken, it cannot publish reviews or invoke high-risk tools without valid, human-signed approval records.
 - **Required Future Action**: Integrate an adversarial embedding classifier (e.g., Llama-Guard or NeMo Guardrails) in front of the Gemini prompt ingestion pipeline.
 
 ---

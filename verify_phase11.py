@@ -104,9 +104,8 @@ class Phase11VerificationSuite:
 
         # Check plugin
         plugin_json = os.path.join(_root, ".agents", "plugins", "codeguard-workflow", "plugin.json")
-        mcp_config = os.path.join(_root, ".agents", "plugins", "codeguard-workflow", "mcp_config.json")
         hooks_json = os.path.join(_root, ".agents", "plugins", "codeguard-workflow", "hooks.json")
-        for pfile in [plugin_json, mcp_config, hooks_json]:
+        for pfile in [plugin_json, hooks_json]:
             if not os.path.exists(pfile):
                 errors.append(f"Missing plugin file: {os.path.relpath(pfile, _root)}")
 

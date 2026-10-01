@@ -42,14 +42,14 @@ CodeGuard AI provides automated, adversarial-resistant GitHub Pull Request code 
 |  5. Execution Sandbox               --> Syntactic & behavioral safety validation  |
 +-----------------------------------------------------------------------------------+
         |                                                           |
-        | Calls Tools under Zero-Trust                              | Outbound Inference
+        | Evaluates Policy under Zero-Trust                         | Outbound Inference
         v                                                           v
 +------------------------+                                  +-----------------------+
-|   MCP Sentinel Server  |                                  |   Google Gemini API   |
-|  (:8001, Forbidden BL) |                                  | (Flash / Pro Models)  |
+|  Zero-Trust Policy     |                                  |   Google Gemini API   |
+|  Engine (app.core.pol) |                                  | (Flash / Pro Models)  |
 +-----------+------------+                                  +-----------------------+
             |
-            | Consequential Tools Require Signature
+            | Consequential Actions Require Signature
             v
 +------------------------+       Publishes Review       +---------------------------+
 |  Human Approval Gate   | ---------------------------> |   GitHub PR Inline Review |
@@ -62,7 +62,7 @@ CodeGuard AI provides automated, adversarial-resistant GitHub Pull Request code 
 ## 2. Component Specifications (The 16 Core Subsystems)
 
 ### 2.1 Frontend Dashboard (`apps/web`)
-1. **Responsibility**: Provides operator interface for reviewing AI findings, authorizing consequential MCP tools, inspecting audit logs, and configuring organization review policies.
+1. **Responsibility**: Provides operator interface for reviewing AI findings, authorizing consequential actions, inspecting audit logs, and configuring organization review policies.
 2. **Entry Point**: `apps/web/app/layout.tsx` and `apps/web/app/page.tsx` (Next.js 15 App Router).
 3. **Dependencies**: React 19, Tailwind CSS, Lucide icons, `apps/web/lib/api.ts` typed client.
 4. **Inputs/Outputs**: Ingests user credentials / operator actions; emits REST API calls to `:8000`.
@@ -193,14 +193,14 @@ CodeGuard AI provides automated, adversarial-resistant GitHub Pull Request code 
 
 ---
 
-### 2.13 MCP Sentinel Tool Server (`apps/mcp-server`)
-1. **Responsibility**: Zero-trust Model Context Protocol server exposing strictly typed tools with hardcoded forbidden actions blocklist (`execute_shell`, `eval_code`, etc.) and immutable audit logging.
-2. **Entry Point**: `apps/mcp-server/app/server/main.py`.
-3. **Dependencies**: FastAPI, Pydantic, internal audit repository.
-4. **Inputs/Outputs**: Ingests JSON-RPC tool call requests with service tokens; outputs tool results or policy rejection blocks.
-5. **Failure Handling**: Unconditionally blocks high-risk operations; rejects unauthenticated calls with `403 Forbidden`.
-6. **Testing**: `apps/mcp-server/tests/test_server.py` (9 tests), AC-022.
-7. **Configuration**: `MCP_SERVICE_TOKEN`, `MCP_SERVER_URL` in `Settings`.
+### 2.13 Zero-Trust Deterministic Policy Engine (`app.core.policy`)
+1. **Responsibility**: Deterministic zero-trust policy engine enforcing hardcoded forbidden actions blocklists (9 operations), tool parameter schemas, and immutable audit logging. Operates in-process without MCP network overhead.
+2. **Entry Point**: `apps/api/app/core/policy.py` (`PolicyEngine`).
+3. **Dependencies**: Pydantic, SQLAlchemy audit logging models.
+4. **Inputs/Outputs**: Ingests evaluated action inputs and principal contexts; outputs `PolicyDecision` (allow / deny / approval required).
+5. **Failure Handling**: Unconditionally blocks high-risk operations; enforces human approval checks for consequential actions.
+6. **Testing**: `apps/api/tests/test_security_resilience.py`, `test_security_audit_phase15.py`, AC-022.
+7. **Configuration**: Hardcoded non-negotiable security invariants.
 
 ---
 

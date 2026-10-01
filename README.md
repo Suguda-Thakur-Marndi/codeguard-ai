@@ -1,14 +1,14 @@
 # CodeGuard AI — Agentic GitHub Pull Request Review Platform
 
 > **Version**: `1.0.0` | **Release Stage**: `Release Candidate 1 (RC1) Qualified` | **Operational Status**: `ACCEPTED (Staging & Local Runtime)`  
-> *Deterministic Tree-sitter AST code intelligence, multi-agent LangGraph review engine, 5-gate adversarial verification judge, MCP zero-trust governance, cryptographic human authorization gates, and atomic GitHub publication.*
+> *Deterministic Tree-sitter AST code intelligence, multi-agent LangGraph review engine, 5-gate adversarial verification judge, zero-trust deterministic policy governance, cryptographic human authorization gates, and direct atomic GitHub publication.*
 
 [![Python Version](https://img.shields.io/badge/python-3.11%20%7C%203.12%20%7C%203.13-blue.svg)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.111-009688.svg)](https://fastapi.tiangolo.com/)
 [![Next.js](https://img.shields.io/badge/Next.js-15%20(App%20Router)-black.svg)](https://nextjs.org/)
 [![LangGraph](https://img.shields.io/badge/LangGraph-0.2-orange.svg)](https://langchain-ai.github.io/langgraph/)
 [![Tree-sitter](https://img.shields.io/badge/Tree--sitter-0.24-green.svg)](https://tree-sitter.github.io/)
-[![Unit & Integration Tests](https://img.shields.io/badge/tests-262%20passed%20(100%25)-brightgreen.svg)](#7-running-the-automated-test-suites)
+[![Unit & Integration Tests](https://img.shields.io/badge/tests-253%20passed%20(100%25)-brightgreen.svg)](#7-running-the-automated-test-suites)
 [![SRE Gates](https://img.shields.io/badge/SRE%20Gates-27%2F27%20passed-brightgreen.svg)](#7-running-the-automated-test-suites)
 [![Security Gates](https://img.shields.io/badge/Security%20Gates-23%2F23%20passed-brightgreen.svg)](#7-running-the-automated-test-suites)
 
@@ -26,7 +26,7 @@ Traditional automated code review tools suffer from three fundamental problems:
 **CodeGuard AI solves these challenges by combining:**
 - **Deterministic AST Context Extraction**: Uses Tree-sitter parsers to bound reviews strictly to modified hunks and enclosing functions, constructing a deterministic `ChangedLineIndex`.
 - **5-Gate Adversarial Judge**: A dedicated verification funnel that checks diff boundaries, caller factuality, actionability, severity calibration, and execution sandbox syntax before any finding is admitted.
-- **Zero-Trust MCP Sentinel**: Hardcoded tool blocklists (`execute_shell`, `eval_code`, etc.) and mandatory human operator approval for consequential actions.
+- **Zero-Trust Policy Engine**: Hardcoded tool blocklists (`execute_shell`, `eval_code`, `delete_repo`, etc.) and mandatory human operator approval for consequential actions.
 - **Commit Drift Protection**: Approvals are cryptographically bound to the PR head commit SHA; pushing new commits automatically invalidates stale approvals (`COMMIT_DRIFT`).
 
 ---
@@ -41,10 +41,10 @@ To maintain strict scientific and engineering honesty, CodeGuard AI clearly dist
 | **Code Intelligence** | Language grammars for Go, Rust, Java | **PLANNED** | Scheduled for future milestones |
 | **Multi-Agent Review**| LangGraph StateGraph with Comprehension, Bug, Security, Perf, Test, Contract specialists | **IMPLEMENTED** | `test_orchestrator.py`, `test_agents.py` |
 | **Adversarial Judge** | 5-Gate filter (Diff boundary, Factuality, Actionability, Severity, Sandbox) | **IMPLEMENTED** | `test_judge.py`, AC-008 |
-| **Zero-Trust MCP** | Standalone MCP Sentinel server with forbidden action blocklists & audit logging | **IMPLEMENTED** | `apps/mcp-server/tests/`, AC-022 |
+| **Zero-Trust Policy Engine** | In-process policy engine with forbidden action blocklists & audit logging | **IMPLEMENTED** | `apps/api/app/core/policy.py`, AC-022 |
 | **Governance & Auth** | Cryptographic human approval gate with commit-drift invalidation (`COMMIT_DRIFT`) | **IMPLEMENTED** | `test_approvals.py`, AC-016 |
 | **GitHub Publishing** | Idempotent multi-line PR review comments with automatic secret scrubbing | **IMPLEMENTED** | `test_github_publisher.py`, AC-028 |
-| **Unit & Integration**| 262 automated tests (253 API + 9 MCP server) | **IMPLEMENTED** | `pytest` (262/262 PASS, 100%) |
+| **Unit & Integration**| 253 automated tests across Backend API | **IMPLEMENTED** | `pytest apps/api/tests` (253/253 PASS, 100%) |
 | **Master Security** | 23 master security verification gates (Auth, RBAC, tenant isolation, injections) | **IMPLEMENTED** | `verify_phase15.py` (23/23 PASS) |
 | **Operational SRE** | 27 operational release gates (Clean build, Pydantic, Alembic 001-006, Redis fallback)| **IMPLEMENTED** | `verify_phase16.py` (27/27 PASS) |
 | **Acceptance Suite** | 30 end-to-end PR review scenarios + 6 specialized system audits | **IMPLEMENTED** | `scripts/run_acceptance_suite.py` (36/36 PASS) |
@@ -87,13 +87,13 @@ To maintain strict scientific and engineering honesty, CodeGuard AI clearly dist
 │  - Context Token Ranker     │             │    - 5-Gate Adversarial Judge    │
 └─────────────────────────────┘             └─────────────────┬────────────────┘
                                                               │
-                                       Calls Tools over MCP   │
+                                       Direct Service Call    │
                                                               ▼
                                             ┌──────────────────────────────────┐
-                                            │      apps/mcp-server/ (:8001)    │
-                                            │      - Zero-Trust Sentinel       │
-                                            │      - Forbidden Tools Blocklist │
-                                            │      - Append-Only Audit Log     │
+                                            │      apps/api/app/core/policy.py │
+                                            │      - Zero-Trust Policy Engine  │
+                                            │      - Forbidden Actions (9 ops) │
+                                            │      - Immutable Audit Logging   │
                                             └─────────────────┬────────────────┘
                                                               │
                                      Consequential Tools Gate │
@@ -121,7 +121,7 @@ To maintain strict scientific and engineering honesty, CodeGuard AI clearly dist
 - **Relational Database**: PostgreSQL 16, SQLAlchemy 2.0 (ORM), Alembic (Migrations 001–006).
 - **Code Intelligence**: Tree-sitter 0.24 (Python, JavaScript, TypeScript grammars), `unidiff`.
 - **AI Agent Orchestration**: LangGraph 0.2, Google GenAI SDK (`gemini-2.5-flash`, `gemini-2.5-pro`).
-- **Security Gateway**: Model Context Protocol (MCP) Sentinel tool server, `pyjwt[crypto]`, `cryptography`.
+- **Security Governance**: Zero-Trust Policy Engine (`app.core.policy`), `pyjwt[crypto]`, `cryptography`.
 - **Frontend Dashboard**: Next.js 15 (App Router), React 19, Tailwind CSS, Lucide Icons.
 - **Testing & Quality**: Pytest 8.2, Ruff 0.4.5 (Linter/Formatter), Pyright / TypeScript Compiler (`tsc`).
 
@@ -146,7 +146,7 @@ python -m venv .venv
 # On Linux/macOS: source .venv/bin/activate
 
 # 3. Install Python monorepo packages in editable mode
-pip install -e "./packages/code-intelligence" -e "./apps/api[dev]" -e "./apps/mcp-server"
+pip install -e "./packages/code-intelligence" -e "./apps/api[dev]"
 
 # 4. Install Next.js frontend dependencies
 cd apps/web && npm install && cd ../..
@@ -171,16 +171,11 @@ Open separate terminal windows with your virtual environment active:
    uvicorn app.main:app --app-dir apps/api --port 8000 --reload
    ```
    *Health probe: `curl http://localhost:8000/api/v1/live`*
-2. **MCP Sentinel Server (`:8001`)**:
-   ```bash
-   python -m uvicorn app.server.main:app --app-dir apps/mcp-server --port 8001 --reload
-   ```
-   *Health probe: `curl http://localhost:8001/health`*
-3. **Celery Worker (Asynchronous mode)**:
+2. **Celery Worker (Asynchronous mode)**:
    ```bash
    celery -A app.workers.celery_app worker --pool=solo -l info
    ```
-4. **Next.js Frontend Dashboard (`:3000`)**:
+3. **Next.js Frontend Dashboard (`:3000`)**:
    ```bash
    cd apps/web && npm run dev
    ```
@@ -189,20 +184,18 @@ Open separate terminal windows with your virtual environment active:
 
 ## 7. Running the Automated Test Suites
 
-CodeGuard AI includes 262 automated unit/integration tests, 27 operational release gates, 23 master security gates, and 36 master acceptance scenarios:
+CodeGuard AI includes 253 automated unit/integration tests, 27 operational release gates, 23 master security gates, and 36 master acceptance scenarios:
 
 ```bash
 # 1. Run all Backend API Unit & Integration tests (253 tests)
 pytest apps/api/tests -q
 
-# 2. Run MCP Sentinel Server tests (9 tests)
-pytest apps/mcp-server/tests -q
-
-# 3. Run Ruff code style & syntax linter (0 errors)
+# 2. Run Ruff code style & syntax linter (0 errors)
 ruff check .
 
-# 4. Run Frontend TypeScript type checker (0 errors)
+# 3. Run Frontend TypeScript type checker (0 errors)
 cd apps/web && npm run lint && cd ../..
+```
 
 # 5. Run Master SRE Operational Verification Suite (27 gates)
 python verify_phase16.py
@@ -231,7 +224,7 @@ Technical documentation is organized by domain across the repository:
 ### Architecture & System Design
 - [`docs/architecture/SYSTEM_OVERVIEW.md`](file:///c:/Users/sugud/OneDrive/Documents/codeguard-ai/docs/architecture/SYSTEM_OVERVIEW.md) — Multi-agent graph, state transitions, and Tree-sitter pipeline.
 - [`docs/architecture/DATA_MODEL.md`](file:///c:/Users/sugud/OneDrive/Documents/codeguard-ai/docs/architecture/DATA_MODEL.md) — Relational PostgreSQL schema (27 tables, constraints, indexes).
-- [`docs/architecture/AGENT_AND_MCP_FLOW.md`](file:///c:/Users/sugud/OneDrive/Documents/codeguard-ai/docs/architecture/AGENT_AND_MCP_FLOW.md) — Detailed agent coordination and MCP Sentinel invocation contracts.
+- [`docs/architecture/AGENT_AND_REVIEW_FLOW.md`](file:///c:/Users/sugud/OneDrive/Documents/codeguard-ai/docs/architecture/AGENT_AND_REVIEW_FLOW.md) — Detailed agent coordination, policy engine, and direct review publication contracts.
 - [`docs/operations/ARCHITECTURE.md`](file:///c:/Users/sugud/OneDrive/Documents/codeguard-ai/docs/operations/ARCHITECTURE.md) — Production operations topology and service dependencies.
 
 ### Security, Governance & Risk

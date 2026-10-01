@@ -101,9 +101,7 @@ class Settings(BaseSettings):
     JUDGE_MODEL_TIER: Literal["fast", "reasoning"] = "reasoning"
     JUDGE_MAX_RETRIES: int = 2
 
-    # Phase 5: MCP Gateway & Human Approval Configuration
-    MCP_SERVER_URL: str = "http://localhost:8001"
-    MCP_SERVICE_TOKEN: str = "dev-mcp-service-token"
+    # Human Approval Configuration
     APPROVAL_EXPIRY_MINUTES_DEFAULT: int = 60
 
     # Security & Auth
@@ -125,7 +123,7 @@ class Settings(BaseSettings):
             return [str(i) for i in v]
         return ["http://localhost:3000"]
 
-    @field_validator("BACKEND_URL", "FRONTEND_URL", "MCP_SERVER_URL")
+    @field_validator("BACKEND_URL", "FRONTEND_URL")
     @classmethod
     def validate_service_urls(cls, v: str) -> str:
         if not v:
@@ -187,8 +185,6 @@ class Settings(BaseSettings):
                 errors.append("LLM_PROVIDER cannot be 'mock' in production.")
             if not self.GEMINI_API_KEY:
                 errors.append("GEMINI_API_KEY must be configured in production.")
-            if self.MCP_SERVICE_TOKEN in ("dev-mcp-service-token", ""):
-                errors.append("Production MCP_SERVICE_TOKEN must be securely configured.")
             if "localhost" in self.DATABASE_URL or "codeguard_secret" in self.DATABASE_URL:
                 errors.append("Production DATABASE_URL must not use local default credentials or localhost.")
             if errors:

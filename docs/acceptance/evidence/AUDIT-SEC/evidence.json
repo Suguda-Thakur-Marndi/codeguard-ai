@@ -1,12 +1,12 @@
 {
   "scenario_id": "AUDIT-SEC",
   "name": "Zero-Secret Audit",
-  "timestamp": "2026-09-29T14:24:45.183771+00:00",
+  "timestamp": "2026-10-01T19:46:30.762682+00:00",
   "expected": "Scan source code, configs, and history for secrets",
-  "actual": "Scanned 206 source files; 0 secrets discovered",
+  "actual": "Scanned 178 source files; 0 secrets discovered",
   "status": "PASS",
   "telemetry": {
-    "scanned_files": 206,
+    "scanned_files": 178,
     "violations": []
   }
 }

@@ -29,14 +29,14 @@ CodeGuard AI enforces a multi-tier testing pyramid to guarantee that no hallucin
 ## 2. Test Execution Commands & Verified Outcomes
 
 ### 2.1 Level 1: Unit & Integration Test Suites
-Executes all unit tests across the API backend and standalone MCP Sentinel tool server.
+Executes all unit and integration tests across the API backend.
 
 ```bash
-# Run all 244 backend and MCP tests
-.\.venv\Scripts\python.exe -m pytest apps/api/tests apps/mcp-server/tests -q
+# Run all 253 backend API tests
+.\.venv\Scripts\python.exe -m pytest apps/api/tests -q
 ```
-- **Target Subsystems**: FastAPI routes, Pydantic schemas, Celery tasks, Tree-sitter parsers, Context ranker, Adversarial Judge, MCP Sentinel policies, and Database repositories.
-- **Verified Outcome**: `244 passed in 23.4s` (`100% PASS, 0 FAIL`).
+- **Target Subsystems**: FastAPI routes, Pydantic schemas, Celery tasks, Tree-sitter parsers, Context ranker, Adversarial Judge, Zero-Trust Policy Engine, and Database repositories.
+- **Verified Outcome**: `253 passed in 18.5s` (`100% PASS, 0 FAIL`).
 
 ---
 

@@ -1,4 +1,4 @@
-"""Tool Execution Audit ORM model for immutable MCP activity tracking."""
+"""Tool Execution Audit ORM model for immutable tool & action activity tracking."""
 
 from datetime import UTC, datetime
 from typing import Any
@@ -10,7 +10,7 @@ from app.db.base import Base, UUIDPrimaryKeyMixin
 
 
 class ToolExecutionAudit(Base, UUIDPrimaryKeyMixin):
-    """Append-only audit record for all MCP tool executions and policy decisions."""
+    """Append-only audit record for all tool executions and policy decisions."""
 
     __tablename__ = "tool_execution_audit"
 

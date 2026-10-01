@@ -28,7 +28,6 @@ All CodeGuard AI containers run as unprivileged, non-root system users to elimin
 |---|---|---|---|---|---|
 | `codeguard-api-prod` | `python:3.12-slim` | 1000:1000 | `codeguard:codeguard` | Read-only app mount | `/tmp` (ephemeral) |
 | `codeguard-worker-prod`| `python:3.12-slim` | 1000:1000 | `codeguard:codeguard` | Read-only app mount | `/tmp` (ephemeral) |
-| `codeguard-mcp-prod` | `python:3.11-slim` | 1001:1001 | `mcpuser:mcpuser` | Read-only app mount | `/tmp` |
 | `codeguard-web-prod` | `node:22-alpine` | 1001:1001 | `nextjs:nodejs` | Standalone bundle | `/app/.next/cache` |
 | `codeguard-postgres-prod`| `postgres:16-alpine` | 70:70 | `postgres:postgres` | Named volume | `/var/lib/postgresql/data` |
 | `codeguard-redis-prod` | `redis:7-alpine` | 999:999 | `redis:redis` | Named volume | `/data` |
@@ -87,9 +86,9 @@ docker compose -f docker-compose.prod.yml run --rm api alembic upgrade head
 ```
 
 ### Step 6: Launch Application Services
-Launch API, Worker, MCP Server, and Web Dashboard:
+Launch API, Worker, and Web Dashboard:
 ```bash
-docker compose -f docker-compose.prod.yml up -d mcp-server api worker web
+docker compose -f docker-compose.prod.yml up -d api worker web
 ```
 
 ### Step 7: Verify Service Health & Readiness
@@ -99,10 +98,7 @@ Execute health probes against all running services:
 curl -sSf http://localhost:8000/api/v1/live | jq .
 curl -sSf http://localhost:8000/api/v1/ready | jq .
 
-# 2. MCP Server Liveness
-curl -sSf http://localhost:8001/live | jq .
-
-# 3. Web Dashboard
+# 2. Web Dashboard
 curl -sSf -I http://localhost:3000/ | grep "HTTP/1.1 200 OK"
 ```
 
@@ -161,7 +157,7 @@ When updating or restarting services:
 docker compose -f docker-compose.prod.yml stop -t 30 worker
 
 # Gracefully stop web & api
-docker compose -f docker-compose.prod.yml stop -t 15 web api mcp-server
+docker compose -f docker-compose.prod.yml stop -t 15 web api
 
 # Shutdown remaining backing infrastructure
 docker compose -f docker-compose.prod.yml down

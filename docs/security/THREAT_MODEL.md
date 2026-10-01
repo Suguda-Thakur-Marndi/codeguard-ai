@@ -125,15 +125,15 @@ CodeGuard AI operates across five explicit trust boundaries. Each boundary defin
 
 ---
 
-### Trust Boundary 4: Agent &rarr; MCP Client &rarr; Policy Engine &rarr; Approval &rarr; GitHub
+### Trust Boundary 4: PublicationService &rarr; PolicyEngine &rarr; Approval &rarr; GitHub
 ```
 [Agent / Worker]
-       │ Tool Request (submit_review)
+       │ Review Output (Findings)
        ▼
-[MCP Client Gateway]
-       │ Service Authentication (Bearer Token)
+[PublicationService]
+       │ Action Request (submit_review)
        ▼
-[MCP Server: PolicyEngine]
+[PolicyEngine (In-Process)]
        ├── 1. Forbidden Operations Check (merge, delete, shell -> DENY)
        ├── 2. Risk Classification (READ_ONLY, LOW, CONSEQUENTIAL, HIGH)
        ├── 3. Organization Policy Evaluation
@@ -147,8 +147,8 @@ CodeGuard AI operates across five explicit trust boundaries. Each boundary defin
 ```
 
 - **Trusted Input**: Human approval records in PostgreSQL (`status == "APPROVED"`), verified head commit SHA.
-- **Untrusted Input**: Agent tool invocations, candidate comment texts, suggested diff lines.
-- **Authentication**: Shared `MCP_SERVICE_TOKEN` between backend and MCP server.
+- **Untrusted Input**: Agent findings, candidate comment texts, suggested diff lines.
+- **Authentication**: In-process method calls with typed `Principal` roles.
 - **Authorization**: Deterministic `PolicyEngine` evaluating principal role, organization policy, and attached approval credentials.
 - **Validation**:
   - `PolicyEngine` verifies approval status, expiration (`now < expires_at`), anti-self-approval (`not is_ai_agent`), head commit SHA binding, repository binding, and tenant organization binding.
@@ -193,7 +193,7 @@ CodeGuard AI explicitly defenses against seven distinct threat actor profiles:
 | **Actor A: Malicious PR Author** | External or internal contributor submitting hostile code | Controls PR diff, commit messages, comments, variable/function names, README | Prompt injection, prompt leakage, tool invocation | Data delimiters in prompts, deterministic PolicyEngine, Adversarial Judge Gate 1 & 2 |
 | **Actor B: Unauthorized Authenticated User** | Valid user with MEMBER role attempting privilege escalation | Valid JWT credentials, valid session | Horizontal/vertical escalation, modifying policies, approving reviews | Server-side RBAC, strict tenant filtering on all repository queries |
 | **Actor C: Compromised Reviewer** | Legit reviewer account compromised by adversary | REVIEWER role permissions | Stale approvals, approving unauthorized actions, cross-tenant approvals | Anti-stale SHA verification, cross-tenant approval rejection, immutable audit logging |
-| **Actor D: Malicious MCP Caller** | Compromised microservice or internal agent caller | Access to internal MCP endpoints | Dangerous tools (`repo_delete`, `arbitrary_shell`, `merge_pull_request`) | PolicyEngine classification, hardcoded forbidden tools blocklist |
+| **Actor D: Malicious Internal Caller** | Compromised microservice or internal caller | Access to internal services | Dangerous operations (`repo_delete`, `arbitrary_shell`, `merge_pull_request`) | PolicyEngine classification, hardcoded forbidden tools blocklist |
 | **Actor E: Compromised Integration** | Malicious or spoofed external GitHub delivery | Can send forged webhooks or modified payloads | Duplicate reviews, triggering CI exhaustion, spamming reviews | HMAC-SHA256 constant-time verification, delivery deduplication, active job idempotency |
 | **Actor F: Hostile Test / Sandbox Payload** | PR containing fork bombs, diskfillers, or escape exploits | Executes inside test verification sandbox | Host filesystem escape, network lateral movement, host container control | `network_mode="none"`, read-only mounts, `cap_drop=["ALL"]`, PID limit 64, 30s timeout |
 | **Actor G: Prompt Injection Attacker** | Direct & Indirect prompt injection crafter | Crafts adversarial payloads in imported modules, comments, descriptions | Hijacking agent instructions, exfiltrating secrets, bypassing human approval | Model is untrusted; PolicyEngine & ApprovalService operate completely outside LLM boundary |
@@ -206,7 +206,7 @@ CodeGuard AI explicitly defenses against seven distinct threat actor profiles:
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | **GitHub App Private Key** | CRITICAL | Secret Manager / Env | Backend App initialization | In-flight / Env variable | Active lifecycle | System Worker | Never committed; redacted from logs |
 | **GitHub Webhook Secret** | CRITICAL | Secret Manager / Env | Webhook HMAC verification | In-flight / Env variable | Active lifecycle | API Gateway | Constant-time HMAC comparison |
-| **Gemini API Key** | HIGH | Secret Manager / Env | AI Provider initialization | In-flight / Env variable | Active lifecycle | AI Agent | Never passed to client or MCP |
+| **Gemini API Key** | HIGH | Secret Manager / Env | AI Provider initialization | In-flight / Env variable | Active lifecycle | AI Agent | Never passed to client or external services |
 | **JWT Secret Key** | HIGH | Secret Manager / Env | Session token generation | In-flight / Env variable | Active lifecycle | Auth Service | Min 32 bytes; validated at startup |
 | **Database Credentials** | CRITICAL | Secret Manager / Env | SQLAlchemy connection pool | In-flight / Env variable | Active lifecycle | DB Engine | Internal network only; non-root user |
 | **Source Code & ASTs** | HIGH | Local disk / PostgreSQL | Code Intelligence Engine | Isolated DB tables / Vol | PR review lifetime | Tenant Members | Tenant-scoped database queries |

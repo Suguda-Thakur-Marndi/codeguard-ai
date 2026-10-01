@@ -5,7 +5,7 @@ Verifies:
 - Unauthorized repository & cross-tenant access controls
 - Expired & stale SHA human approval rejections
 - Anti-forgery & AI agent self-approval prevention
-- Forbidden MCP tools & operations boundary
+- Forbidden tools & operations boundary
 - Malformed tool argument validation
 - Prompt injection & malicious repository content defense
 - Sandbox dangerous command & shell injection blocking
@@ -25,11 +25,16 @@ from sqlalchemy.orm import Session
 from app.agents.prompts.registry import PromptRegistry
 from app.agents.validation.sandbox import ExecutionSandbox
 from app.core.config import settings
+from app.core.policy import (
+    FORBIDDEN_OPERATIONS,
+    GetPullRequestInput,
+    PolicyDecision,
+    PolicyEngine,
+    Principal,
+    PrincipalRole,
+    SubmitReviewInput,
+)
 from app.github.publisher import sanitize_secrets
-from app.mcp.auth import Principal, PrincipalRole
-from app.mcp.classification import FORBIDDEN_OPERATIONS
-from app.mcp.policy_engine import PolicyDecision, PolicyEngine
-from app.mcp.schemas import GetPullRequestInput, SubmitReviewInput
 from app.models.organization import Organization
 from app.models.pull_request import PullRequest
 from app.models.repository import Repository
@@ -245,8 +250,8 @@ def test_ai_agent_self_approval_blocked(db_session: Session, security_org_repo: 
         )
 
 
-def test_forbidden_mcp_tools_strictly_blocked() -> None:
-    """Privileged and dangerous operations must be blocked by the MCP PolicyEngine."""
+def test_forbidden_tools_strictly_blocked() -> None:
+    """Privileged and dangerous operations must be blocked by the PolicyEngine."""
     for tool_name in ["merge_pull_request", "branch_delete", "repo_delete", "arbitrary_shell", "secret_access"]:
         assert tool_name in FORBIDDEN_OPERATIONS
         principal = Principal(
@@ -265,8 +270,8 @@ def test_forbidden_mcp_tools_strictly_blocked() -> None:
         assert "forbidden" in decision.reason.lower()
 
 
-def test_malformed_mcp_parameters_rejected() -> None:
-    """MCP parameter schemas must strictly reject out-of-range, negative, and invalid values."""
+def test_malformed_tool_parameters_rejected() -> None:
+    """Parameter schemas must strictly reject out-of-range, negative, and invalid values."""
     with pytest.raises(ValidationError):
         GetPullRequestInput.model_validate({"repository_id": "r1", "pull_request_number": -10})
 

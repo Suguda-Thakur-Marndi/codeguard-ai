@@ -51,9 +51,9 @@ python -m pip install --upgrade pip
 ```
 
 ### Step 3: Install Python Monorepo Packages in Editable Mode
-Install the code intelligence package, API with development dependencies, and MCP server:
+Install the code intelligence package and API with development dependencies:
 ```bash
-pip install -e "./packages/code-intelligence" -e "./apps/api[dev]" -e "./apps/mcp-server"
+pip install -e "./packages/code-intelligence" -e "./apps/api[dev]"
 ```
 
 Verify that all packages are installed cleanly without dependency conflicts:
@@ -92,7 +92,6 @@ cp .env.example .env
 | **`FRONTEND_URL`** | Yes | All | `http://localhost:3000` | Fully qualified frontend dashboard URL |
 | **`DATABASE_URL`** | Yes | All | `sqlite:///./local.db` *(or `postgresql://user:pass@localhost:5432/codeguard`)* | Database connection URI |
 | **`REDIS_URL`** | Yes | All | `redis://localhost:6379/0` | Redis task queue and cache broker |
-| **`MCP_SERVER_URL`** | Yes | All | `http://localhost:8001` | Zero-trust MCP Sentinel tool gateway |
 | **`SECRET_KEY`** | Yes | All | `dev-secret-key-change-in-production-min-32-chars` | JWT cryptographic signing key |
 | **`DEV_AUTH_BYPASS`** | No | Dev Only | `true` *(Strictly rejected if `APP_ENV=production`)* | Allows bypass of JWT auth in local development |
 | **`CELERY_TASK_ALWAYS_EAGER`** | No | Dev/Test | `true` *(Set to `false` when running Celery worker daemon)* | Executes tasks synchronously inline |
@@ -103,7 +102,6 @@ cp .env.example .env
 | **`GITHUB_APP_ID`** | Conditional | Prod/Staging | `12345` | GitHub App numerical ID |
 | **`GITHUB_PRIVATE_KEY`** | Conditional | Prod/Staging | `""` *(PEM-encoded RSA key)* | Required for live GitHub API authentication |
 | **`GITHUB_WEBHOOK_SECRET`** | Conditional | Prod/Staging | `dev-webhook-secret-token` | Secret for HMAC-SHA256 signature verification |
-| **`MCP_SERVICE_TOKEN`** | Yes | All | `dev-mcp-service-token` | Internal service token between API and MCP server |
 
 ---
 
@@ -137,19 +135,13 @@ To run the complete system locally for development, open separate terminal windo
 - **Readiness Probe**: `curl http://localhost:8000/api/v1/ready` $\rightarrow$ `{"status": "ok", "database": true}`
 - **Swagger Documentation**: Open `http://localhost:8000/docs` in your browser.
 
-### Terminal 2: Standalone MCP Sentinel Server (`:8001`)
-```powershell
-.\.venv\Scripts\python.exe -m uvicorn app.server.main:app --app-dir apps/mcp-server --reload --port 8001
-```
-- **Health Check**: `curl http://localhost:8001/health` $\rightarrow$ `{"status": "healthy"}`
-
-### Terminal 3: Celery Background Review Worker (When not in eager mode)
+### Terminal 2: Celery Background Review Worker (When not in eager mode)
 ```powershell
 .\.venv\Scripts\celery.exe -A app.workers.celery_app worker --loglevel=info --pool=solo
 ```
 *(On Linux/macOS, omit `--pool=solo`)*.
 
-### Terminal 4: Next.js Frontend Dashboard (`:3000`)
+### Terminal 3: Next.js Frontend Dashboard (`:3000`)
 ```bash
 cd apps/web
 npm run dev
@@ -163,8 +155,8 @@ npm run dev
 Run the complete automated test suite to ensure your local environment is 100% operational:
 
 ```powershell
-# 1. Run all Pytest unit & integration tests (244 tests)
-.\.venv\Scripts\python.exe -m pytest apps/api/tests apps/mcp-server/tests -q
+# 1. Run all Pytest backend unit & integration tests (253 tests)
+.\.venv\Scripts\python.exe -m pytest apps/api/tests -q
 
 # 2. Run Ruff linter and static code check
 .\.venv\Scripts\ruff.exe check .
@@ -182,7 +174,7 @@ Run the complete automated test suite to ensure your local environment is 100% o
 
 ### Issue 1: `ModuleNotFoundError: No module named 'tree_sitter'`
 - **Cause**: Packages were not installed in editable mode within the active virtual environment.
-- **Solution**: Run `pip install -e "./packages/code-intelligence" -e "./apps/api[dev]" -e "./apps/mcp-server"`.
+- **Solution**: Run `pip install -e "./packages/code-intelligence" -e "./apps/api[dev]"`.
 
 ### Issue 2: `ValueError: DEV_AUTH_BYPASS cannot be True in production`
 - **Cause**: `.env` contains `APP_ENV=production` while `DEV_AUTH_BYPASS=true`.

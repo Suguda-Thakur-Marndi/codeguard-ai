@@ -67,9 +67,9 @@ This document defines the alerting thresholds, severity matrix, trigger conditio
   2. Check GitHub status at https://www.githubstatus.com.
   3. Verify GitHub App installation token has not expired or lost repository permissions.
 
-### Alert: `MCP_POLICY_DENIAL_SPIKE`
+### Alert: `POLICY_DENIAL_SPIKE`
 - **Severity**: P2 — HIGH
-- **Trigger**: More than 10 tool authorization denials in 5 minutes.
+- **Trigger**: More than 10 policy action authorization denials in 5 minutes.
 - **Impact**: Possible credential tampering, unauthorized agent escalation, or misconfigured token.
 - **Remediation**:
   1. Query `tool_execution_audits` for `authorization_decision='DENY'`.

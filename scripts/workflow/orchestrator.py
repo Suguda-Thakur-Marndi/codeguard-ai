@@ -57,7 +57,7 @@ class WorkflowOrchestrator:
 
     def _select_specialist(self, task_lower: str, target_area: str) -> AgentRole:
         """Dynamically pick the appropriate specialized agent based on task domain."""
-        if any(w in task_lower or w in target_area.lower() for w in ["mcp", "sentinel", "tool", "approval"]):
+        if any(w in task_lower or w in target_area.lower() for w in ["policy", "sentinel", "tool", "approval"]):
             return AgentRole.MCP
         elif any(w in task_lower or w in target_area.lower() for w in ["database", "migration", "alembic", "postgres", "sql"]):
             return AgentRole.DATABASE
@@ -374,10 +374,10 @@ class WorkflowOrchestrator:
 
 if __name__ == "__main__":
     orch = WorkflowOrchestrator()
-    print("Executing Sample 10-Step Workflow: 'Fix MCP approval validation'...")
+    print("Executing Sample 10-Step Workflow: 'Fix policy approval validation'...")
     res = orch.execute_task(
-        task_description="Fix MCP approval validation and commit-drift checking",
-        target_area="mcp",
+        task_description="Fix policy approval validation and commit-drift checking",
+        target_area="policy",
         relevant_symbols=["AdversarialJudge", "ApprovalService"],
         external_libraries=["fastapi", "pydantic"],
     )

@@ -52,13 +52,13 @@ from app.agents.schemas.finding import (  # noqa: E402
 )
 from app.core.exceptions import GitHubAPIError  # noqa: E402
 from app.core.logging import redact_sensitive_data  # noqa: E402
-from app.github.publisher import GitHubReviewPublisher  # noqa: E402
-from app.main import app as fastapi_app  # noqa: E402
-from app.mcp.classification import (  # noqa: E402
+from app.core.policy import (  # noqa: E402
     FORBIDDEN_TOOL_ACTIONS,
     TOOL_RISK_MAP,
     ToolRiskLevel,
 )
+from app.github.publisher import GitHubReviewPublisher  # noqa: E402
+from app.main import app as fastapi_app  # noqa: E402
 from app.models.approval_request import ApprovalStatus  # noqa: E402
 from app.models.github_publication import PublicationStatus  # noqa: E402
 from app.models.organization import Organization  # noqa: E402
@@ -680,14 +680,14 @@ diff --git a/src/util.py b/src/util.py
         )
 
     def run_ac_022(self) -> None:
-        """AC-022: MCP unauthorized / forbidden tool execution blocked."""
+        """AC-022: Policy unauthorized / forbidden tool execution blocked."""
         forbidden = "execute_shell"
         is_blocked = forbidden in FORBIDDEN_TOOL_ACTIONS or "arbitrary_shell" in FORBIDDEN_TOOL_ACTIONS
         actual = f"Sentinel policy strictly blocked '{forbidden}' from execution"
 
         self.record_evidence(
             "AC-022",
-            "MCP Unauthorized Tool",
+            "Policy Unauthorized Tool",
             "Forbidden tools strictly blocked by Sentinel",
             actual,
             "PASS" if is_blocked else "FAIL",
@@ -695,7 +695,7 @@ diff --git a/src/util.py b/src/util.py
         )
 
     def run_ac_023(self) -> None:
-        """AC-023: MCP approval-required operation routing."""
+        """AC-023: Policy approval-required operation routing."""
         action = "submit_review"
         risk = TOOL_RISK_MAP.get(action)
         risk_value = risk.value if risk else "UNKNOWN"
@@ -704,7 +704,7 @@ diff --git a/src/util.py b/src/util.py
 
         self.record_evidence(
             "AC-023",
-            "MCP Approval Operation",
+            "Policy Approval Operation",
             "Consequential tools routed to approval gate",
             actual,
             "PASS" if is_approval_req else "FAIL",
@@ -1106,7 +1106,7 @@ diff --git a/src/util.py b/src/util.py
             {"step": "T5", "event": "specialists_executed", "duration_ms": 45.0, "timestamp": datetime.now(UTC).isoformat()},
             {"step": "T6", "event": "judge_verified", "duration_ms": 18.4, "timestamp": datetime.now(UTC).isoformat()},
             {"step": "T7", "event": "validation_completed", "duration_ms": 9.1, "timestamp": datetime.now(UTC).isoformat()},
-            {"step": "T8", "event": "mcp_governance_passed", "duration_ms": 3.2, "timestamp": datetime.now(UTC).isoformat()},
+            {"step": "T8", "event": "policy_governance_passed", "duration_ms": 3.2, "timestamp": datetime.now(UTC).isoformat()},
             {"step": "T9", "event": "human_approved", "duration_ms": 1.0, "timestamp": datetime.now(UTC).isoformat()},
             {"step": "T10", "event": "github_published", "duration_ms": 22.0, "timestamp": datetime.now(UTC).isoformat()},
         ]

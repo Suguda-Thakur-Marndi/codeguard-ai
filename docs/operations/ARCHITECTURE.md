@@ -6,7 +6,7 @@ This document details the production operational architecture, service topologie
 
 ## 1. System Overview & Component Topology
 
-CodeGuard AI is structured as a resilient, modular multi-service platform designed to provide automated, adversarial-resistant GitHub Pull Request code reviews under strict human-in-the-loop and MCP zero-trust governance.
+CodeGuard AI is structured as a resilient, modular multi-service platform designed to provide automated, adversarial-resistant GitHub Pull Request code reviews under strict human-in-the-loop and zero-trust policy governance.
 
 ```
                                   +-----------------------+
@@ -33,19 +33,19 @@ CodeGuard AI is structured as a resilient, modular multi-service platform design
 |                                                                           |         |
 |                     +-----------------------------------------------------+         |
 |                     |                                                               |
-|                     v                                 v                             v
-|         +-----------------------+         +-----------------------+     +-----------+-----------+
-|         |     Redis 7 Cache     |         |     PostgreSQL 16     |     |      MCP Server       |
-|         |     & Task Broker     |         |    Relational Store   |     |    (Port 8001 / Zero  |
-|         |      (Port 6379)      |         |      (Port 5432)      |     |     Trust Gateway)    |
-|         +-----------+-----------+         +-----------+-----------+     +-----------+-----------+
-|                     |                                 ^                             ^
+|                     v                                 v                             |
+|         +-----------------------+         +-----------------------+                 |
+|         |     Redis 7 Cache     |         |     PostgreSQL 16     |                 |
+|         |     & Task Broker     |         |    Relational Store   |                 |
+|         |      (Port 6379)      |         |      (Port 5432)      |                 |
+|         +-----------+-----------+         +-----------+-----------+                 |
+|                     |                                 ^                             |
 |                     v                                 |                             |
 |         +-----------------------+                     |                             |
-|         |     Celery Worker     +---------------------+-----------------------------+
-|         | (Multi-Agent Pipeline)|
-|         +-----------+-----------+
-|                     |
+|         |     Celery Worker     +---------------------+                             |
+|         | (Multi-Agent Pipeline)|                                                   |
+|         +-----------+-----------+                                                   |
+|                     |                                                               |
 +---------------------|---------------------------------------------------------------+
                       |
                       v Outbound HTTPS
@@ -63,7 +63,6 @@ CodeGuard AI is structured as a resilient, modular multi-service platform design
 |---|---|---|---|---|---|
 | **api** | Python 3.12 (`python:3.12-slim`) | `8000/tcp` | `uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 4` | `/api/v1/health`<br>`/api/v1/live`<br>`/api/v1/ready` | Webhook ingestion, REST API, JWT auth, approval workflows, reporting. |
 | **worker** | Python 3.12 (`python:3.12-slim`) | None (Internal) | `celery -A app.workers.celery_app worker --loglevel=info --concurrency=4` | Redis Celery ping | Asynchronous review orchestration, Tree-sitter AST parsing, LangGraph multi-agent execution, Adversarial Judge verification. |
-| **mcp-server** | Python 3.11 (`python:3.11-slim`) | `8001/tcp` | `uvicorn app.server.main:app --host 0.0.0.0 --port 8001` | `/health`<br>`/live`<br>`/ready` | Zero-trust Model Context Protocol tool execution gateway with Sentinel Policy Engine. |
 | **web** | Node.js 22 (`node:22-alpine`) | `3000/tcp` | `node server.js` | HTTP GET `/` (200 OK) | Next.js 15 reactive operator dashboard: approvals, audit logs, policies, repo management. |
 | **postgres** | PostgreSQL 16 (`postgres:16-alpine`) | `5432/tcp` | `postgres` | `pg_isready -U codeguard -d codeguard` | 27 relational tables across review state, findings, approvals, publications, and audit logs. |
 | **redis** | Redis 7 (`redis:7-alpine`) | `6379/tcp` | `redis-server --appendonly yes --requirepass $REDIS_PASSWORD` | `redis-cli ping` | Celery task message broker, review queue, webhook delivery deduplication cache, rate limits. |
@@ -99,11 +98,11 @@ CodeGuard AI enforces strict zero-trust operational boundaries:
     - Gate 4: Security severity calibration.
     - Gate 5: Actionable recommendation criteria.
 
-### Boundary 4: MCP Sentinel Tool Governance Enclave
+### Boundary 4: Zero-Trust Policy Engine Enclave (`app.core.policy`)
 - **Enforcement**:
-  - Consequential actions (`submit_review`, `merge_pull_request`, `modify_policy`) are classified under `ToolRiskLevel.CONSEQUENTIAL` or `HIGH_RISK`.
-  - Dangerous actions (`execute_shell`, `delete_repository`, `bypass_approval`) are hard-coded in `FORBIDDEN_OPERATIONS` and `FORBIDDEN_TOOL_ACTIONS` and rejected unconditionally.
-  - Tool requests require valid Bearer service tokens (`MCP_SERVICE_TOKEN`) and valid caller Principals (`PrincipalRole.AGENT`, `PrincipalRole.REVIEWER`, `PrincipalRole.ADMIN`).
+  - Consequential actions (`submit_review`, `post_comment`) are classified under `ActionRiskLevel.CONSEQUENTIAL` and require human approval.
+  - Dangerous actions (`merge_pull_request`, `delete_repository`, `execute_shell`, `eval_code`, etc.) are hard-coded in `FORBIDDEN_OPERATIONS` and `FORBIDDEN_TOOL_ACTIONS` and rejected unconditionally.
+  - Direct in-process evaluation executed by `PublicationService` before any GitHub API interaction.
 
 ### Boundary 5: Human Approval & Publication Binding
 - **Enforcement**:

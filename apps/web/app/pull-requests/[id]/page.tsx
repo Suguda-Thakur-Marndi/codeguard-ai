@@ -243,7 +243,7 @@ export default function PullRequestDetailPage({
       <div className="bg-slate-900/60 border border-slate-800 rounded-xl p-5 shadow-sm">
         <div className="text-xs font-mono uppercase tracking-wider text-slate-400 mb-4 flex items-center justify-between">
           <span>End-to-End Governance Pipeline</span>
-          <span className="text-indigo-400 font-semibold">Zero-Trust MCP Control</span>
+          <span className="text-indigo-400 font-semibold">Zero-Trust Policy Control</span>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
