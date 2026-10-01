@@ -41,16 +41,10 @@ To maintain strict scientific and engineering honesty, CodeGuard AI clearly dist
 | **Code Intelligence** | Language grammars for Go, Rust, Java | **PLANNED** | Scheduled for future milestones |
 | **Multi-Agent Review**| LangGraph StateGraph with Comprehension, Bug, Security, Perf, Test, Contract specialists | **IMPLEMENTED** | `test_orchestrator.py`, `test_agents.py` |
 | **Adversarial Judge** | 5-Gate filter (Diff boundary, Factuality, Actionability, Severity, Sandbox) | **IMPLEMENTED** | `test_judge.py`, AC-008 |
-| **Zero-Trust Policy Engine** | In-process policy engine with forbidden action blocklists & audit logging | **IMPLEMENTED** | `apps/api/app/core/policy.py`, AC-022 |
-| **Governance & Auth** | Cryptographic human approval gate with commit-drift invalidation (`COMMIT_DRIFT`) | **IMPLEMENTED** | `test_approvals.py`, AC-016 |
-| **GitHub Publishing** | Idempotent multi-line PR review comments with automatic secret scrubbing | **IMPLEMENTED** | `test_github_publisher.py`, AC-028 |
-| **Unit & Integration**| 253 automated tests across Backend API | **IMPLEMENTED** | `pytest apps/api/tests` (253/253 PASS, 100%) |
-| **Master Security** | 23 master security verification gates (Auth, RBAC, tenant isolation, injections) | **IMPLEMENTED** | `verify_phase15.py` (23/23 PASS) |
-| **Operational SRE** | 27 operational release gates (Clean build, Pydantic, Alembic 001-006, Redis fallback)| **IMPLEMENTED** | `verify_phase16.py` (27/27 PASS) |
-| **Acceptance Suite** | 30 end-to-end PR review scenarios + 6 specialized system audits | **IMPLEMENTED** | `scripts/run_acceptance_suite.py` (36/36 PASS) |
-| **RC1 Qualification**| Phase 23 audit remediation (AST bounds, token limits, Celery retry, rate limits) | **IMPLEMENTED** | [`docs/phase23/PHASE23_RELEASE_CANDIDATE_DECISION.md`](file:///c:/Users/sugud/OneDrive/Documents/codeguard-ai/docs/phase23/PHASE23_RELEASE_CANDIDATE_DECISION.md) |
-| **Customer Pilot** | Production deployment across external customer repositories | **PILOT READY** | Pilot plan in [`docs/pilot/`](file:///c:/Users/sugud/OneDrive/Documents/codeguard-ai/docs/pilot/); held pending explicit authorization |
-| **Cloud Autoscaling** | Remote Kubernetes / ECS cluster orchestration under live burst traffic | **PILOT PENDING** | Local tests validated; cloud cluster pending |
+| **Zero-Trust Policy Engine** | In-process policy engine with forbidden action blocklists & audit logging | **IMPLEMENTED** | `apps/api/app/core/policy.py` |
+| **Governance & Auth** | Cryptographic human approval gate with commit-drift invalidation (`COMMIT_DRIFT`) | **IMPLEMENTED** | `test_approvals.py` |
+| **GitHub Publishing** | Idempotent multi-line PR review comments with automatic secret scrubbing | **IMPLEMENTED** | `test_github_publisher.py` |
+| **Unit & Integration**| Automated test suite across Backend API & Security Invariants | **IMPLEMENTED** | `pytest apps/api/tests` |
 
 ---
 
@@ -184,33 +178,17 @@ Open separate terminal windows with your virtual environment active:
 
 ## 7. Running the Automated Test Suites
 
-CodeGuard AI includes 253 automated unit/integration tests, 27 operational release gates, 23 master security gates, and 36 master acceptance scenarios:
+CodeGuard AI includes automated unit/integration tests and complete static analysis:
 
 ```bash
-# 1. Run all Backend API Unit & Integration tests (253 tests)
-pytest apps/api/tests -q
+# 1. Run all Backend API Unit & Integration tests
+pytest apps/api/tests -v
 
 # 2. Run Ruff code style & syntax linter (0 errors)
 ruff check .
 
 # 3. Run Frontend TypeScript type checker (0 errors)
 cd apps/web && npm run lint && cd ../..
-```
-
-# 5. Run Master SRE Operational Verification Suite (27 gates)
-python verify_phase16.py
-
-# 6. Run Master Security Verification Suite (23 gates)
-python verify_phase15.py
-
-# 7. Run Core Architecture Scorecard (17 gates)
-python verify_phase10.py
-
-# 8. Run Master Acceptance Suite (36 scenarios)
-python scripts/run_acceptance_suite.py
-
-# 9. Run Empirical Benchmark Suite (12 scenarios)
-python benchmark.py run --dataset v1
 ```
 
 For the comprehensive testing guide, see [`docs/TESTING.md`](file:///c:/Users/sugud/OneDrive/Documents/codeguard-ai/docs/TESTING.md).
@@ -246,16 +224,6 @@ Technical documentation is organized by domain across the repository:
 - [`docs/MAINTAINER_ONBOARDING.md`](file:///c:/Users/sugud/OneDrive/Documents/codeguard-ai/docs/MAINTAINER_ONBOARDING.md) — New maintainer walkthrough and quick-start verification.
 - [`AGENTS.md`](file:///c:/Users/sugud/OneDrive/Documents/codeguard-ai/AGENTS.md) — Multi-agent engineering architecture, roles, and rules.
 - [`GEMINI.md`](file:///c:/Users/sugud/OneDrive/Documents/codeguard-ai/GEMINI.md) — AI engineering orchestrator invariants and guardrails.
-
-### Release Milestones, Audits & Cleanup
-- [`docs/PHASE21_REMEDIATION_REPORT.md`](file:///c:/Users/sugud/OneDrive/Documents/codeguard-ai/docs/PHASE21_REMEDIATION_REPORT.md) — Phase 21 technical audit findings and systematic remediation.
-- [`docs/pilot/PHASE22_PILOT_PLAN.md`](file:///c:/Users/sugud/OneDrive/Documents/codeguard-ai/docs/pilot/PHASE22_PILOT_PLAN.md) — Controlled pilot framework and real-world evaluation protocol.
-- [`docs/pilot/PHASE22_FINAL_DECISION.md`](file:///c:/Users/sugud/OneDrive/Documents/codeguard-ai/docs/pilot/PHASE22_FINAL_DECISION.md) — Pilot gate governance and evidence standards.
-- [`docs/phase23/PHASE23_REMEDIATION_REPORT.md`](file:///c:/Users/sugud/OneDrive/Documents/codeguard-ai/docs/phase23/PHASE23_REMEDIATION_REPORT.md) — Deep-dive audit resolving 4 critical hardening items (AST bounds, token limits, Celery retry, rate limits).
-- [`docs/phase23/PHASE23_RELEASE_CANDIDATE_DECISION.md`](file:///c:/Users/sugud/OneDrive/Documents/codeguard-ai/docs/phase23/PHASE23_RELEASE_CANDIDATE_DECISION.md) — Release Candidate 1 (RC1) qualification certification.
-- [`docs/phase24/PHASE24_FINAL_RELEASE_AUDIT.md`](file:///c:/Users/sugud/OneDrive/Documents/codeguard-ai/docs/phase24/PHASE24_FINAL_RELEASE_AUDIT.md) — Final release qualification and pre-deployment audit.
-- [`docs/phase24/PHASE24_DEPLOYMENT_PLAN.md`](file:///c:/Users/sugud/OneDrive/Documents/codeguard-ai/docs/phase24/PHASE24_DEPLOYMENT_PLAN.md) — Production deployment runbook, health probes, and rollback procedures.
-- [`docs/CLEANUP_REPORT.md`](file:///c:/Users/sugud/OneDrive/Documents/codeguard-ai/docs/CLEANUP_REPORT.md) — Monorepo cleanup audit, removed artifacts, and post-cleanup test verification.
 
 ---
 

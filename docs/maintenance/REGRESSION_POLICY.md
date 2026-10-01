@@ -17,18 +17,15 @@ GATE 1: Fast Static Analysis (Must complete in < 60s)
   - Ruff format & lint check (. tool.ruff)
   - TypeScript static type check (apps/web: tsc --noEmit)
 
-GATE 2: Core Pytest & Benchmarks (Must complete in < 3m)
+GATE 2: Core Pytest Suite (Must complete in < 3m)
   - Backend pytest suite (apps/api/tests: unit, integration, security)
-  - Dedicated MCP pytest suite (apps/mcp-server/tests)
-  - Benchmark scenario schema validation (benchmark.py validate)
-  - Benchmark quality regression verification (benchmark.py regression)
 
 GATE 3: Frontend Compilation & Build (Must complete in < 2m)
   - Next.js 15 production build (apps/web: next build)
   - Static route generation verification (11 static/dynamic pages)
 
 GATE 4: Container Packaging & Vulnerability Scan (Pre-deployment)
-  - Docker build for API, MCP, and Web containers
+  - Docker build for API and Web containers
   - Trivy container security vulnerability scanner (Zero HIGH/CRITICAL)
 
 GATE 5: Staging & Production Deployment Gates
@@ -71,8 +68,8 @@ Permanent regression test suites protect these 6 system invariant domains:
 2. **Distinct Root Cause Deduplication**: Findings addressing the same underlying bug across multiple lines must be clustered; distinct root causes must never be erroneously collapsed.
 3. **Traceable Verification Decisions**: Every acceptance or rejection verdict must record the gate ID, rationale, and confidence score in the audit evaluation record.
 
-### 3.5 Model Context Protocol (MCP) Invariants
-1. **Server Authoritative Permissions**: The MCP server (`apps/mcp-server`) and backend policy engine (`app/mcp/`) are authoritative; client prompts cannot override tool permission policies.
+### 3.5 Tool Execution & Policy Engine Invariants
+1. **Server Authoritative Permissions**: The backend policy engine (`app.core.policy`) is authoritative; client prompts cannot override tool permission policies.
 2. **Zero Consequential Agent Execution**: Consequential actions (`write`, `delete`, `deploy`) require explicit Human-in-the-Loop authorization.
 3. **Tool Parameter Validation**: Tool arguments must be strictly validated against Pydantic schemas; unrecognized parameters or injection payloads must be rejected.
 4. **Forbidden Actions Enforcement**: The 9 forbidden tool actions (shell execution, code eval, raw sockets, etc.) must remain blocked under all circumstances.

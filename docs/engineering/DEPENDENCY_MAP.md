@@ -10,9 +10,8 @@
 
 CodeGuard AI strictly segregates dependencies across specialized micro-packages and application services:
 1. `apps/api`: Production backend, API endpoints, LangGraph orchestrator, database ORM, and Celery workers.
-2. `apps/mcp-server`: Dedicated Model Context Protocol server exposing tool capabilities over stdio/JSON-RPC.
-3. `packages/code-intelligence`: Core AST parsers, unified diff indexers, and dependency graph engines.
-4. `apps/web`: Next.js 15 App Router web client.
+2. `packages/code-intelligence`: Core AST parsers, unified diff indexers, and dependency graph engines.
+3. `apps/web`: Next.js 15 App Router web client.
 
 ---
 
@@ -52,19 +51,7 @@ CodeGuard AI strictly segregates dependencies across specialized micro-packages 
 
 ---
 
-## 3. MCP Server Dependencies (`apps/mcp-server`)
-
-| Package Name | Version | Purpose |
-| :--- | :--- | :--- |
-| `fastapi` | `>=0.115.0` | FastMCP transport server |
-| `uvicorn[standard]` | `>=0.34.0` | MCP server process runtime |
-| `pydantic` | `>=2.10.0` | Tool input/output JSON schema validation |
-| `httpx` | `>=0.28.0` | Tool HTTP egress |
-| `python-dotenv` | `>=1.0.0` | Standalone environment file loader |
-
----
-
-## 4. Frontend Ecosystem Dependencies (`apps/web`)
+## 3. Frontend Ecosystem Dependencies (`apps/web`)
 
 | Package Name | Version | Purpose |
 | :--- | :--- | :--- |
@@ -79,7 +66,7 @@ CodeGuard AI strictly segregates dependencies across specialized micro-packages 
 
 ---
 
-## 5. Upgrade & Version Safety Policy
+## 4. Upgrade & Version Safety Policy
 
 1. **Context7 Protocol**: Prior to any dependency upgrade, verify target library versions against installed locks and consult official release changelogs.
 2. **Deterministic Version Pinning**:

@@ -36,7 +36,6 @@ SERENA (Codebase Understanding) / CONTEXT7 (Official Docs)
 | :--- | :--- | :--- | :--- |
 | **Continuous (Per PR)** | CI Fast Checks: Lint, Type Check, Pytest, Frontend Build | CI Engine / Review Agent | GitHub Actions workflow status |
 | **Weekly** | Dependency Advisories & Dependabot PR Review | Security / DevOps Agent | Dependabot PRs, `pip audit`, `npm audit` |
-| **Bi-Weekly** | Benchmark Regression & Quality Checks | AI / LangGraph Agent | `python benchmark.py regression` |
 | **Monthly** | Database Migration & Connection Pool Health | Database Agent | Migration rollback tests, schema audit |
 | **Quarterly** | Technical Debt Review & Deprecation Cleanup | Architect Agent | `docs/maintenance/TECHNICAL_DEBT.md` |
 
@@ -59,16 +58,15 @@ SERENA (Codebase Understanding) / CONTEXT7 (Official Docs)
 5. **Security Agent**:
    - Reviews authentication, secret handling, tenant boundaries, and sandbox controls.
    - Conducts weekly dependency vulnerability triages.
-6. **MCP Agent**:
-   - Maintains MCP server (`apps/mcp-server/`) and client tools in `apps/api/app/mcp/`.
-   - Enforces the 9 forbidden actions and Sentinel policy checks.
+6. **Policy & Governance Agent**:
+   - Maintains zero-trust policy engine in `app.core.policy`.
+   - Enforces the 9 forbidden actions and audit logging.
 7. **AI / LangGraph Agent**:
    - Maintains LLM provider abstractions, prompt registry, and LangGraph review workflow.
-   - Validates model changes using empirical benchmark runs.
 8. **Code Intelligence Agent**:
    - Maintains Tree-sitter parsers, AST mappings, and symbol graphs in `packages/code-intelligence/`.
 9. **Testing & QA Agent**:
-   - Maintains unit, integration, and operational test suites (`pytest`, `verify_phase16.py`).
+   - Maintains unit and integration test suites (`pytest`).
    - Investigates and resolves any flaky or nondeterministic tests.
 10. **DevOps / Release Agent**:
     - Manages CI/CD pipelines, Docker configurations, and release versioning.
@@ -81,14 +79,13 @@ Every maintenance pull request must supply structured justification:
 
 ```text
 MAINTENANCE PR CHECKLIST:
-1. Target Component: [Backend | Frontend | DB | MCP | AI | DevOps]
+1. Target Component: [Backend | Frontend | DB | Policy | AI | DevOps]
 2. Reason for Change: [Security Advisory | Bug Fix | Deprecation | Performance]
 3. Empirical Evidence: [Error log, test failure, advisory CVE ID]
 4. Minimal Diff Confirmed: [Yes / No]
 5. No UI/UX Redesign: [Confirmed]
 6. No Business Logic Invention: [Confirmed]
 7. Tests Added or Updated (not weakened): [List of test files]
-8. Benchmark Impact: [Neutral / Improved / Not Affected]
 ```
 
 PRs lacking concrete evidence or containing speculative refactoring must be **REJECTED** by the Review Agent.
@@ -104,7 +101,6 @@ When a critical production defect or high-severity CVE is identified:
 3. **Fix**: Implement the minimal code change to satisfy the regression test.
 4. **Validate**:
    - Run targeted test: `pytest apps/api/tests/test_<name>.py`
-   - Run full suite: `pytest apps/api/tests apps/mcp-server/tests`
-   - Run operational verification: `python verify_phase16.py`
+   - Run full suite: `pytest apps/api/tests`
 5. **Peer Review**: Minimum 2 maintainers (or Security Agent + Domain Specialist) must sign off.
 6. **Deploy**: Deploy via CI/CD staging gate, execute smoke tests, then deploy to production with immediate rollback plan in place.

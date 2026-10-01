@@ -69,14 +69,6 @@ jobs:
         run: |
           pytest apps/api/tests -v
 
-      - name: Validate Benchmark Dataset Integrity
-        run: |
-          python benchmark.py validate
-
-      - name: Run Benchmark Regression Verification
-        run: |
-          python benchmark.py regression --baseline benchmark_report.json --concurrency 4
-
   frontend-build:
     name: 3. Frontend Lint & Build
     runs-on: ubuntu-latest

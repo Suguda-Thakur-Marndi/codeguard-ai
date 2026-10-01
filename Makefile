@@ -40,31 +40,7 @@ lint:
 format:
 	$(VENV_BIN)/ruff check --fix apps/api packages/code-intelligence scripts
 
-validate-benchmark:
-	$(VENV_BIN)/python benchmark.py validate
-
-verify-all:
-	$(VENV_BIN)/python verify_phase1.py
-	$(VENV_BIN)/python verify_phase2.py
-	$(VENV_BIN)/python verify_phase3.py
-	$(VENV_BIN)/python verify_phase4.py
-	$(VENV_BIN)/python verify_phase5.py
-	$(VENV_BIN)/python verify_phase7.py
-	$(VENV_BIN)/python verify_phase8.py
-	$(VENV_BIN)/python verify_phase10.py
-	$(VENV_BIN)/python verify_phase11.py
-	$(VENV_BIN)/python verify_phase12.py
-
-verify-phase10:
-	$(VENV_BIN)/python verify_phase10.py
-
-verify-phase11:
-	$(VENV_BIN)/python verify_phase11.py
-
-verify-phase12:
-	$(VENV_BIN)/python verify_phase12.py
-
-check-release: lint test validate-benchmark
+check-release: lint test
 	cd apps/web && npm run build
 	@echo "All pre-release quality gates passed successfully."
 

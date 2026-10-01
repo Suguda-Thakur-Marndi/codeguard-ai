@@ -102,6 +102,6 @@ Before modifying any API endpoint or schema:
 - **Format**: Structured outputs requested via JSON schema mode (`response_mime_type="application/json"`).
 - **Timeouts & Retries**: Requests time out at 60 seconds; retry on HTTP 503 / 429 with exponential backoff (max 3 retries).
 
-### 5.3 Model Context Protocol (MCP) Integration
-- **SDK**: `mcp>=1.0.0` / JSON-RPC 2.0 over SSE and STDIO.
-- **Security Boundary**: The MCP server (`apps/mcp-server`) validates all tool calls against Sentinel policies. Untrusted LLM outputs cannot invoke tools without matching principal permissions.
+### 5.3 Policy Engine Integration
+- **Authorization**: Tool execution authorization handled directly by `app.core.policy` (`SentinelPolicy`, `TOOL_RISK_MAP`).
+- **Security Boundary**: Backend policy engine validates all consequential actions. Untrusted LLM outputs cannot invoke write/deploy operations without human approval.

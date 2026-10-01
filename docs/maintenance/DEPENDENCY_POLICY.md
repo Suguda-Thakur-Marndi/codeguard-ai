@@ -40,17 +40,7 @@ This inventory captures all direct dependencies across the CodeGuard AI ecosyste
 | `ruff` | `>=0.4.5` | High-speed linter and formatter | Local / CI linting |
 | `mypy` | `>=1.10.0` | Static type checker | Local / CI type checking |
 
-### 1.3 Dedicated MCP Server (`apps/mcp-server/pyproject.toml`)
-
-| Package Name | Specified Version | Purpose | Runtime Context |
-| :--- | :--- | :--- | :--- |
-| `fastapi` | `>=0.115.0` | MCP HTTP & SSE REST endpoints | `mcp-server` container |
-| `uvicorn[standard]`| `>=0.34.0` | Server runtime | `mcp-server` container |
-| `pydantic` | `>=2.10.0` | MCP tool parameter schemas | `mcp-server` container |
-| `httpx` | `>=0.28.0` | Inter-service webhook callbacks | `mcp-server` container |
-| `python-dotenv` | `>=1.0.0` | MCP environment configuration | `mcp-server` container |
-
-### 1.4 Frontend Web Application (`apps/web/package.json`)
+### 1.3 Frontend Web Application (`apps/web/package.json`)
 
 | Package Name | Installed Version | Type | Purpose |
 | :--- | :--- | :--- | :--- |
@@ -67,12 +57,11 @@ This inventory captures all direct dependencies across the CodeGuard AI ecosyste
 | `eslint` | `^9.39.5` | Dev | JavaScript / TypeScript linting |
 | `eslint-config-next`| `^16.3.5` | Dev | Next.js linting rules |
 
-### 1.5 Container Base Images & CI Actions
+### 1.4 Container Base Images & CI Actions
 
 | Asset | Specified Image / Action | Purpose |
 | :--- | :--- | :--- |
 | **API & Worker Container** | `python:3.12-slim` | Debian-based slim Python 3.12 image |
-| **MCP Server Container** | `python:3.11-slim` | Debian-based slim Python 3.11 image |
 | **Web Container** | `node:22-alpine` | Alpine-based Node.js 22 LTS image |
 | **Redis Service** | `redis:7-alpine` | Alpine-based Redis 7 container |
 | **CI Checkout** | `actions/checkout@v4` | Git repository checkout |
@@ -84,9 +73,9 @@ This inventory captures all direct dependencies across the CodeGuard AI ecosyste
 
 ---
 
-## 2. The 13-Step Safe Dependency Update Protocol
+## 2. Safe Dependency Update Protocol
 
-Whenever a dependency requires updating (due to a security advisory, bug fix, or end-of-life deprecation), engineers must follow this 13-step sequence:
+Whenever a dependency requires updating (due to a security advisory, bug fix, or end-of-life deprecation), engineers must follow this sequence:
 
 1. **Inspect Release Notes**: Read the upstream changelog and migration guide for breaking changes.
 2. **Check Compatibility**: Cross-reference minimum Python (`>=3.11`) and Node (`>=20`) version requirements.
@@ -95,24 +84,21 @@ Whenever a dependency requires updating (due to a security advisory, bug fix, or
 5. **Regenerate Lockfiles**: For Node.js, run `npm install --package-lock-only` in `apps/web/`.
 6. **Run Formatting & Linting**: Run `ruff check .` across the workspace and `npm run lint` in `apps/web/`.
 7. **Run Type Checks**: Run `npm run lint` (`tsc --noEmit`) and verify Python typing.
-8. **Run Unit Tests**: Run `pytest apps/api/tests -k unit` and `pytest apps/mcp-server/tests`.
+8. **Run Unit Tests**: Run `pytest apps/api/tests -k unit`.
 9. **Run Integration Tests**: Run full pytest backend test suite (`pytest apps/api/tests`).
-10. **Run Security Tests**: Run `verify_phase15.py` and security audit suites.
-11. **Run Acceptance / E2E Tests**: Run `python scripts/run_acceptance_suite.py` (36 scenarios).
-12. **Run Benchmark Regression**: Run `python benchmark.py regression --baseline benchmark_report.json` to verify zero AI quality regression.
-13. **Review Complete Diff**: Review `git diff` to ensure no accidental changes or lockfile corruptions occurred.
+10. **Review Complete Diff**: Review `git diff` to ensure no accidental changes or lockfile corruptions occurred.
 
 ---
 
 ## 3. Automated Dependency Monitoring (Dependabot)
 
 Dependabot is configured in `.github/dependabot.yml` to perform weekly automated version scans across:
-- Python packages (`pip` in `/apps/api`, `/apps/mcp-server`, `/packages/code-intelligence`)
+- Python packages (`pip` in `/apps/api`, `/packages/code-intelligence`)
 - Node.js packages (`npm` in `/apps/web`)
-- Docker base images (`docker` in `/apps/api`, `/apps/web`, `/apps/mcp-server`)
+- Docker base images (`docker` in `/apps/api`, `/apps/web`)
 - GitHub Actions workflows (`github-actions` in `/`)
 
 ### Invariants for Automated Updates
 - Dependabot pull requests **must never be auto-merged**.
-- Each PR must pass the complete CI pipeline (Lint, Pytest, Frontend Build, Benchmark Regression).
+- Each PR must pass the complete CI pipeline (Lint, Pytest, Frontend Build).
 - Maintainers must verify that no UI/UX styling or business logic was altered by transitive updates.

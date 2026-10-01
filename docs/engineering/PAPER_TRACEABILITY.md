@@ -25,17 +25,15 @@ No research claim is made without direct backing by verified source code, active
 | **5. Strict Diff Line Mapping** | Classifying diff hunks into LEFT/RIGHT coordinates to prevent out-of-diff hallucinations. | `packages/code-intelligence/code_intelligence/diff/` | `UnifiedDiffParser`<br>`ChangedLineIndex`<br>`LineSide` | `apps/api/tests/test_diff_parser.py`<br>`test_line_index.py` |
 | **6. Adversarial Verification (5-Gate Judge)** | Independent adversarial judge rejecting candidates failing strict line, evidence, or schema tests. | `apps/api/app/agents/judge/` | `AdversarialJudge`<br>`JudgeDecision`<br>`GateResult` | `apps/api/tests/test_judge.py`<br>`AC-008` (False Positive Trap) |
 | **7. Dynamic Execution Sandbox** | Sandboxed environment executing tests without risk of remote code execution or shell escapes. | `apps/api/app/agents/validation/` | `ExecutionSandbox`<br>`SandboxResult`<br>`ALLOWLISTED_COMMANDS` | `apps/api/tests/test_sandbox.py`<br>`test_finding_validation.py` |
-| **8. MCP Governance (Sentinel)** | Tool authorization interceptor classifying risk levels and blocking dangerous operations. | `apps/api/app/mcp/`<br>`apps/mcp-server/app/` | `SentinelPolicy`<br>`TOOL_RISK_MAP`<br>`FORBIDDEN_OPERATIONS` | `apps/mcp-server/tests/test_mcp_policy.py`<br>`AC-022`, `AC-023` |
-| **9. Human-in-the-Loop Authorization** | Anti-self-approval and commit-drift stale SHA invalidation for consequential actions. | `apps/api/app/services/approval_service.py`<br>`apps/api/app/models/approval_request.py` | `ApprovalService`<br>`ApprovalRequest`<br>`ApprovalStatus` | `apps/api/tests/test_approvals.py`<br>`AC-016`, `AC-024`, `AC-025` |
-| **10. Publication Idempotency** | Atomic review publishing preventing duplicate comments on GitHub PRs. | `apps/api/app/github/publisher.py`<br>`apps/api/app/services/publication_service.py` | `GitHubReviewPublisher`<br>`PublicationService`<br>`PublicationStatus` | `apps/api/tests/test_github_publisher.py`<br>`AC-018`, `AC-028` |
-| **11. Resilience & Outage Handling** | Exponential backoff for external APIs and graceful database/Redis degradation. | `apps/api/app/core/redis.py`<br>`apps/api/app/services/review_job_service.py` | `RedisClientManager`<br>`ReviewJobService`<br>`FailureRecovery` | `apps/api/tests/test_failure_recovery.py`<br>`AC-020`, `AC-021`, `AC-030` |
-| **12. Empirical Benchmarking** | Reproducible benchmarking with precision/recall metrics and ground truth datasets. | `evaluation/`<br>`benchmark.py` | `BatchBenchmarkRunner`<br>`PipelineRunner`<br>`ScenarioLoader` | `benchmark.py regression`<br>`12 Scenarios, F1=1.0000` |
+| **8. Policy Governance (Sentinel)** | Tool authorization interceptor classifying risk levels and blocking dangerous operations. | `apps/api/app/core/policy.py` | `SentinelPolicy`<br>`TOOL_RISK_MAP`<br>`FORBIDDEN_OPERATIONS` | `apps/api/tests/test_policy.py`<br>`apps/api/tests/test_security.py` |
+| **9. Human-in-the-Loop Authorization** | Anti-self-approval and commit-drift stale SHA invalidation for consequential actions. | `apps/api/app/services/approval_service.py`<br>`apps/api/app/models/approval_request.py` | `ApprovalService`<br>`ApprovalRequest`<br>`ApprovalStatus` | `apps/api/tests/test_approvals.py` |
+| **10. Publication Idempotency** | Atomic review publishing preventing duplicate comments on GitHub PRs. | `apps/api/app/github/publisher.py`<br>`apps/api/app/services/publication_service.py` | `GitHubReviewPublisher`<br>`PublicationService`<br>`PublicationStatus` | `apps/api/tests/test_github_publisher.py` |
+| **11. Resilience & Outage Handling** | Exponential backoff for external APIs and graceful database/Redis degradation. | `apps/api/app/core/redis.py`<br>`apps/api/app/services/review_job_service.py` | `RedisClientManager`<br>`ReviewJobService`<br>`FailureRecovery` | `apps/api/tests/test_failure_recovery.py` |
 
 ---
 
 ## 3. Empirical Research Evidence Summary
 
-- **Ground Truth Evaluation**: 12 benchmark scenarios across Python, TypeScript, and JavaScript evaluated with 100% precision, 100% recall, and zero false positives.
 - **Hallucination Elimination**: 100% of out-of-diff candidate findings deterministically rejected by Gate 1 of the Adversarial Judge.
-- **Governance Enforcement**: 100% of the 9 forbidden MCP operations unconditionally blocked at the protocol layer.
+- **Governance Enforcement**: 100% of the 9 forbidden tool operations unconditionally blocked at the policy layer.
 - **Zero Drift**: 100% of post-approval commit drifts invalidated prior to GitHub publication.

@@ -145,4 +145,4 @@ Every checklist item below is linked to empirical documentation and reproduction
 - **Current Limitations**:
   - Release state is currently **MORE EVIDENCE REQUIRED** pending an authorized customer pilot.
   - General availability release to production requires explicit Project Owner approval.
-- **Reference**: [`docs/pilot/PHASE22_PILOT_PLAN.md`](file:///c:/Users/sugud/OneDrive/Documents/codeguard-ai/docs/pilot/PHASE22_PILOT_PLAN.md), [`docs/phase23/PHASE23_RELEASE_CANDIDATE_DECISION.md`](file:///c:/Users/sugud/OneDrive/Documents/codeguard-ai/docs/phase23/PHASE23_RELEASE_CANDIDATE_DECISION.md).
+- **Reference**: [`docs/operations/DEPLOYMENT.md`](file:///c:/Users/sugud/OneDrive/Documents/codeguard-ai/docs/operations/DEPLOYMENT.md).

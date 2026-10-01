@@ -155,17 +155,17 @@ npm run dev
 Run the complete automated test suite to ensure your local environment is 100% operational:
 
 ```powershell
-# 1. Run all Pytest backend unit & integration tests (253 tests)
-.\.venv\Scripts\python.exe -m pytest apps/api/tests -q
+# 1. Run all Pytest backend unit & integration tests
+.\.venv\Scripts\python.exe -m pytest apps/api/tests -v
 
 # 2. Run Ruff linter and static code check
 .\.venv\Scripts\ruff.exe check .
 
-# 3. Run Master SRE Operational Verification Suite (27 gates)
-.\.venv\Scripts\python.exe verify_phase16.py
-
-# 4. Run Master Acceptance Suite (36 scenarios)
-.\.venv\Scripts\python.exe scripts/run_acceptance_suite.py
+# 3. Check frontend build
+cd apps\web
+npm run lint
+npm run build
+cd ..\..
 ```
 
 ---

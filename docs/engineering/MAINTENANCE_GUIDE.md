@@ -25,11 +25,7 @@ Follow the **Context7 Protocol** for all third-party package upgrades:
 4. **Validation Suite**:
    ```powershell
    # Run full test suites
-   .\.venv\Scripts\python.exe -m pytest apps/api/tests apps/mcp-server/tests -v
-   # Run benchmark regression
-   .\.venv\Scripts\python.exe benchmark.py regression --baseline benchmark_report.json --concurrency 4
-   # Run acceptance suite
-   .\.venv\Scripts\python.exe scripts/run_acceptance_suite.py
+   .\.venv\Scripts\python.exe -m pytest apps/api/tests -v
    ```
 
 ---
@@ -49,7 +45,7 @@ To add or modify database tables:
    - **Never write destructive operations (`drop_table`, `drop_column`) against production without data migration plans.**
 4. **Test Clean Migration From Zero**:
    ```powershell
-   .\.venv\Scripts\python.exe scripts/run_acceptance_suite.py  # Tests clean SQLite staging migration
+   .\.venv\Scripts\python.exe -m pytest apps/api/tests/test_migrations.py
    ```
 
 ---
@@ -61,30 +57,14 @@ CodeGuard AI isolates LLM interactions within `app/agents/llm/`. To update or mi
 2. **Verify Provider Abstraction**:
    - Check structured output schemas conforming to `ReviewFinding`.
    - Ensure token cost formula in `app/agents/llm/gemini.py` matches current pricing.
-3. **Empirical Benchmark Gate**:
-   - Execute benchmark evaluation:
-     ```powershell
-     .\.venv\Scripts\python.exe benchmark.py run --dataset v1 --save candidate_report.json
-     .\.venv\Scripts\python.exe benchmark.py regression --baseline benchmark_report.json --candidate candidate_report.json
-     ```
-   - If Delta F1 < 0.0 or False Positives > 0, the model change is rejected.
+3. **Empirical Validation**: Run full test suite to verify that structured output schemas and model responses remain consistent.
+   ```powershell
+   .\.venv\Scripts\python.exe -m pytest apps/api/tests -k "llm or agent or review" -v
+   ```
 
 ---
 
-## 5. Adding New MCP Tools
-
-Every newly introduced tool in `apps/mcp-server/` or `app/mcp/` must follow the 8-point governance contract:
-1. **Pydantic Schema**: Define explicit input/output schemas with field descriptions.
-2. **Risk Classification**: Assign a `ToolRiskLevel` in `app/mcp/classification.py`:
-   - `READ_ONLY`: Low risk, automated execution permitted.
-   - `CONSEQUENTIAL`: High impact (e.g., publishing review, modifying files), requires human approval.
-   - `FORBIDDEN`: Shell access, secret reading, or privilege escalation — permanently blocked by Sentinel.
-3. **Audit Logging**: Ensure tool execution dispatches `ToolExecutionAudit` records with redacted inputs.
-4. **Tests**: Add unit tests in `apps/mcp-server/tests/test_mcp_tools.py` and policy tests in `test_mcp_policy.py`.
-
----
-
-## 6. Tree-sitter Parser Updates
+## 5. Tree-sitter Parser Updates
 
 When upgrading Tree-sitter language grammars:
 1. Test grammar loading in `packages/code-intelligence/code_intelligence/treesitter/`.

@@ -25,7 +25,7 @@ Technical debt in CodeGuard AI is managed with empirical rigor. Functional, well
 - **Description**: Developer workstations running native Windows without active WSL2 / Docker Desktop Linux daemons cannot execute local multi-container compose builds or local Trivy scans.
 - **Impact**: Container image compilation and vulnerability scanning are executed in GitHub Actions CI (`ubuntu-latest`) rather than pre-commit local hooks.
 - **Evidence**: Local Docker socket `//./pipe/dockerDesktopLinuxEngine` unavailable during local Windows execution.
-- **Risk**: Low. Containerfiles (`apps/api/Dockerfile`, `apps/mcp-server/Dockerfile`, `apps/web/Dockerfile`) are verified and cleanly build in CI.
+- **Risk**: Low. Containerfiles (`apps/api/Dockerfile`, `apps/web/Dockerfile`) are verified and cleanly build in CI.
 - **Suggested Remediation**: Document WSL2 setup in `docs/maintenance/MAINTENANCE_RUNBOOK.md` while treating CI as the authoritative container builder.
 - **Dependencies**: Developer workstation OS configuration.
 - **Status**: **MONITORED**
@@ -36,7 +36,7 @@ Technical debt in CodeGuard AI is managed with empirical rigor. Functional, well
 - **Component**: `apps/api/app/services/llm_provider.py`, `apps/api/app/services/github_publisher.py`
 - **Description**: When external cloud credentials (`GEMINI_API_KEY`, `GITHUB_PRIVATE_KEY`) are not present in local or CI environments, service clients fall back to deterministic synthetic providers.
 - **Impact**: Test suites execute with 100% determinism and zero API cost, but external API contract drift (e.g. Gemini deprecations or GitHub schema changes) must be caught in staging.
-- **Evidence**: All 230 tests pass offline in < 25s without external network calls.
+- **Evidence**: All 226 tests pass offline in < 7s without external network calls.
 - **Risk**: Low to Medium. External cloud API changes could occur without failing offline tests.
 - **Suggested Remediation**: Run weekly scheduled staging smoke tests against live sandbox APIs with dedicated non-production keys.
 - **Dependencies**: Cloud API quota and test credentials.

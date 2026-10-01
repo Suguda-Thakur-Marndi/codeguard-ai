@@ -89,7 +89,7 @@ ROLE_REGISTRY: dict[AgentRole, RoleDefinition] = {
     AgentRole.TESTING: RoleDefinition(
         role=AgentRole.TESTING,
         description="Unit, integration, security, benchmark, and regression test suites.",
-        allowed_file_patterns=["apps/api/tests/*", "tests/*", "verify_*.py", "evaluation/*"],
+        allowed_file_patterns=["apps/api/tests/*", "tests/*"],
         forbidden_actions=["weaken_tests_to_pass", "delete_failing_assertions"],
     ),
     AgentRole.DEVOPS: RoleDefinition(
