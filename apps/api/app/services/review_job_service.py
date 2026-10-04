@@ -132,7 +132,7 @@ class ReviewJobService:
                 if not repo:
                     raise EntityNotFoundError("Repository", pr.repository_id)
 
-                installation_id = repo.organization.github_installation_id
+                installation_id = repo.organization.github_installation_id if repo.organization else 1
 
                 # 1. Fetch Pull Request metadata
                 logger.info(f"Fetching PR metadata from GitHub for {repo.full_name}#{pr.number}")
@@ -303,6 +303,22 @@ class ReviewJobService:
                 source_code_by_file: dict[str, str] = {}
                 for df in analysis.diff_files:
                     raw_content = source_provider.get_file(df.file_path)
+                    if not raw_content and hasattr(self.github, "get_file_content"):
+                        try:
+                            raw_content = await self.github.get_file_content(
+                                owner=repo.owner,
+                                repo=repo.name,
+                                path=df.file_path,
+                                ref=pr.head_sha,
+                                installation_id=installation_id,
+                            )
+                            if raw_content and isinstance(source_provider, MemoryRepositorySourceProvider):
+                                current_files = source_provider.get_files(pr.head_sha)
+                                current_files[df.file_path] = raw_content if isinstance(raw_content, bytes) else str(raw_content).encode("utf-8")
+                                source_provider.set_commit_files(pr.head_sha, current_files)
+                        except Exception as fetch_err:
+                            logger.debug(f"Could not fetch {df.file_path} from GitHub: {fetch_err}")
+
                     if isinstance(raw_content, bytes):
                         source_code_by_file[df.file_path] = raw_content.decode("utf-8", errors="replace")
                     elif isinstance(raw_content, str):
@@ -560,13 +576,23 @@ class ReviewJobService:
 
                 # 16. Policy Governance & Publication Preparation
                 try:
+                    from app.models.github_publication import PublicationStatus
                     from app.services.publication_service import PublicationService
                     pub_service = PublicationService(self.db)
-                    pub_service.prepare_publication(
+                    pub_record, _approval_req = pub_service.prepare_publication(
                         review_job_id=job.id,
                         action="COMMENT",
                         requested_by="codeguard-agent",
                     )
+                    # If publication does not require human approval and is PENDING, dispatch publication task
+                    if pub_record and pub_record.status == PublicationStatus.PENDING:
+                        try:
+                            from app.workers.tasks import publish_review_task
+                            publish_review_task.delay(pub_record.id)
+                        except Exception as pub_err:
+                            logger.warning(
+                                f"Notice: Publication task dispatch deferred for review job {job.id}: {pub_err}"
+                            )
                 except Exception as pub_prep_err:
                     logger.warning(
                         f"Notice: Publication preparation deferred for review job {job.id}: {pub_prep_err}"

@@ -318,6 +318,7 @@ class PublicationService:
         pub_instance = publisher or self.publisher
         owner = repo.full_name.split("/")[0] if "/" in repo.full_name else "org"
         repo_name = repo.name
+        installation_id = repo.organization.github_installation_id if repo.organization else None
 
         res = await pub_instance.publish_atomic_review(
             owner=owner,
@@ -328,6 +329,7 @@ class PublicationService:
             findings=findings_data,
             action=pub.event,
             valid_lines_by_file=valid_lines_by_file,
+            installation_id=installation_id,
         )
 
         if not res.success:

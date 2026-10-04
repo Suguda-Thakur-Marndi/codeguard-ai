@@ -1,5 +1,6 @@
 """Application configuration using Pydantic Settings."""
 
+import os
 from typing import Literal
 from urllib.parse import urlparse
 
@@ -40,7 +41,9 @@ class Settings(BaseSettings):
 
     # GitHub App Credentials
     GITHUB_APP_ID: str = "dev-app-id"
+    GITHUB_APP_CLIENT_ID: str = ""
     GITHUB_PRIVATE_KEY: str = ""
+    GITHUB_PRIVATE_KEY_PATH: str = ""
     GITHUB_WEBHOOK_SECRET: str = "dev-webhook-secret"
     GITHUB_CLIENT_ID: str = "dev-client-id"
     GITHUB_CLIENT_SECRET: str = "dev-client-secret"
@@ -168,7 +171,29 @@ class Settings(BaseSettings):
         return v
 
     def model_post_init(self, __context: object) -> None:
-        """Validate production invariants."""
+        """Validate production invariants and resolve file-based credentials."""
+        # 1. Resolve GITHUB_PRIVATE_KEY from GITHUB_PRIVATE_KEY_PATH if path provided and key is empty
+        if not self.GITHUB_PRIVATE_KEY and self.GITHUB_PRIVATE_KEY_PATH:
+            candidate_paths = [
+                self.GITHUB_PRIVATE_KEY_PATH,
+                os.path.abspath(self.GITHUB_PRIVATE_KEY_PATH),
+                os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))), self.GITHUB_PRIVATE_KEY_PATH),
+            ]
+            for p in candidate_paths:
+                if os.path.isfile(p):
+                    try:
+                        with open(p, encoding="utf-8") as f:
+                            self.GITHUB_PRIVATE_KEY = f.read().strip()
+                        break
+                    except Exception:
+                        pass
+
+        # 2. Sync GITHUB_APP_CLIENT_ID and GITHUB_CLIENT_ID
+        if self.GITHUB_APP_CLIENT_ID and self.GITHUB_CLIENT_ID in ("", "dev-client-id"):
+            self.GITHUB_CLIENT_ID = self.GITHUB_APP_CLIENT_ID
+        elif self.GITHUB_CLIENT_ID and not self.GITHUB_APP_CLIENT_ID and self.GITHUB_CLIENT_ID != "dev-client-id":
+            self.GITHUB_APP_CLIENT_ID = self.GITHUB_CLIENT_ID
+
         if self.APP_ENV == "production":
             errors = []
             if "*" in self.CORS_ORIGINS:

@@ -1,5 +1,6 @@
 """GitHub App JWT generation and Installation token provider."""
 
+import os
 import time
 from datetime import datetime
 
@@ -20,7 +21,22 @@ class GitHubAppAuth:
         private_key: str | None = None,
     ):
         self.app_id = app_id or settings.GITHUB_APP_ID
-        self.private_key = private_key or settings.GITHUB_PRIVATE_KEY
+        pk = private_key or settings.GITHUB_PRIVATE_KEY
+        if not pk and settings.GITHUB_PRIVATE_KEY_PATH:
+            candidate_paths = [
+                settings.GITHUB_PRIVATE_KEY_PATH,
+                os.path.abspath(settings.GITHUB_PRIVATE_KEY_PATH),
+                os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))), settings.GITHUB_PRIVATE_KEY_PATH),
+            ]
+            for p in candidate_paths:
+                if os.path.isfile(p):
+                    try:
+                        with open(p, encoding="utf-8") as f:
+                            pk = f.read().strip()
+                        break
+                    except Exception:
+                        pass
+        self.private_key = pk
         # In-memory cache for installation tokens: {installation_id: (token, expiry_timestamp)}
         self._token_cache: dict[int, tuple[str, float]] = {}
 
@@ -33,10 +49,12 @@ class GitHubAppAuth:
             raise GitHubAuthError("Missing GITHUB_PRIVATE_KEY or GITHUB_APP_ID")
 
         now = int(time.time())
+        # GitHub requires the 'iss' claim to be an Integer
+        iss_val: int | str = int(self.app_id) if str(self.app_id).isdigit() else self.app_id
         payload = {
             "iat": now - 60,  # 60 seconds in the past for clock drift
             "exp": now + (10 * 60),  # 10 minutes expiry
-            "iss": self.app_id,
+            "iss": iss_val,
         }
 
         try:
@@ -59,8 +77,8 @@ class GitHubAppAuth:
             if expires_at - now > 60:
                 return cached_token
 
-        # In dev/test environment without credentials, return mock token
-        if not self.private_key and settings.APP_ENV in ("development", "test"):
+        # In dev/test environment without valid credentials, return mock token
+        if (not self.private_key or self.app_id in ("dev-app-id", "")) and settings.APP_ENV in ("development", "test"):
             mock_token = f"ghs_mock_token_for_{installation_id}"
             self._token_cache[installation_id] = (mock_token, now + 3600)
             return mock_token
@@ -71,6 +89,7 @@ class GitHubAppAuth:
             "Authorization": f"Bearer {app_jwt}",
             "Accept": "application/vnd.github+json",
             "X-GitHub-Api-Version": "2022-11-28",
+            "User-Agent": "CodeGuard-AI/0.1.0",
         }
 
         with TimingLogger("github_api_installation_token", {"installation_id": installation_id}):

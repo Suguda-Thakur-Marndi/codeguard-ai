@@ -192,6 +192,31 @@ class GitHubClient:
                 ],
             )
 
+        if "contents/" in path:
+            mock_code = (
+                "export function hello(): string {\n"
+                "  // Production greeting\n"
+                "  return 'hello world';\n"
+                "}\n"
+            )
+            if accept == "application/vnd.github.raw":
+                return httpx.Response(200, content=mock_code.encode("utf-8"))
+            import base64
+            b64_content = base64.b64encode(mock_code.encode("utf-8")).decode("utf-8")
+            return httpx.Response(200, json={"content": b64_content, "encoding": "base64", "path": path})
+
+        if "commits/" in path:
+            return httpx.Response(
+                200,
+                json={
+                    "sha": "9e5c45b5b57875f334f61aebed695e2e4193db5f",
+                    "commit": {
+                        "message": "Add production greeting feature",
+                        "author": {"name": "octocat", "date": "2026-10-04T00:00:00Z"},
+                    },
+                },
+            )
+
         if "repos/" in path:
             return httpx.Response(
                 200,
@@ -267,3 +292,92 @@ class GitHubClient:
         inst_id = installation_id or 1
         response = await self._request_with_retry("GET", path, inst_id)
         return response.json()
+
+    async def get_file_content(
+        self,
+        owner: str,
+        repo: str,
+        path: str,
+        ref: str | None = None,
+        installation_id: int | None = None,
+    ) -> bytes | None:
+        """Fetch raw file content from GitHub repository at a specific git ref/commit."""
+        clean_path = path.lstrip("/")
+        api_path = f"/repos/{owner}/{repo}/contents/{clean_path}"
+        inst_id = installation_id or 1
+        params = {"ref": ref} if ref else {}
+        try:
+            response = await self._request_with_retry(
+                "GET",
+                api_path,
+                inst_id,
+                accept="application/vnd.github.raw",
+                params=params,
+            )
+            return response.content
+        except GitHubNotFoundError:
+            return None
+
+    async def get_commit(
+        self,
+        owner: str,
+        repo: str,
+        commit_sha: str,
+        installation_id: int | None = None,
+    ) -> dict[str, Any]:
+        """Fetch commit details from GitHub."""
+        path = f"/repos/{owner}/{repo}/commits/{commit_sha}"
+        inst_id = installation_id or 1
+        response = await self._request_with_retry("GET", path, inst_id)
+        return response.json()
+
+    async def get_repository_installation(
+        self,
+        owner: str,
+        repo: str,
+    ) -> dict[str, Any]:
+        """Fetch GitHub App installation details for a repository using App JWT."""
+        path = f"/repos/{owner}/{repo}/installation"
+        if not self.auth.private_key and settings.APP_ENV in ("development", "test"):
+            return {"id": 1, "account": {"login": owner, "type": "Organization"}}
+
+        app_jwt = self.auth.generate_app_jwt()
+        headers = {
+            "Authorization": f"Bearer {app_jwt}",
+            "Accept": "application/vnd.github+json",
+            "X-GitHub-Api-Version": "2022-11-28",
+            "User-Agent": "CodeGuard-AI/0.1.0",
+        }
+        url = f"{self.base_url}/{path.lstrip('/')}"
+        async with httpx.AsyncClient(timeout=15.0) as client:
+            resp = await client.get(url, headers=headers)
+            if resp.status_code == 404:
+                raise GitHubNotFoundError(resource=path, details={"response": resp.text})
+            if resp.status_code >= 400:
+                raise GitHubAPIError(f"GitHub API error {resp.status_code}: {resp.text}", status_code=resp.status_code)
+            return resp.json()
+
+    async def get_installation(
+        self,
+        installation_id: int,
+    ) -> dict[str, Any]:
+        """Fetch details for a specific GitHub App installation."""
+        path = f"/app/installations/{installation_id}"
+        if not self.auth.private_key and settings.APP_ENV in ("development", "test"):
+            return {"id": installation_id, "account": {"login": "octocat", "type": "Organization"}}
+
+        app_jwt = self.auth.generate_app_jwt()
+        headers = {
+            "Authorization": f"Bearer {app_jwt}",
+            "Accept": "application/vnd.github+json",
+            "X-GitHub-Api-Version": "2022-11-28",
+            "User-Agent": "CodeGuard-AI/0.1.0",
+        }
+        url = f"{self.base_url}/{path.lstrip('/')}"
+        async with httpx.AsyncClient(timeout=15.0) as client:
+            resp = await client.get(url, headers=headers)
+            if resp.status_code == 404:
+                raise GitHubNotFoundError(resource=path, details={"response": resp.text})
+            if resp.status_code >= 400:
+                raise GitHubAPIError(f"GitHub API error {resp.status_code}: {resp.text}", status_code=resp.status_code)
+            return resp.json()

@@ -148,15 +148,7 @@ def publish_review_task(self: object, publication_id: str) -> dict:
     logger.info(f"Worker received review publication task: {publication_id}")
     db = SessionLocal()
     try:
-        from app.services.publication_service import PublicationService
-        service = PublicationService(db)
-        pub = asyncio.run(service.execute_publication(publication_id=publication_id))
-        return {
-            "status": "success",
-            "publication_id": pub.id,
-            "publication_status": pub.status.value,
-            "github_review_id": pub.github_review_id,
-        }
+        return publish_review_sync(publication_id=publication_id, db=db)
     except GitHubAPIError as exc:
         if exc.retryable:
             logger.warning(f"Transient GitHub API error on review publication {publication_id}. Retrying: {exc}")

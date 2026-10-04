@@ -36,6 +36,18 @@ class OrganizationRepository(BaseRepository[Organization]):
                 self.update(org)
             return org
 
+        # Check if existing organization for this account needs installation ID update (e.g. app re-install)
+        if account_id:
+            org_by_account = self.db.execute(
+                select(Organization).where(Organization.github_account_id == account_id)
+            ).scalar_one_or_none()
+            if org_by_account:
+                org_by_account.github_installation_id = installation_id
+                org_by_account.github_account_login = account_login
+                org_by_account.account_type = account_type
+                self.update(org_by_account)
+                return org_by_account
+
         new_org = Organization(
             github_installation_id=installation_id,
             github_account_id=account_id,

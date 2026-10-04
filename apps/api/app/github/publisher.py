@@ -151,6 +151,7 @@ class GitHubReviewPublisher:
         action: str = "COMMENT",
         valid_lines_by_file: Mapping[str, Any] | None = None,
         max_retries: int = 3,
+        installation_id: int | None = None,
     ) -> ReviewPublishResult:
         """
         Executes atomic GitHub review publication.
@@ -219,6 +220,7 @@ class GitHubReviewPublisher:
                         repo=repo,
                         pull_number=pull_number,
                         payload=payload,
+                        installation_id=installation_id,
                     )
                     review_id = resp.get("id", 998877)
                     comment_ids = resp.get("comment_ids") or [1000 + i for i in range(len(inline_comments))]
