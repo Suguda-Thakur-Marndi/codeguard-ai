@@ -28,7 +28,11 @@ export const authStorage = {
   },
 };
 
-async function request<T>(endpoint: string, options?: RequestInit): Promise<T> {
+export interface RequestOptions extends RequestInit {
+  allowNotFound?: boolean;
+}
+
+async function request<T>(endpoint: string, options?: RequestOptions): Promise<T> {
   const url = `${API_BASE}${endpoint.startsWith("/") ? endpoint : `/${endpoint}`}`;
   const token = authStorage.getToken();
   const authHeaders: Record<string, string> = token
@@ -47,14 +51,23 @@ async function request<T>(endpoint: string, options?: RequestInit): Promise<T> {
     });
 
     if (!res.ok) {
+      if (res.status === 404 && options?.allowNotFound) {
+        return null as unknown as T;
+      }
       const errorData = await res.json().catch(() => ({}));
-      throw new Error(
+      const error = new Error(
         errorData?.error?.message || errorData?.detail || `API error (${res.status})`
       );
+      (error as any).status = res.status;
+      (error as any).data = errorData;
+      throw error;
     }
 
     return res.json();
   } catch (err: any) {
+    if (options?.allowNotFound) {
+      return null as unknown as T;
+    }
     console.error(`API request error on ${endpoint}:`, err);
     throw err;
   }
@@ -102,7 +115,9 @@ export const api = {
 
   // Code Intelligence API
   getRepositoryIndex: (repoId: string) =>
-    request<import("./types").RepositoryIndex>(`/repositories/${repoId}/index`),
+    request<import("./types").RepositoryIndex | null>(`/repositories/${repoId}/index`, {
+      allowNotFound: true,
+    }),
 
   triggerRepositoryIndex: (repoId: string, commitSha?: string) =>
     request<import("./types").RepositoryIndex>(`/repositories/${repoId}/index`, {

@@ -11,6 +11,8 @@ router = APIRouter(tags=["Health"])
 
 def check_redis_connectivity() -> bool:
     """Verify Redis connection for the readiness probe."""
+    if settings.REDIS_URL.startswith("memory://") or settings.CELERY_TASK_ALWAYS_EAGER:
+        return True
     try:
         import redis
         client = redis.from_url(settings.REDIS_URL, socket_timeout=2.0)
