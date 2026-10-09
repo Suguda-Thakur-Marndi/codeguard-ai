@@ -27,7 +27,7 @@ Tier 2: Fast Deterministic CI (Every PR)
   ├── 172 Automated Unit & Integration Tests (9.11s)
   ├── Tree-sitter Diff & Line Index Invariants
   ├── Adversarial Judge 5-Gate Deterministic Filters
-  ├── MCP Tool Registry & 9 Forbidden Tool Rejections
+  ├── Zero-Trust Policy Engine & 9 Forbidden Tool Rejections
   └── Frontend Next.js Production Build
 
 Tier 3: Empirical Quality & Benchmark Regression (Merge Queue)
@@ -66,9 +66,9 @@ Tier 4: Acceptance & Operational Simulation (Nightly / Release)
   5. Gate 5: Semantic Deduplication against existing findings
 - **Regression Check**: Candidate findings targeting line 8888 or ungrounded evidence are deterministically rejected without LLM invocation.
 
-### 4. MCP Sentinel Policies & Forbidden Operations
+### 4. Zero-Trust Policy Engine & Forbidden Operations
 - **Invariant**: AI agents must never execute unauthorized, destructive, or shell commands.
-- **Guard**: MCP Sentinel policy engine intercepts all tool requests. All 9 dangerous operations (`execute_shell`, `eval_code`, `drop_database`, `modify_auth_policy`, `bypass_approval`, `access_raw_secrets`, `export_private_keys`, `impersonate_user`, `disable_audit_logging`) are unconditionally blocked.
+- **Guard**: Zero-Trust PolicyEngine intercepts all tool requests. All 9 dangerous operations (`execute_shell`, `eval_code`, `drop_database`, `modify_auth_policy`, `bypass_approval`, `access_raw_secrets`, `export_private_keys`, `impersonate_user`, `disable_audit_logging`) are unconditionally blocked.
 - **Regression Check**: Every tool dispatch is verified against `TOOL_RISK_MAP`. Consequential tools require explicit, authenticated human approval.
 
 ### 5. Human Approval & Commit Drift Invalidation

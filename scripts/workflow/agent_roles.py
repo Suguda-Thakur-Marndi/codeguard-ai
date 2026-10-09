@@ -12,7 +12,7 @@ class AgentRole(StrEnum):
     FRONTEND = "FRONTEND AGENT"
     DATABASE = "DATABASE AGENT"
     SECURITY = "SECURITY AGENT"
-    MCP = "MCP AGENT"
+    POLICY_GOVERNANCE = "POLICY & GOVERNANCE AGENT"
     AI_LANGGRAPH = "AI/LANGGRAPH AGENT"
     CODE_INTELLIGENCE = "CODE INTELLIGENCE AGENT"
     TESTING = "TESTING AGENT"
@@ -47,7 +47,7 @@ ROLE_REGISTRY: dict[AgentRole, RoleDefinition] = {
     AgentRole.BACKEND: RoleDefinition(
         role=AgentRole.BACKEND,
         description="FastAPI routers, business services, authentication, workers, background tasks.",
-        allowed_file_patterns=["apps/api/*", "packages/shared/*"],
+        allowed_file_patterns=["apps/api/*"],
         forbidden_actions=["ui_redesign", "bypass_api_contracts", "skip_authentication"],
     ),
     AgentRole.FRONTEND: RoleDefinition(
@@ -68,9 +68,9 @@ ROLE_REGISTRY: dict[AgentRole, RoleDefinition] = {
         allowed_file_patterns=["*"],
         forbidden_actions=["disable_security", "bypass_approval", "hardcode_credentials"],
     ),
-    AgentRole.MCP: RoleDefinition(
-        role=AgentRole.MCP,
-        description="Tool policy validation, security policies, audit logging, approval integration.",
+    AgentRole.POLICY_GOVERNANCE: RoleDefinition(
+        role=AgentRole.POLICY_GOVERNANCE,
+        description="Zero-trust policy validation, security policies, audit logging, approval integration.",
         allowed_file_patterns=["apps/api/app/core/policy.py", "apps/api/app/services/policy_service.py"],
         forbidden_actions=["bypass_policy", "auto_execute_dangerous_tool", "skip_sha_check"],
     ),

@@ -22,7 +22,7 @@ Step 3: Context7 Documentation Retrieval
    │   - Fetch version-specific documentation for external APIs
    ▼
 Step 4: Specialized Engineering Agent Implementation
-   │   - Backend / Frontend / MCP / DB / AI / DevOps agent drafts minimal change
+   │   - Backend / Frontend / Policy & Governance / DB / AI / DevOps agent drafts minimal change
    ▼
 Step 5: Testing Agent Validation
    │   - Author unit/integration tests and run targeted test suite
@@ -49,5 +49,5 @@ Do not invoke all agents for every task. Select the minimal appropriate team:
 
 - **Simple Typo / Documentation**: Single specialized agent + Review Agent.
 - **Backend Service Fix**: Architect + Serena + Backend Agent + Testing Agent + Review Agent.
-- **Security / MCP Boundary Update**: Architect + Serena + Context7 + MCP/Security Agent + Testing Agent + Review Agent + Final Integration Agent.
+- **Security / Policy Boundary Update**: Architect + Serena + Context7 + Policy/Security Agent + Testing Agent + Review Agent + Final Integration Agent.
 - **Cross-Cutting Feature**: Full 10-step pipeline with all relevant specialists.

@@ -8,6 +8,7 @@ from app.api.v1.endpoints.auth import router as auth_router
 from app.api.v1.endpoints.benchmarks import router as benchmarks_router
 from app.api.v1.endpoints.code_intelligence import router as code_intelligence_router
 from app.api.v1.endpoints.findings import router as findings_router
+from app.api.v1.endpoints.github import router as github_router
 from app.api.v1.endpoints.health import router as health_router
 from app.api.v1.endpoints.organizations import router as organizations_router
 from app.api.v1.endpoints.policies import router as policies_router
@@ -22,6 +23,7 @@ api_v1_router = APIRouter(prefix="/api/v1")
 # Mount sub-routers
 api_v1_router.include_router(health_router)
 api_v1_router.include_router(auth_router)
+api_v1_router.include_router(github_router)
 api_v1_router.include_router(webhooks_router)
 api_v1_router.include_router(organizations_router)
 api_v1_router.include_router(repositories_router)

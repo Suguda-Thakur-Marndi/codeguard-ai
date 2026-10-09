@@ -3,7 +3,7 @@ name: codeguard-agency-agents
 description: >-
   Specialized engineering roles and execution contracts for CodeGuard AI development.
   Covers the 12 domain agents: Architect, Backend, Frontend, Database, Security,
-  MCP, AI/LangGraph, Code Intelligence, Testing, DevOps, Review, and Final Integration.
+  Policy & Governance, AI/LangGraph, Code Intelligence, Testing, DevOps, Review, and Final Integration.
 ---
 
 # CodeGuard Agency Agents
@@ -19,10 +19,10 @@ This skill governs the responsibilities, input/output schemas, and execution bou
 | **Frontend** | `apps/web/` | Next.js components, API hooks, client state, error boundaries | Redesigning UI/UX, altering layouts/colors |
 | **Database** | `apps/api/alembic/`, models | PostgreSQL schemas, migrations, indexes, constraints | Direct DB mutations, bypassing Alembic, dropping tables |
 | **Security** | Security boundary | Zero-trust verification, auth/authz review, prompt injection, sandbox | Bypassing auth, hardcoding secrets, approving untrusted inputs |
-| **MCP** | `apps/mcp-server/`, `apps/api/app/mcp/` | Tool schemas, Sentinel policy, audit logging, approval integration | Bypassing policy checks, auto-executing dangerous tools |
+| **Policy & Governance** | `apps/api/app/core/policy.py`, policy schemas | Tool schemas, zero-trust policy, audit logging, approval integration | Bypassing policy checks, auto-executing dangerous tools |
 | **AI / LangGraph** | `apps/api/app/agents/` | Gemini routing, LangGraph graph, prompt templates, structured output | Treating AI as authority, bypassing Adversarial Judge |
 | **Code Intelligence**| `packages/code-intelligence/`| Tree-sitter parsers, AST mappings, diff indexer, dependency graph | Replacing Tree-sitter with regex, weakening parser diagnostics |
-| **Testing** | `apps/api/tests/`, `verify_*.py` | Unit, integration, security, benchmark regression tests | Weakening tests, deleting failing assertions |
+| **Testing** | `apps/api/tests/` | Unit, integration, security, benchmark regression tests | Weakening tests, deleting failing assertions |
 | **DevOps** | `docker/`, `infra/`, root configs| Docker, compose manifests, environment variables, health checks | Committing secrets, unnecessary cloud alterations |
 | **Review** | Pull requests & diffs | Independent quality, correctness, security, maintainability gate | Approving without verification, rubber-stamping |
 | **Final Integration**| Cross-cutting | Multi-service verification, import validation, end-to-end flow | Overriding specialist findings, skipping test runs |

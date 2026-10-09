@@ -14,4 +14,4 @@ The following domain models and workflows represent core business logic and must
 3. **Publication Integrity**:
    - GitHub publications require valid commit SHA match. Stale reviews targeting outdated commits must be blocked.
 4. **Tool Risk Classification**:
-   - Destructive operations (`git push --force`, `drop table`, `rm -rf`) are classified as `CRITICAL/FORBIDDEN` and must be rejected by MCP Sentinel.
+   - Destructive operations (`git push --force`, `drop table`, `rm -rf`) are classified as `CRITICAL/FORBIDDEN` and must be rejected by PolicyEngine Sentinel.

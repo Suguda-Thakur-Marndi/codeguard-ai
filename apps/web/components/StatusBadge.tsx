@@ -2,13 +2,14 @@ import React from "react";
 
 interface StatusBadgeProps {
   status?: string | null;
-  type?: "job" | "pr";
+  type?: "job" | "pr" | "finding";
+  size?: "sm" | "md";
 }
 
 export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, type = "job" }) => {
   if (!status) {
     return (
-      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-800 text-gray-400 border border-gray-700">
+      <span className="inline-flex items-center px-1.5 py-0.5 rounded font-label-mono text-kbd-shortcut bg-surface-container-high text-outline">
         No Review
       </span>
     );
@@ -19,16 +20,48 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, type = "job" }
   if (type === "pr") {
     if (s === "OPEN") {
       return (
-        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-950/80 text-emerald-400 border border-emerald-800">
-          <span className="w-1.5 h-1.5 mr-1.5 rounded-full bg-emerald-400" />
-          Open
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded font-label-mono text-kbd-shortcut bg-tertiary-container text-on-tertiary-container font-semibold">
+          <span className="w-1.5 h-1.5 rounded-full bg-tertiary-fixed-dim" />
+          OPEN
         </span>
       );
     }
     return (
-      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-purple-950/80 text-purple-400 border border-purple-800">
-        <span className="w-1.5 h-1.5 mr-1.5 rounded-full bg-purple-400" />
-        Closed
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded font-label-mono text-kbd-shortcut bg-surface-container-highest text-on-surface-variant font-medium">
+        <span className="w-1.5 h-1.5 rounded-full bg-outline" />
+        {s}
+      </span>
+    );
+  }
+
+  if (type === "finding") {
+    if (s === "CRITICAL") {
+      return (
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded font-label-mono text-kbd-shortcut bg-error-container text-on-error-container font-bold">
+          <span className="w-1.5 h-1.5 rounded-full bg-error" />
+          CRITICAL
+        </span>
+      );
+    }
+    if (s === "HIGH") {
+      return (
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded font-label-mono text-kbd-shortcut bg-surface-container-highest text-surface-tint font-bold">
+          <span className="w-1.5 h-1.5 rounded-full bg-surface-tint" />
+          HIGH
+        </span>
+      );
+    }
+    if (s === "MEDIUM") {
+      return (
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded font-label-mono text-kbd-shortcut bg-surface-container-high text-amber-400 font-medium">
+          <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+          MEDIUM
+        </span>
+      );
+    }
+    return (
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded font-label-mono text-kbd-shortcut bg-surface-container-high text-on-surface-variant font-medium">
+        {s}
       </span>
     );
   }
@@ -36,70 +69,46 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, type = "job" }
   switch (s) {
     case "COMPLETED":
       return (
-        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-950/60 text-emerald-400 border border-emerald-700/60">
-          <span className="w-1.5 h-1.5 mr-1.5 rounded-full bg-emerald-400" />
-          Completed
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded font-label-mono text-kbd-shortcut bg-tertiary-container text-on-tertiary-container font-semibold">
+          <span className="material-symbols-outlined text-[12px]">check_circle</span>
+          Auto-Verified Pass
         </span>
       );
     case "RUNNING":
+    case "ANALYZING":
+    case "PREPARING":
+    case "COMPREHENDING":
+    case "VALIDATING":
       return (
-        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-950/60 text-blue-400 border border-blue-700/60 animate-pulse">
-          <span className="w-1.5 h-1.5 mr-1.5 rounded-full bg-blue-400" />
-          Running
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded font-label-mono text-kbd-shortcut bg-surface-container-highest text-secondary font-semibold">
+          <span className="material-symbols-outlined text-[12px] animate-spin">refresh</span>
+          Review in Progress
         </span>
       );
     case "PENDING":
       return (
-        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-950/60 text-amber-400 border border-amber-700/60">
-          <span className="w-1.5 h-1.5 mr-1.5 rounded-full bg-amber-400" />
-          Pending
-        </span>
-      );
-    case "PREPARING":
-      return (
-        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-cyan-950/60 text-cyan-400 border border-cyan-700/60 animate-pulse">
-          <span className="w-1.5 h-1.5 mr-1.5 rounded-full bg-cyan-400" />
-          Preparing Code
-        </span>
-      );
-    case "COMPREHENDING":
-      return (
-        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-950/60 text-indigo-400 border border-indigo-700/60 animate-pulse">
-          <span className="w-1.5 h-1.5 mr-1.5 rounded-full bg-indigo-400" />
-          Comprehending PR
-        </span>
-      );
-    case "ANALYZING":
-      return (
-        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-950/60 text-purple-400 border border-purple-700/60 animate-pulse">
-          <span className="w-1.5 h-1.5 mr-1.5 rounded-full bg-purple-400" />
-          AI Specialists Analyzing
-        </span>
-      );
-    case "VALIDATING":
-      return (
-        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-teal-950/60 text-teal-400 border border-teal-700/60 animate-pulse">
-          <span className="w-1.5 h-1.5 mr-1.5 rounded-full bg-teal-400" />
-          Validating Findings
-        </span>
-      );
-    case "PARTIAL":
-      return (
-        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-950/60 text-amber-300 border border-amber-600/60">
-          <span className="w-1.5 h-1.5 mr-1.5 rounded-full bg-amber-400" />
-          Partial Review
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded font-label-mono text-kbd-shortcut bg-surface-container-high text-on-surface-variant">
+          <span className="material-symbols-outlined text-[12px]">schedule</span>
+          Awaiting Review
         </span>
       );
     case "FAILED":
       return (
-        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-rose-950/60 text-rose-400 border border-rose-700/60">
-          <span className="w-1.5 h-1.5 mr-1.5 rounded-full bg-rose-400" />
-          Failed
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded font-label-mono text-kbd-shortcut bg-error-container text-on-error-container font-semibold">
+          <span className="material-symbols-outlined text-[12px]">block</span>
+          Blocked / Failed
+        </span>
+      );
+    case "PARTIAL":
+      return (
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded font-label-mono text-kbd-shortcut bg-surface-container-high text-amber-400 font-semibold">
+          <span className="material-symbols-outlined text-[12px]">warning</span>
+          Partial Gate
         </span>
       );
     default:
       return (
-        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-800 text-gray-300 border border-gray-700">
+        <span className="inline-flex items-center px-2 py-0.5 rounded font-label-mono text-kbd-shortcut bg-surface-container-high text-on-surface">
           {status}
         </span>
       );

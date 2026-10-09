@@ -18,10 +18,15 @@ os.environ["SECRET_KEY"] = "test-secret-key-at-least-32-characters-long"
 os.environ["DEV_AUTH_BYPASS"] = "true"
 os.environ["CELERY_TASK_ALWAYS_EAGER"] = "true"
 os.environ["REDIS_URL"] = "memory://"
+os.environ["LLM_PROVIDER"] = "mock"
 
-from app.db.base import Base
-from app.db.session import get_db
-from app.main import app
+from app.core.config import settings  # noqa: E402
+
+settings.LLM_PROVIDER = "mock"
+
+from app.db.base import Base  # noqa: E402
+from app.db.session import get_db  # noqa: E402
+from app.main import app  # noqa: E402
 
 # In-memory SQLite engine for fast, isolated unit test execution
 TEST_SQLALCHEMY_DATABASE_URL = "sqlite:///:memory:"
@@ -63,6 +68,7 @@ def mock_celery_task_delay(monkeypatch: pytest.MonkeyPatch) -> None:
     """Mock Celery delay call so tests do not require a live Redis instance."""
     from app.workers import tasks
     monkeypatch.setattr(tasks.process_review_job, "delay", lambda *args, **kwargs: None)
+    monkeypatch.setattr(tasks.publish_review_task, "delay", lambda *args, **kwargs: None)
 
 
 @pytest.fixture

@@ -58,7 +58,7 @@ class WorkflowOrchestrator:
     def _select_specialist(self, task_lower: str, target_area: str) -> AgentRole:
         """Dynamically pick the appropriate specialized agent based on task domain."""
         if any(w in task_lower or w in target_area.lower() for w in ["policy", "sentinel", "tool", "approval"]):
-            return AgentRole.MCP
+            return AgentRole.POLICY_GOVERNANCE
         elif any(w in task_lower or w in target_area.lower() for w in ["database", "migration", "alembic", "postgres", "sql"]):
             return AgentRole.DATABASE
         elif any(w in task_lower or w in target_area.lower() for w in ["ui", "frontend", "react", "next", "web", "css"]):

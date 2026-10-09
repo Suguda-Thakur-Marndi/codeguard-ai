@@ -2,7 +2,7 @@
 
 ## 1. API Architecture & Versioning Strategy
 
-CodeGuard AI exposes RESTful endpoints under the `/api/v1` namespace. The API is designed for consumption by the Next.js frontend (`apps/web`), CI/CD webhook integrations, developer tooling, and external MCP clients.
+CodeGuard AI exposes RESTful endpoints under the `/api/v1` namespace. The API is designed for consumption by the Next.js frontend (`apps/web`), CI/CD webhook integrations, and developer tooling.
 
 ### 1.1 Invariants & Versioning Rules
 - **Additive Evolution**: All changes to `/api/v1` endpoints must be strictly backward compatible. New response fields are optional; existing response field names and types must never be changed.

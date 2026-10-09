@@ -1,6 +1,7 @@
 """Tests for atomic GitHub review publisher, line validation, idempotency, and endpoints."""
 
 import pytest
+from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
 from app.github.publisher import GitHubReviewPublisher
@@ -167,3 +168,52 @@ async def test_publication_service_e2e_flow(db_session: Session, pub_setup: dict
     dup_pub = await service.execute_publication(publication_id=pub.id)
     assert dup_pub.id == completed_pub.id
     assert dup_pub.github_review_id == completed_pub.github_review_id
+
+
+def test_api_publication_endpoints(client: TestClient, db_session: Session, pub_setup: dict) -> None:
+    job_id = pub_setup["job"].id
+
+    # 1. GET publication (initially None)
+    get_res = client.get(f"/api/v1/review-jobs/{job_id}/publication")
+    assert get_res.status_code == 200
+    assert get_res.json()["publication"] is None
+
+    # 2. POST /review-jobs/{id}/publication/request-approval
+    req_res = client.post(
+        f"/api/v1/review-jobs/{job_id}/publication/request-approval",
+        json={"action": "COMMENT"},
+    )
+    assert req_res.status_code == 200
+    req_data = req_res.json()
+    assert "approval_id" in req_data
+    approval_id = req_data["approval_id"]
+    assert approval_id is not None
+
+    # 3. Direct publication without human approval is rejected (Policy enforcement)
+    unapproved_res = client.post(
+        f"/api/v1/review-jobs/{job_id}/publication/publish",
+        json={"action": "COMMENT"},
+    )
+    assert unapproved_res.status_code == 400
+    assert "requires human" in unapproved_res.json()["detail"].lower()
+
+    # 4. Human reviewer approves the request
+    approve_res = client.post(
+        f"/api/v1/approvals/{approval_id}/approve",
+        json={"comment": "Approved by security lead"},
+    )
+    assert approve_res.status_code == 200
+    assert approve_res.json()["status"] == "success"
+    assert approve_res.json()["approval_status"] == "APPROVED"
+
+    # 5. Now POST /review-jobs/{id}/publication/publish succeeds (or returns idempotent published state)
+    pub_res = client.post(
+        f"/api/v1/review-jobs/{job_id}/publication/publish",
+        json={"action": "COMMENT"},
+    )
+    assert pub_res.status_code == 200
+    pub_data = pub_res.json()
+    assert pub_data["status"] in ["PUBLISHED", "ALREADY_PUBLISHED"]
+    assert "publication_id" in pub_data
+
+

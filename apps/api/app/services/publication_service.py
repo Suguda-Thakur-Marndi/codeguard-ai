@@ -1,5 +1,6 @@
 """Publication service managing atomic GitHub PR review publication and background jobs."""
 
+import json
 from datetime import UTC, datetime
 from typing import Any
 
@@ -276,7 +277,14 @@ class PublicationService:
                 ReviewArtifact.artifact_type == ArtifactType.CHANGED_LINE_INDEX,
             )
         )
-        valid_lines_by_file = line_idx_art.metadata_json if line_idx_art and line_idx_art.metadata_json else None
+        valid_lines_by_file = None
+        if line_idx_art and line_idx_art.content:
+            try:
+                valid_lines_by_file = json.loads(line_idx_art.content)
+            except Exception:
+                valid_lines_by_file = line_idx_art.metadata_json
+        elif line_idx_art and line_idx_art.metadata_json:
+            valid_lines_by_file = line_idx_art.metadata_json
 
         # Mark PUBLISHING
         pub.status = PublicationStatus.PUBLISHING

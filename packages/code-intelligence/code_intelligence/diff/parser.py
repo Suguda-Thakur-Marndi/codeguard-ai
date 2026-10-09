@@ -141,15 +141,59 @@ class UnifiedDiffParser:
     ) -> tuple[list[DiffFile], list[ParserDiagnostic]]:
         """Simple regex-based fallback parser for broken diff chunks to recover partial file changes."""
         parsed_files: list[DiffFile] = []
-        file_chunks = re.split(r"(?=diff --git )", raw_diff)
+        file_chunks = [c for c in re.split(r"(?=diff --git )", raw_diff) if c.strip()]
 
         for chunk in file_chunks:
-            if not chunk.strip():
-                continue
+            # Try parsing isolated chunk directly with PatchSet without recursing back to parse()
             try:
-                sub_files, sub_diag = cls.parse(chunk)
-                parsed_files.extend(sub_files)
-                diagnostics.extend(sub_diag)
+                patch_set = PatchSet(chunk)
+                for patched_file in patch_set:
+                    primary_path = _clean_path(patched_file.path)
+                    old_path = _clean_path(getattr(patched_file, "source_file", None))
+                    new_path = _clean_path(getattr(patched_file, "target_file", None))
+                    change_type = "modified"
+                    if patched_file.is_added_file:
+                        change_type = "added"
+                    elif patched_file.is_removed_file:
+                        change_type = "deleted"
+
+                    hunks: list[DiffHunk] = []
+                    for hunk in patched_file:
+                        diff_lines: list[DiffLine] = []
+                        for line in hunk:
+                            lt = DiffLineType.CONTEXT
+                            if line.is_added:
+                                lt = DiffLineType.ADDED
+                            elif line.is_removed:
+                                lt = DiffLineType.DELETED
+                            diff_lines.append(
+                                DiffLine(
+                                    line_type=lt,
+                                    content=line.value,
+                                    old_line_number=line.source_line_no,
+                                    new_line_number=line.target_line_no,
+                                )
+                            )
+                        hunks.append(
+                            DiffHunk(
+                                old_start=hunk.source_start,
+                                old_count=hunk.source_length,
+                                new_start=hunk.target_start,
+                                new_count=hunk.target_length,
+                                lines=diff_lines,
+                                section_header=getattr(hunk, "section_header", "") or "",
+                            )
+                        )
+                    parsed_files.append(
+                        DiffFile(
+                            file_path=primary_path,
+                            old_path=old_path,
+                            new_path=new_path,
+                            change_type=change_type,
+                            is_binary=patched_file.is_binary_file,
+                            hunks=hunks,
+                        )
+                    )
             except Exception:  # noqa: BLE001
                 # Extract file name via regex
                 match = re.search(r"diff --git a/(.+?) b/(.+)", chunk)

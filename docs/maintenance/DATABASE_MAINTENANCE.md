@@ -75,7 +75,7 @@ To protect intellectual property, prevent database bloat, and comply with enterp
 | **Source Code Diffs** | 30 Days | Hot DB (`diff_hunks`) | Automated truncation after PR review completion |
 | **Raw LLM Agent Traces** | 14 Days | Hot DB (`agent_runs`) | Compressed to JSON archive in cold storage or pruned |
 | **Verified Findings** | 1 Year | Hot DB (`review_findings`)| Retained for audit and security tracking |
-| **MCP Audit Logs** | 3 Years | Append-only DB (`audit_logs`) | Exported to immutable WORM storage monthly |
+| **Tool & Policy Audit Logs** | 3 Years | Append-only DB (`audit_logs`) | Exported to immutable WORM storage monthly |
 | **Human Approval Signatures** | 3 Years | Hot DB (`approval_signatures`)| Tamper-evident hash chain preserved |
 | **Benchmark Artifacts** | Permanent | File/DB (`benchmark_runs`) | Anonymized synthetic data only; no customer code |
 

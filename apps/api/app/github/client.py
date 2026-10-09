@@ -132,7 +132,7 @@ class GitHubClient:
                 "index 1234567..89abcde 100644\n"
                 "--- a/src/index.ts\n"
                 "+++ b/src/index.ts\n"
-                "@@ -1,5 +1,6 @@\n"
+                "@@ -1,3 +1,4 @@\n"
                 " export function hello(): string {\n"
                 "-  return 'hello';\n"
                 "+  // Production greeting\n"
@@ -214,6 +214,46 @@ class GitHubClient:
                         "message": "Add production greeting feature",
                         "author": {"name": "octocat", "date": "2026-10-04T00:00:00Z"},
                     },
+                },
+            )
+
+        if "installation/repositories" in path:
+            return httpx.Response(
+                200,
+                json={
+                    "total_count": 3,
+                    "repositories": [
+                        {
+                            "id": 94669001,
+                            "name": "auth-service",
+                            "full_name": "codeguard-ai/auth-service",
+                            "owner": {"login": "codeguard-ai", "id": 1001, "type": "Organization"},
+                            "private": True,
+                            "default_branch": "main",
+                            "html_url": "https://github.com/codeguard-ai/auth-service",
+                            "description": "Core authentication and authorization service",
+                        },
+                        {
+                            "id": 96847002,
+                            "name": "payment-gateway",
+                            "full_name": "codeguard-ai/payment-gateway",
+                            "owner": {"login": "codeguard-ai", "id": 1001, "type": "Organization"},
+                            "private": True,
+                            "default_branch": "main",
+                            "html_url": "https://github.com/codeguard-ai/payment-gateway",
+                            "description": "Secure payment processing and gateway",
+                        },
+                        {
+                            "id": 98765003,
+                            "name": "code-intelligence-core",
+                            "full_name": "codeguard-ai/code-intelligence-core",
+                            "owner": {"login": "codeguard-ai", "id": 1001, "type": "Organization"},
+                            "private": False,
+                            "default_branch": "main",
+                            "html_url": "https://github.com/codeguard-ai/code-intelligence-core",
+                            "description": "AST parsing and code intelligence engine",
+                        },
+                    ],
                 },
             )
 
@@ -381,3 +421,12 @@ class GitHubClient:
             if resp.status_code >= 400:
                 raise GitHubAPIError(f"GitHub API error {resp.status_code}: {resp.text}", status_code=resp.status_code)
             return resp.json()
+
+    async def list_installation_repositories(
+        self,
+        installation_id: int,
+    ) -> dict[str, Any]:
+        """Fetch repositories accessible to a GitHub App installation."""
+        path = "/installation/repositories"
+        response = await self._request_with_retry("GET", path, installation_id)
+        return response.json()

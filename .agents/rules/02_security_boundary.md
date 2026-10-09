@@ -11,7 +11,7 @@
    - Any agent proposing `DEV_AUTH_BYPASS = true` in production code must be rejected immediately.
 2. **No Approval Bypass**:
    - Human approval is mandatory for all high/critical findings and state-modifying actions.
-   - MCP tools marked with high risk must never be executed automatically.
+   - Consequential or high-risk tool actions must never be executed automatically.
 3. **No Direct Production Database Access**:
    - All schema changes must use Alembic migrations.
    - Raw SQL execution bypassing the repository and ORM layers is strictly forbidden.

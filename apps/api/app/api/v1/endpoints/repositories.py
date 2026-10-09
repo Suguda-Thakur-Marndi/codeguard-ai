@@ -1,6 +1,7 @@
 """Repositories API endpoints."""
 
 import math
+from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
@@ -53,3 +54,25 @@ def get_repository(
             detail=f"Repository with ID '{repository_id}' not found",
         )
     return RepositoryDetail.model_validate(repository)
+
+
+@router.delete("/{repository_id}", status_code=status.HTTP_200_OK)
+def delete_repository(
+    repository_id: str,
+    db: Session = Depends(get_db),
+    _user: dict = Depends(get_current_user_or_bypass),
+) -> dict[str, Any]:
+    """Disconnect repository from CodeGuard."""
+    repo = RepositoryRepository(db)
+    repository = repo.get_by_id(repository_id)
+    if not repository:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Repository with ID '{repository_id}' not found",
+        )
+    repo.delete(repository)
+    return {
+        "success": True,
+        "message": f"Repository '{repository.full_name}' disconnected successfully",
+        "repository_id": repository_id,
+    }

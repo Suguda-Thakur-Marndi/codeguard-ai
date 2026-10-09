@@ -111,6 +111,22 @@ class WebhookService:
                 if payload.installation
                 else int(settings.GITHUB_APP_ID if settings.GITHUB_APP_ID.isdigit() else 1)
             )
+
+            # Security check: Tenant isolation & installation ownership verification
+            existing_repo = self.repo_repo.get_by_github_repo_id(payload.repository.id)
+            if existing_repo and existing_repo.organization:
+                if existing_repo.organization.github_installation_id != installation_id:
+                    logger.warning(
+                        f"Webhook rejected: installation_id mismatch for repo '{payload.repository.full_name}'. "
+                        f"Expected {existing_repo.organization.github_installation_id}, got {installation_id}"
+                    )
+                    return WebhookResponse(
+                        status="ignored",
+                        event="pull_request",
+                        action=action,
+                        message="Installation ID does not match repository organization.",
+                    )
+
             repo_owner = payload.repository.owner
             org = self.org_repo.get_or_create(
                 installation_id=installation_id,

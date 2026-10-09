@@ -110,14 +110,12 @@ python scripts/backup_db.py \
 
 ---
 
-### Scenario 4: Worker / MCP Server Failure
+### Scenario 4: Worker Service Failure
 - **Worker Recovery**:
   1. Inspect Celery dead-letter and error logs: `docker logs codeguard-worker --tail 100`.
   2. Restart worker container: `docker compose -f docker-compose.prod.yml restart worker`.
   3. Workers resume processing pending jobs from Redis.
-- **MCP Server Recovery**:
-  1. Restart stateless MCP server: `docker compose -f docker-compose.prod.yml restart mcp-server`.
-  2. Healthcheck (`GET /health`) confirms readiness in < 5 seconds.
+  4. In-process zero-trust policy engine validates review publication tasks automatically upon task dispatch.
 
 ---
 

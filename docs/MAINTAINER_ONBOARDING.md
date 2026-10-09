@@ -86,16 +86,16 @@ Every checklist item below is linked to empirical documentation and reproduction
 ---
 
 ### [x] Step 7: Run the Test Suites
-- **Action**: Execute all unit tests, acceptance scenarios, and SRE release gates.
+- **Action**: Execute all unit tests, acceptance scenarios, and linter gates.
   ```powershell
-  # 1. Run all backend unit & integration tests
+  # 1. Run all backend unit, security & integration tests
   .\.venv\Scripts\python.exe -m pytest apps/api/tests -q
   # 2. Run Ruff linter
   .\.venv\Scripts\ruff.exe check .
-  # 3. Run Master SRE Verification Suite (27 gates)
-  .\.venv\Scripts\python.exe verify_phase16.py
+  # 3. Run Frontend typecheck & production build
+  cd apps/web; npm run lint; npm run build; cd ../..
   ```
-- **Verification Evidence**: 253/253 pytest tests pass; 27/27 operational gates pass; Ruff reports `All checks passed!`.
+- **Verification Evidence**: 232/232 pytest tests pass; Ruff reports `All checks passed!`; Next.js compiles 16 static/dynamic routes with 0 errors.
 - **Reference**: [`docs/TESTING.md`](file:///c:/Users/sugud/OneDrive/Documents/codeguard-ai/docs/TESTING.md).
 
 ---

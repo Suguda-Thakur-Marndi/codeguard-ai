@@ -64,57 +64,94 @@ export default function ApprovalsPage() {
   function getStatusBadge(status: string) {
     switch (status) {
       case "PENDING":
-        return <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20 animate-pulse">PENDING APPROVAL</span>;
+        return (
+          <span className="px-2 py-0.5 rounded font-label-mono text-kbd-shortcut bg-surface-container-highest text-primary-fixed border border-primary-fixed/30 font-semibold animate-pulse">
+            PENDING APPROVAL
+          </span>
+        );
       case "APPROVED":
-        return <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">APPROVED</span>;
+        return (
+          <span className="px-2 py-0.5 rounded font-label-mono text-kbd-shortcut bg-tertiary-container text-on-tertiary-container font-semibold">
+            APPROVED
+          </span>
+        );
       case "REJECTED":
-        return <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-500/10 text-rose-400 border border-rose-500/20">REJECTED</span>;
+        return (
+          <span className="px-2 py-0.5 rounded font-label-mono text-kbd-shortcut bg-error-container text-on-error-container font-semibold">
+            REJECTED
+          </span>
+        );
       case "EXPIRED":
-        return <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-500/10 text-slate-400 border border-slate-500/20">EXPIRED</span>;
-      case "CANCELLED":
-        return <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-zinc-500/10 text-zinc-400 border border-zinc-500/20">CANCELLED</span>;
+        return (
+          <span className="px-2 py-0.5 rounded font-label-mono text-kbd-shortcut bg-surface-container-high text-outline">
+            EXPIRED
+          </span>
+        );
       default:
-        return <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-800 text-slate-300">{status}</span>;
+        return (
+          <span className="px-2 py-0.5 rounded font-label-mono text-kbd-shortcut bg-surface-container-high text-on-surface">
+            {status}
+          </span>
+        );
     }
   }
 
   function getRiskBadge(risk: string) {
     switch (risk) {
       case "HIGH_RISK":
-        return <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-rose-500/20 text-rose-400 border border-rose-500/30">HIGH RISK</span>;
+        return (
+          <span className="px-1.5 py-0.5 rounded font-label-mono text-kbd-shortcut font-bold bg-error-container/40 text-error border border-error/30">
+            HIGH RISK
+          </span>
+        );
       case "CONSEQUENTIAL":
-        return <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30">CONSEQUENTIAL</span>;
+        return (
+          <span className="px-1.5 py-0.5 rounded font-label-mono text-kbd-shortcut font-bold bg-surface-container-highest text-surface-tint border border-surface-tint/30">
+            CONSEQUENTIAL
+          </span>
+        );
       default:
-        return <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-slate-800 text-slate-400">{risk}</span>;
+        return (
+          <span className="px-1.5 py-0.5 rounded font-label-mono text-kbd-shortcut bg-surface-container-high text-outline">
+            {risk}
+          </span>
+        );
     }
   }
 
+  const pendingCount = approvals.filter((a) => a.status === "PENDING").length;
+  const approvedCount = approvals.filter((a) => a.status === "APPROVED").length;
+  const rejectedCount = approvals.filter((a) => a.status === "REJECTED").length;
+
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+    <div className="flex flex-col w-full pb-16 space-y-space-md">
       {/* Top Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800 pb-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#262930] pb-space-md">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold tracking-tight text-white">Human Approval Gate</h1>
-            <span className="px-2 py-0.5 rounded text-xs font-mono bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
-              Zero-Trust Tool Boundary
+            <h1 className="font-headline-lg text-headline-lg text-primary tracking-tight">
+              Human Approval &amp; Governance Gate
+            </h1>
+            <span className="px-2 py-0.5 rounded font-label-mono text-kbd-shortcut bg-surface-container-high text-secondary border border-[#262930]">
+              Zero-Trust Policy Boundary
             </span>
           </div>
-          <p className="text-sm text-slate-400 mt-1">
-            Consequential and high-risk GitHub operations require explicit human reviewer authorization.
+          <p className="font-body-sm text-body-sm text-outline mt-1">
+            Consequential and high-risk operations require explicit human reviewer sign-off before publishing.
           </p>
         </div>
 
         {/* Filter pills */}
-        <div className="flex items-center gap-1.5 bg-slate-900/80 p-1 rounded-lg border border-slate-800 text-xs">
+        <div className="flex items-center gap-1.5 bg-surface-container p-1 rounded-lg border border-[#262930] text-xs">
           {["ALL", "PENDING", "APPROVED", "REJECTED", "EXPIRED"].map((status) => (
             <button
               key={status}
+              type="button"
               onClick={() => setFilterStatus(status)}
-              className={`px-3 py-1.5 rounded-md font-medium transition-colors ${
+              className={`px-3 py-1 rounded font-label-mono text-kbd-shortcut transition-colors ${
                 filterStatus === status
-                  ? "bg-indigo-600 text-white shadow-sm"
-                  : "text-slate-400 hover:text-white hover:bg-slate-800/50"
+                  ? "bg-surface-container-highest text-primary-fixed font-semibold"
+                  : "text-on-surface-variant hover:text-on-surface"
               }`}
             >
               {status}
@@ -124,215 +161,196 @@ export default function ApprovalsPage() {
       </div>
 
       {/* Overview stats cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-        <div className="p-4 rounded-xl bg-slate-900/50 border border-slate-800/80">
-          <span className="text-xs text-slate-400 uppercase tracking-wider font-mono">Pending Gate</span>
-          <div className="text-2xl font-bold text-amber-400 mt-1">
-            {approvals.filter((a) => a.status === "PENDING").length}
+      <div className="grid grid-cols-1 sm:grid-cols-4 gap-space-sm">
+        <div className="p-space-md rounded-lg bg-surface-container-low border border-[#262930]">
+          <span className="font-label-mono text-kbd-shortcut text-outline uppercase tracking-wider">Pending Gate</span>
+          <div className="font-headline-md text-headline-md font-bold text-primary-fixed mt-1">
+            {pendingCount}
           </div>
         </div>
-        <div className="p-4 rounded-xl bg-slate-900/50 border border-slate-800/80">
-          <span className="text-xs text-slate-400 uppercase tracking-wider font-mono">Approved</span>
-          <div className="text-2xl font-bold text-emerald-400 mt-1">
-            {approvals.filter((a) => a.status === "APPROVED").length}
+        <div className="p-space-md rounded-lg bg-surface-container-low border border-[#262930]">
+          <span className="font-label-mono text-kbd-shortcut text-outline uppercase tracking-wider">Approved</span>
+          <div className="font-headline-md text-headline-md font-bold text-tertiary-fixed-dim mt-1">
+            {approvedCount}
           </div>
         </div>
-        <div className="p-4 rounded-xl bg-slate-900/50 border border-slate-800/80">
-          <span className="text-xs text-slate-400 uppercase tracking-wider font-mono">Rejected</span>
-          <div className="text-2xl font-bold text-rose-400 mt-1">
-            {approvals.filter((a) => a.status === "REJECTED").length}
+        <div className="p-space-md rounded-lg bg-surface-container-low border border-[#262930]">
+          <span className="font-label-mono text-kbd-shortcut text-outline uppercase tracking-wider">Rejected</span>
+          <div className="font-headline-md text-headline-md font-bold text-error mt-1">
+            {rejectedCount}
           </div>
         </div>
-        <div className="p-4 rounded-xl bg-slate-900/50 border border-slate-800/80">
-          <span className="text-xs text-slate-400 uppercase tracking-wider font-mono">Total Requests</span>
-          <div className="text-2xl font-bold text-slate-200 mt-1">{approvals.length}</div>
+        <div className="p-space-md rounded-lg bg-surface-container-low border border-[#262930]">
+          <span className="font-label-mono text-kbd-shortcut text-outline uppercase tracking-wider">Total Evaluated</span>
+          <div className="font-headline-md text-headline-md font-bold text-primary mt-1">
+            {approvals.length}
+          </div>
         </div>
       </div>
 
-      {/* Main Table Card */}
-      <div className="rounded-xl bg-slate-900/40 border border-slate-800 overflow-hidden">
-        {loading ? (
-          <div className="p-12 text-center text-slate-500 font-mono text-sm animate-pulse">
-            Loading approval requests...
-          </div>
-        ) : error ? (
-          <div className="p-6 text-center text-rose-400 bg-rose-500/10 border border-rose-500/20 text-sm">
-            {error}
-          </div>
-        ) : approvals.length === 0 ? (
-          <div className="p-12 text-center text-slate-500 space-y-2">
-            <div className="w-12 h-12 rounded-full bg-slate-800 mx-auto flex items-center justify-center text-slate-400">
-              ✓
-            </div>
-            <p className="text-sm font-medium text-slate-300">No approval requests found</p>
-            <p className="text-xs text-slate-500">
-              {filterStatus === "ALL" ? "All operations authorized or no pending reviews require human sign-off." : `No requests match status "${filterStatus}".`}
-            </p>
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm text-slate-300">
-              <thead className="bg-slate-950/60 text-xs font-mono text-slate-400 uppercase border-b border-slate-800">
-                <tr>
-                  <th className="px-6 py-3">Repository & PR</th>
-                  <th className="px-6 py-3">Action & Risk</th>
-                  <th className="px-6 py-3">Finding Target</th>
-                  <th className="px-6 py-3">Status</th>
-                  <th className="px-6 py-3">Timing & Expiration</th>
-                  <th className="px-6 py-3 text-right">Gate Actions</th>
+      {error && (
+        <div className="p-space-md rounded bg-error-container/20 border border-error text-error text-xs font-mono">
+          {error}
+        </div>
+      )}
+
+      {/* Main Approvals Table */}
+      <div className="bg-surface-container-lowest rounded-lg border border-[#262930] overflow-hidden shadow-sm">
+        <table className="w-full text-left font-body-sm text-body-sm border-collapse">
+          <thead>
+            <tr className="bg-surface-container text-on-surface-variant font-label-mono text-kbd-shortcut uppercase tracking-wider">
+              <th className="py-2.5 px-4">Action / Scope</th>
+              <th className="py-2.5 px-3">Risk Level</th>
+              <th className="py-2.5 px-3">Status</th>
+              <th className="py-2.5 px-3">Review Job / PR</th>
+              <th className="py-2.5 px-3">Requested At</th>
+              <th className="py-2.5 px-4 text-right">Decision</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-[#262930]/40">
+            {loading ? (
+              <tr>
+                <td colSpan={6} className="py-12 text-center text-outline font-label-mono">
+                  Loading approval requests...
+                </td>
+              </tr>
+            ) : approvals.length === 0 ? (
+              <tr>
+                <td colSpan={6} className="py-12 text-center">
+                  <div className="flex flex-col items-center gap-2">
+                    <span className="material-symbols-outlined text-[32px] text-tertiary-fixed-dim">
+                      assignment_turned_in
+                    </span>
+                    <p className="text-on-surface font-medium">No approval requests found</p>
+                    <p className="text-outline text-xs">
+                      All autonomous policy gates are clear. No pending human reviews.
+                    </p>
+                  </div>
+                </td>
+              </tr>
+            ) : (
+              approvals.map((app) => (
+                <tr key={app.id} className="hover:bg-surface-container transition-colors group">
+                  <td className="py-3 px-4">
+                    <div className="flex flex-col">
+                      <span className="font-mono text-xs font-semibold text-primary">{app.requested_action}</span>
+                      <span className="text-[11px] text-outline truncate max-w-sm">
+                        {app.reason || "Requires human confirmation before GitHub dispatch."}
+                      </span>
+                    </div>
+                  </td>
+                  <td className="py-3 px-3">{getRiskBadge(app.risk_level)}</td>
+                  <td className="py-3 px-3">{getStatusBadge(app.status)}</td>
+                  <td className="py-3 px-3">
+                    <div className="flex flex-col font-mono text-[11px]">
+                      {app.pull_request_id ? (
+                        <Link
+                          href={`/pull-requests/${app.pull_request_id}`}
+                          className="text-primary-fixed hover:underline"
+                        >
+                          PR {app.pull_request_id.slice(0, 8)}...
+                        </Link>
+                      ) : (
+                        <span className="text-outline">PR —</span>
+                      )}
+                      <span className="text-outline">Job: {app.review_job_id.slice(0, 8)}...</span>
+                    </div>
+                  </td>
+                  <td className="py-3 px-3 font-mono text-[11px] text-outline">
+                    {new Date(app.created_at).toLocaleString()}
+                  </td>
+                  <td className="py-3 px-4 text-right">
+                    {app.status === "PENDING" ? (
+                      <div className="flex items-center justify-end gap-1.5">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setActiveModal({ type: "approve", approval: app });
+                            setActionInput("");
+                          }}
+                          className="px-2.5 py-1 rounded bg-primary-container text-on-primary-container font-label-mono text-kbd-shortcut font-semibold hover:brightness-105 transition-all shadow-sm"
+                        >
+                          Approve
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setActiveModal({ type: "reject", approval: app });
+                            setActionInput("");
+                          }}
+                          className="px-2.5 py-1 rounded bg-surface-container-high hover:bg-error-container hover:text-on-error-container text-on-surface font-label-mono text-kbd-shortcut border border-[#262930] transition-colors"
+                        >
+                          Reject
+                        </button>
+                      </div>
+                    ) : (
+                      <span className="text-[11px] font-mono text-outline">Decision Recorded</span>
+                    )}
+                  </td>
                 </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-800/60 font-mono">
-                {approvals.map((req) => {
-                  const isPending = req.status === "PENDING";
-                  return (
-                    <tr key={req.id} className="hover:bg-slate-800/30 transition-colors">
-                      <td className="px-6 py-4 font-sans">
-                        <div className="font-semibold text-white">
-                          {req.repository_name || req.repository_id.slice(0, 8)}
-                        </div>
-                        <div className="text-xs text-slate-400 mt-0.5">
-                          PR #{req.pull_request_number || "—"}{" "}
-                          <span className="text-slate-600">|</span> Commit:{" "}
-                          <span className="font-mono text-slate-300">
-                            {req.head_sha ? req.head_sha.slice(0, 7) : "—"}
-                          </span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 font-sans space-y-1">
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs font-bold text-indigo-300">{req.requested_action}</span>
-                          {getRiskBadge(req.risk_level)}
-                        </div>
-                        <div className="text-[11px] text-slate-500">
-                          By: <span className="font-mono text-slate-400">{req.requested_by}</span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 font-sans max-w-xs">
-                        <div className="font-medium text-slate-200 truncate">
-                          {req.finding_title || `Finding ${req.finding_id.slice(0, 8)}`}
-                        </div>
-                        {req.finding_severity && (
-                          <div className="text-xs text-rose-400 mt-0.5">
-                            Severity: {req.finding_severity}
-                          </div>
-                        )}
-                        {req.reason && (
-                          <div className="text-xs text-slate-400 mt-1 italic line-clamp-1">
-                            &ldquo;{req.reason}&rdquo;
-                          </div>
-                        )}
-                      </td>
-                      <td className="px-6 py-4 font-sans">{getStatusBadge(req.status)}</td>
-                      <td className="px-6 py-4 text-xs text-slate-400 font-mono">
-                        <div>Created: {new Date(req.created_at).toLocaleTimeString()}</div>
-                        <div className="text-slate-500">
-                          Expires: {new Date(req.expires_at).toLocaleTimeString()}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 text-right font-sans">
-                        {isPending ? (
-                          <div className="flex items-center justify-end gap-2">
-                            <button
-                              onClick={() => {
-                                setActiveModal({ type: "approve", approval: req });
-                                setActionInput("");
-                              }}
-                              className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white shadow transition-colors"
-                            >
-                              Approve
-                            </button>
-                            <button
-                              onClick={() => {
-                                setActiveModal({ type: "reject", approval: req });
-                                setActionInput("");
-                              }}
-                              className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-rose-600/20 hover:bg-rose-600/30 text-rose-400 border border-rose-500/30 transition-colors"
-                            >
-                              Reject
-                            </button>
-                          </div>
-                        ) : (
-                          <span className="text-xs text-slate-500">
-                            {req.approved_by ? `Resolved by ${req.approved_by}` : "Closed"}
-                          </span>
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        )}
+              ))
+            )}
+          </tbody>
+        </table>
       </div>
 
-      {/* Interactive Modal */}
+      {/* Decision Modal */}
       {activeModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-              <h3 className="text-lg font-bold text-white">
-                {activeModal.type === "approve" ? "Authorize GitHub Action" : "Reject Approval Request"}
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+          <div className="bg-surface-container-low border border-[#333842] rounded-xl max-w-lg w-full p-space-md shadow-2xl space-y-space-md">
+            <div className="flex items-center justify-between border-b border-[#262930] pb-2">
+              <h3 className="font-headline-sm text-headline-sm text-primary">
+                {activeModal.type === "approve" ? "Confirm Authorization" : "Reject Operation"}
               </h3>
               <button
+                type="button"
                 onClick={() => setActiveModal(null)}
-                className="text-slate-500 hover:text-white text-sm"
+                className="text-outline hover:text-on-surface"
               >
                 ✕
               </button>
             </div>
 
-            <div className="bg-slate-950/60 p-3 rounded-lg border border-slate-800/80 text-xs space-y-1 font-mono">
-              <div className="text-slate-400">
-                Action: <span className="text-white font-bold">{activeModal.approval.requested_action}</span>
-              </div>
-              <div className="text-slate-400">
-                Head SHA: <span className="text-indigo-400">{activeModal.approval.head_sha || "—"}</span>
-              </div>
-              <div className="text-slate-400">
-                Target Finding: <span className="text-slate-300">{activeModal.approval.finding_id}</span>
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1">
+            <div className="space-y-2 text-xs">
+              <p className="text-on-surface">
+                Action: <code className="text-primary-fixed font-mono">{activeModal.approval.requested_action}</code>
+              </p>
+              <p className="text-outline">
                 {activeModal.type === "approve"
-                  ? "Optional Approval Note"
-                  : "Rejection Reason (Required)"}
-              </label>
+                  ? "Authorizing this request will dispatch the tool operation to the external system."
+                  : "Provide a justification for blocking this execution:"}
+              </p>
               <textarea
-                rows={3}
                 value={actionInput}
                 onChange={(e) => setActionInput(e.target.value)}
                 placeholder={
                   activeModal.type === "approve"
-                    ? "Add human reviewer authorization rationale..."
-                    : "Specify why this finding should not be published to GitHub..."
+                    ? "Optional approval comment..."
+                    : "Mandatory rejection reason..."
                 }
-                className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200 placeholder-slate-600 focus:outline-none focus:border-indigo-500"
+                className="w-full bg-surface-container-lowest text-on-surface border border-[#262930] rounded p-2 text-xs outline-none focus:border-primary-fixed h-24"
               />
             </div>
 
-            <div className="flex justify-end gap-2 pt-2">
+            <div className="flex items-center justify-end gap-2 border-t border-[#262930] pt-2">
               <button
                 type="button"
                 onClick={() => setActiveModal(null)}
-                className="px-4 py-2 rounded-lg text-xs font-medium text-slate-400 hover:bg-slate-800"
+                className="px-3 py-1.5 rounded bg-surface-container-high text-on-surface font-label-mono text-kbd-shortcut border border-[#262930]"
               >
                 Cancel
               </button>
               <button
                 type="button"
-                disabled={submitting}
                 onClick={handleConfirmAction}
-                className={`px-4 py-2 rounded-lg text-xs font-semibold text-white shadow ${
+                disabled={submitting}
+                className={`px-3 py-1.5 rounded font-label-mono text-kbd-shortcut font-semibold shadow-sm ${
                   activeModal.type === "approve"
-                    ? "bg-emerald-600 hover:bg-emerald-500"
-                    : "bg-rose-600 hover:bg-rose-500"
-                } disabled:opacity-50`}
+                    ? "bg-primary-container text-on-primary-container hover:brightness-105"
+                    : "bg-error-container text-on-error-container hover:brightness-110"
+                }`}
               >
-                {submitting ? "Processing..." : activeModal.type === "approve" ? "Confirm Approval" : "Reject Request"}
+                {submitting ? "Submitting..." : activeModal.type === "approve" ? "Authorize & Publish" : "Reject Bypass"}
               </button>
             </div>
           </div>

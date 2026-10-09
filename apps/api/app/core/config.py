@@ -39,9 +39,11 @@ class Settings(BaseSettings):
     DB_MAX_OVERFLOW: int = 20
     DB_POOL_TIMEOUT: int = 30
 
-    # GitHub App Credentials
+    # GitHub App Credentials & Installation URLs
     GITHUB_APP_ID: str = "dev-app-id"
+    GITHUB_APP_SLUG: str = "codeguard-ai-123"
     GITHUB_APP_CLIENT_ID: str = ""
+    GITHUB_APP_INSTALL_URL: str = ""
     GITHUB_PRIVATE_KEY: str = ""
     GITHUB_PRIVATE_KEY_PATH: str = ""
     GITHUB_WEBHOOK_SECRET: str = "dev-webhook-secret"
@@ -216,6 +218,14 @@ class Settings(BaseSettings):
                 raise ValueError(
                     f"Production configuration validation failed: {'; '.join(errors)}"
                 )
+
+    @property
+    def github_app_install_url(self) -> str:
+        """Resolve GitHub App installation URL."""
+        if self.GITHUB_APP_INSTALL_URL:
+            return self.GITHUB_APP_INSTALL_URL
+        slug = self.GITHUB_APP_SLUG or "codeguard-ai"
+        return f"https://github.com/apps/{slug}/installations/new"
 
 
 settings = Settings()

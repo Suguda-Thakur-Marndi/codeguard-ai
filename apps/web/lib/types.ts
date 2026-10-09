@@ -100,6 +100,7 @@ export interface RepositoryIndex {
   error_count: number;
   total_symbols?: number;
   total_references?: number;
+  symbol_count?: number;
 }
 
 export interface CodeSymbol {
@@ -157,6 +158,9 @@ export interface DiffFile {
   new_path: string;
   change_type: string;
   hunks: DiffHunk[];
+  additions?: number;
+  deletions?: number;
+  patch?: string;
 }
 
 export interface ASTChunk {
@@ -379,6 +383,8 @@ export interface ReviewFinding {
   judge_decisions?: JudgeDecision[];
   validation_scenarios?: ValidationScenario[];
   grounding_evidence?: FindingEvidence[];
+  rule_id?: string | null;
+  suggested_fix?: string | null;
   created_at: string;
 }
 
@@ -544,4 +550,159 @@ export interface OrganizationReviewPolicy {
   created_at: string;
   updated_at: string;
 }
+
+// ==========================================
+// GitHub App Connection & Repository Discovery
+// ==========================================
+
+export interface GitHubInstallUrlResponse {
+  install_url: string;
+  app_slug: string;
+  app_id: string;
+}
+
+export interface GitHubInstallation {
+  id: string;
+  installation_id: number;
+  account_id: number;
+  account_login: string;
+  account_type: string;
+  repository_count: number;
+  created_at: string;
+}
+
+export interface GitHubAccessibleRepository {
+  github_repo_id: number;
+  name: string;
+  full_name: string;
+  owner: string;
+  default_branch: string;
+  is_private: boolean;
+  html_url: string;
+  description: string | null;
+  is_connected: boolean;
+  codeguard_repo_id: string | null;
+}
+
+export interface GitHubAccessibleRepositoriesResponse {
+  installation_id: number;
+  account_login: string;
+  total_count: number;
+  repositories: GitHubAccessibleRepository[];
+}
+
+export interface GitHubConnectRepositoryRequest {
+  installation_id: number;
+  github_repo_id: number;
+  owner: string;
+  name: string;
+  full_name: string;
+  default_branch?: string;
+  is_private?: boolean;
+}
+
+export interface GitHubDisconnectResponse {
+  success: boolean;
+  message: string;
+  repository_id: string;
+}
+
+// ==========================================
+// Benchmarks & Evaluation Types
+// ==========================================
+
+export interface BenchmarkEvaluation {
+  finding_id: string;
+  classification: string;
+  predicted_category?: string;
+  expected_category?: string;
+  category_matched?: boolean;
+  predicted_severity?: string;
+  expected_severity?: string;
+  severity_matched?: boolean;
+  line_matched?: boolean;
+  semantic_similarity?: number;
+  reasons?: string[];
+}
+
+export interface BenchmarkScenarioResult {
+  id: string;
+  scenario_id: string;
+  status: string;
+  language: string;
+  category: string;
+  scenario_type: string;
+  latency_ms: number;
+  input_tokens: number;
+  output_tokens: number;
+  estimated_cost: number;
+  raw_findings_count: number;
+  final_findings_count: number;
+  tp_count: number;
+  fp_count: number;
+  fn_count: number;
+  error_message?: string | null;
+  evaluations: BenchmarkEvaluation[];
+}
+
+export interface BenchmarkMetricsSummary {
+  precision?: number;
+  recall?: number;
+  f1_score?: number;
+  accuracy?: number;
+  latency_p50_ms?: number;
+  latency_p95_ms?: number;
+  total_cost?: number;
+  total_tokens?: number;
+  total_scenarios?: number;
+  passed_scenarios?: number;
+  failed_scenarios?: number;
+  tp_total?: number;
+  fp_total?: number;
+  fn_total?: number;
+  [key: string]: any;
+}
+
+export interface BenchmarkRunItem {
+  id: string;
+  name: string;
+  dataset_version: string;
+  model_name: string;
+  status: string;
+  git_revision: string;
+  scenarios_total: number;
+  scenarios_passed: number;
+  scenarios_failed: number;
+  metrics_summary: BenchmarkMetricsSummary;
+  completed_at: string | null;
+  created_at: string;
+}
+
+export interface BenchmarkRunDetail extends BenchmarkRunItem {
+  configuration?: Record<string, any>;
+  results: BenchmarkScenarioResult[];
+}
+
+export interface BenchmarkComparison {
+  baseline_run: {
+    id: string;
+    name: string;
+    metrics: BenchmarkMetricsSummary;
+  };
+  candidate_run: {
+    id: string;
+    name: string;
+    metrics: BenchmarkMetricsSummary;
+  };
+  delta: {
+    precision_delta: number;
+    recall_delta: number;
+    f1_delta: number;
+    latency_p50_delta_ms: number;
+    total_cost_delta: number;
+  };
+  is_regression: boolean;
+  regressions: string[];
+}
+
 

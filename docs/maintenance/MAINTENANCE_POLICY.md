@@ -24,7 +24,7 @@ SERENA (Codebase Understanding) / CONTEXT7 (Official Docs)
 
 ### Core Invariants
 1. **No UI/UX Redesigns**: Visual layouts, Tailwind classes, typography, component hierarchies, and navigation in `apps/web/` must remain unchanged during maintenance.
-2. **No Business Logic Invention**: Never rewrite existing working logic or create ad-hoc abstractions. Maintain adversarial judge 5-gate filters, MCP Sentinel policies, human approval lifecycles, and tenant isolation as designed.
+2. **No Business Logic Invention**: Never rewrite existing working logic or create ad-hoc abstractions. Maintain adversarial judge 5-gate filters, Zero-Trust PolicyEngine Sentinel policies, human approval lifecycles, and tenant isolation as designed.
 3. **Never Weaken Tests**: Tests are authoritative evidence. If a test fails after an update, fix the implementation; never loosen assertions or delete tests.
 4. **No Speculative Changes**: Code is modified only to fix verified bugs, address confirmed security advisories, or update dependencies following empirical validation.
 

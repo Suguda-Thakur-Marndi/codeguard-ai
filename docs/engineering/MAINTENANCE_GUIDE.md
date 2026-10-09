@@ -78,4 +78,4 @@ When upgrading Tree-sitter language grammars:
 Verify active service health locally or in staging:
 - **Liveness Probe**: `GET http://localhost:8000/api/v1/live` -> HTTP 200 `{"status": "alive"}`
 - **Readiness Probe**: `GET http://localhost:8000/api/v1/health` -> HTTP 200 `{"status": "healthy", "database": "connected", "redis": "connected"}`
-- **MCP Server**: `GET http://localhost:8001/health` -> HTTP 200 `{"status": "ok"}`
+- **Frontend Dashboard**: `GET http://localhost:3000/` -> HTTP 200 (Next.js SSR)

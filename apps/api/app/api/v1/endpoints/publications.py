@@ -74,6 +74,7 @@ def get_job_publication(
 
 
 @router.post("/review-jobs/{review_job_id}/publish", response_model=dict[str, Any])
+@router.post("/review-jobs/{review_job_id}/publication/publish", response_model=dict[str, Any])
 def publish_job_review(
     review_job_id: str,
     payload: PublishRequestPayload = PublishRequestPayload(),
@@ -128,3 +129,47 @@ def publish_job_review(
 
     except Exception as exc:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
+
+
+class ApprovalRequestPayload(BaseModel):
+    finding_id: str | None = None
+    action: str = "COMMENT"
+
+
+@router.post("/review-jobs/{review_job_id}/publication/request-approval", response_model=dict[str, Any])
+def request_job_approval(
+    review_job_id: str,
+    payload: ApprovalRequestPayload = ApprovalRequestPayload(),
+    db: Session = Depends(get_db),
+    _user: dict = Depends(get_current_user_or_bypass),
+) -> dict[str, Any]:
+    user_org_id = _user.get("organization_id")
+    user_role = str(_user.get("role", "MEMBER")).upper()
+    if user_org_id and user_role != "ADMIN":
+        from app.models.pull_request import PullRequest
+        from app.models.repository import Repository
+        from app.models.review_job import ReviewJob
+
+        job = db.scalar(select(ReviewJob).where(ReviewJob.id == review_job_id))
+        if job:
+            pr = db.scalar(select(PullRequest).where(PullRequest.id == job.pull_request_id))
+            if pr:
+                repo = db.scalar(select(Repository).where(Repository.id == pr.repository_id))
+                if repo and repo.organization_id != user_org_id:
+                    raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Cross-tenant access forbidden")
+
+    service = PublicationService(db)
+    try:
+        pub, approval_req = service.prepare_publication(
+            review_job_id=review_job_id,
+            action=payload.action,
+        )
+        return {
+            "approval_id": approval_req.id if approval_req else None,
+            "publication_id": pub.id,
+            "status": "PENDING" if approval_req else pub.status.value,
+            "message": "Approval request registered in governance log." if approval_req else "Publication authorized.",
+        }
+    except Exception as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
+

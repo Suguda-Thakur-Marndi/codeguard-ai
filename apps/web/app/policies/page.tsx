@@ -61,7 +61,7 @@ export default function PoliciesPage() {
         approval_expiry_minutes: policy.approval_expiry_minutes,
       });
       setPolicy(updated);
-      setMessage({ type: "success", text: "Organization policies successfully updated." });
+      setMessage({ type: "success", text: "Organization policies successfully synchronized and enforced." });
     } catch (err: any) {
       setMessage({ type: "error", text: err.message || "Failed to save policies" });
     } finally {
@@ -70,31 +70,32 @@ export default function PoliciesPage() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+    <div className="max-w-4xl mx-auto space-y-6">
       {/* Top Header */}
-      <div className="border-b border-slate-800 pb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="border-b border-[#262930] pb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2.5">
             <h1 className="text-2xl font-bold tracking-tight text-white">Organization Review Policy</h1>
-            <span className="px-2 py-0.5 rounded text-xs font-mono bg-purple-500/10 text-purple-400 border border-purple-500/20">
+            <span className="px-2 py-0.5 rounded text-[11px] font-mono bg-[#8B5CF6]/10 text-[#A78BFA] border border-[#8B5CF6]/30 uppercase tracking-wider font-semibold">
               Admin Restricted
             </span>
           </div>
-          <p className="text-sm text-slate-400 mt-1">
-            Configure automated GitHub publishing thresholds and mandatory human approval gates.
+          <p className="text-xs text-slate-400 mt-1">
+            Configure automated GitHub publishing thresholds and deterministic zero-trust approval gates.
           </p>
         </div>
 
         {orgs.length > 0 && (
-          <div>
+          <div className="flex items-center gap-2">
+            <span className="text-[11px] font-mono text-slate-400">Target:</span>
             <select
               value={selectedOrgId}
               onChange={(e) => setSelectedOrgId(e.target.value)}
-              className="bg-slate-900 border border-slate-800 text-slate-200 rounded-lg px-3 py-1.5 text-xs font-mono focus:outline-none focus:border-indigo-500"
+              className="bg-surface-container-low border border-[#333842] text-slate-200 rounded-lg px-3 py-1.5 text-xs font-mono focus:outline-none focus:border-[#F5E900]"
             >
               {orgs.map((org) => (
                 <option key={org.id} value={org.id}>
-                  Org: {org.github_account_login}
+                  {org.github_account_login}
                 </option>
               ))}
             </select>
@@ -104,40 +105,47 @@ export default function PoliciesPage() {
 
       {message && (
         <div
-          className={`p-4 rounded-xl text-xs font-mono border ${
+          className={`p-3.5 rounded-xl text-xs font-mono border flex items-center gap-2.5 ${
             message.type === "success"
-              ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
-              : "bg-rose-500/10 text-rose-400 border-rose-500/20"
+              ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
+              : "bg-rose-500/10 text-rose-400 border-rose-500/30"
           }`}
         >
-          {message.text}
+          <span className="material-symbols-outlined text-[16px]">
+            {message.type === "success" ? "check_circle" : "error"}
+          </span>
+          <span>{message.text}</span>
         </div>
       )}
 
       {loading ? (
-        <div className="p-12 text-center text-slate-500 font-mono text-sm animate-pulse">
-          Loading organization policies...
+        <div className="p-12 text-center text-slate-500 font-mono text-xs flex items-center justify-center gap-2">
+          <span className="w-3.5 h-3.5 border-2 border-[#F5E900] border-t-transparent rounded-full animate-spin"></span>
+          <span>Loading organization policies...</span>
         </div>
       ) : !policy ? (
-        <div className="p-8 text-center text-slate-500 text-sm">
-          No policy found for the selected organization.
+        <div className="p-10 text-center bg-surface-container-low border border-[#262930] rounded-xl text-slate-400 text-xs font-mono">
+          No policy configuration found for the selected organization.
         </div>
       ) : (
-        <div className="space-y-6 bg-slate-900/40 border border-slate-800 rounded-2xl p-6 shadow-xl">
+        <div className="space-y-6 bg-surface-container-low border border-[#262930] rounded-xl p-6 shadow-xl">
           {/* Section: Auto-Publishing Gates */}
           <div>
-            <h3 className="text-sm font-bold text-white uppercase tracking-wider font-mono border-b border-slate-800 pb-2">
-              Automated Publishing Gates
-            </h3>
-            <p className="text-xs text-slate-400 mt-1">
-              Control which severity tiers can be automatically published without human sign-off.
+            <div className="flex items-center gap-2 border-b border-[#262930] pb-2.5">
+              <span className="material-symbols-outlined text-slate-400 text-[18px]">publish</span>
+              <h3 className="text-xs font-bold text-white uppercase tracking-wider font-mono">
+                Automated Publishing Gates
+              </h3>
+            </div>
+            <p className="text-xs text-slate-400 mt-1.5">
+              Control which severity tiers can be automatically published without mandatory human sign-off.
             </p>
 
-            <div className="divide-y divide-slate-800/60 mt-4">
+            <div className="divide-y divide-[#262930]/80 mt-4">
               <div className="py-3.5 flex items-center justify-between">
                 <div>
-                  <div className="text-sm font-semibold text-slate-200">Advisory Findings</div>
-                  <div className="text-xs text-slate-400">Informational style or hygiene suggestions</div>
+                  <div className="text-xs font-semibold text-slate-200">Advisory Findings</div>
+                  <div className="text-[11px] text-slate-400">Informational style, hygiene, or maintenance suggestions</div>
                 </div>
                 <label className="relative inline-flex items-center cursor-pointer">
                   <input
@@ -148,14 +156,14 @@ export default function PoliciesPage() {
                     }
                     className="sr-only peer"
                   />
-                  <div className="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                  <div className="w-10 h-5 bg-[#20232B] border border-[#333842] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#8B5CF6]"></div>
                 </label>
               </div>
 
               <div className="py-3.5 flex items-center justify-between">
                 <div>
-                  <div className="text-sm font-semibold text-slate-200">Low Severity Findings</div>
-                  <div className="text-xs text-slate-400">Minor issues with low blast radius</div>
+                  <div className="text-xs font-semibold text-slate-200">Low Severity Findings</div>
+                  <div className="text-[11px] text-slate-400">Minor security caveats or bugs with limited blast radius</div>
                 </div>
                 <label className="relative inline-flex items-center cursor-pointer">
                   <input
@@ -164,7 +172,7 @@ export default function PoliciesPage() {
                     onChange={(e) => setPolicy({ ...policy, auto_publish_low: e.target.checked })}
                     className="sr-only peer"
                   />
-                  <div className="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                  <div className="w-10 h-5 bg-[#20232B] border border-[#333842] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#8B5CF6]"></div>
                 </label>
               </div>
             </div>
@@ -172,20 +180,23 @@ export default function PoliciesPage() {
 
           {/* Section: Mandatory Human Approval */}
           <div>
-            <h3 className="text-sm font-bold text-white uppercase tracking-wider font-mono border-b border-slate-800 pb-2">
-              Mandatory Human Sign-off
-            </h3>
-            <p className="text-xs text-slate-400 mt-1">
-              Zero-trust enforcement prevents unreviewed publication of critical findings.
+            <div className="flex items-center gap-2 border-b border-[#262930] pb-2.5">
+              <span className="material-symbols-outlined text-[#F5E900] text-[18px]">verified_user</span>
+              <h3 className="text-xs font-bold text-white uppercase tracking-wider font-mono">
+                Mandatory Human Sign-off Gates
+              </h3>
+            </div>
+            <p className="text-xs text-slate-400 mt-1.5">
+              Zero-trust enforcement halts publication of critical or high-risk findings until authorized by a security reviewer.
             </p>
 
-            <div className="divide-y divide-slate-800/60 mt-4">
+            <div className="divide-y divide-[#262930]/80 mt-4">
               <div className="py-3.5 flex items-center justify-between">
                 <div>
-                  <div className="text-sm font-semibold text-slate-200">
+                  <div className="text-xs font-semibold text-slate-200">
                     Require Approval for High Severity
                   </div>
-                  <div className="text-xs text-slate-400">Severe logic errors and vulnerabilities</div>
+                  <div className="text-[11px] text-slate-400">Severe logic flaws, authorization boundaries, and vulnerable calls</div>
                 </div>
                 <label className="relative inline-flex items-center cursor-pointer">
                   <input
@@ -196,17 +207,17 @@ export default function PoliciesPage() {
                     }
                     className="sr-only peer"
                   />
-                  <div className="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                  <div className="w-10 h-5 bg-[#20232B] border border-[#333842] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#F5E900] peer-checked:after:bg-black"></div>
                 </label>
               </div>
 
               <div className="py-3.5 flex items-center justify-between">
                 <div>
-                  <div className="text-sm font-semibold text-slate-200">
+                  <div className="text-xs font-semibold text-slate-200">
                     Require Approval for Critical Severity
                   </div>
-                  <div className="text-xs text-slate-400">
-                    Critical exploits, authentication bypasses, data loss
+                  <div className="text-[11px] text-slate-400">
+                    Direct RCE, authentication bypasses, secret leaks, data loss vectors
                   </div>
                 </div>
                 <label className="relative inline-flex items-center cursor-pointer">
@@ -218,7 +229,7 @@ export default function PoliciesPage() {
                     }
                     className="sr-only peer"
                   />
-                  <div className="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                  <div className="w-10 h-5 bg-[#20232B] border border-[#333842] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#F5E900] peer-checked:after:bg-black"></div>
                 </label>
               </div>
             </div>
@@ -226,18 +237,21 @@ export default function PoliciesPage() {
 
           {/* Section: Action Permissions & TTL */}
           <div>
-            <h3 className="text-sm font-bold text-white uppercase tracking-wider font-mono border-b border-slate-800 pb-2">
-              Privilege Limits & Expiration
-            </h3>
+            <div className="flex items-center gap-2 border-b border-[#262930] pb-2.5">
+              <span className="material-symbols-outlined text-slate-400 text-[18px]">timer</span>
+              <h3 className="text-xs font-bold text-white uppercase tracking-wider font-mono">
+                Privilege Boundaries & Expiration
+              </h3>
+            </div>
 
-            <div className="divide-y divide-slate-800/60 mt-4">
+            <div className="divide-y divide-[#262930]/80 mt-4">
               <div className="py-3.5 flex items-center justify-between">
                 <div>
-                  <div className="text-sm font-semibold text-slate-200">
+                  <div className="text-xs font-semibold text-slate-200">
                     Allow AI REQUEST_CHANGES Action
                   </div>
-                  <div className="text-xs text-slate-400">
-                    Allows submitting reviews with blocking REQUEST_CHANGES event (requires human approval)
+                  <div className="text-[11px] text-slate-400">
+                    Permits CodeGuard to issue a blocking REQUEST_CHANGES review event on GitHub
                   </div>
                 </div>
                 <label className="relative inline-flex items-center cursor-pointer">
@@ -249,20 +263,20 @@ export default function PoliciesPage() {
                     }
                     className="sr-only peer"
                   />
-                  <div className="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                  <div className="w-10 h-5 bg-[#20232B] border border-[#333842] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#8B5CF6]"></div>
                 </label>
               </div>
 
               <div className="py-3.5 flex items-center justify-between">
                 <div>
-                  <div className="text-sm font-semibold text-slate-200">
+                  <div className="text-xs font-semibold text-slate-200">
                     Approval Window TTL (Minutes)
                   </div>
-                  <div className="text-xs text-slate-400">
-                    Approvals automatically expire if not published within this timeframe
+                  <div className="text-[11px] text-slate-400">
+                    Pending approvals automatically expire if not published within this window
                   </div>
                 </div>
-                <div className="w-32">
+                <div className="w-28">
                   <input
                     type="number"
                     min={5}
@@ -274,20 +288,30 @@ export default function PoliciesPage() {
                         approval_expiry_minutes: parseInt(e.target.value) || 30,
                       })
                     }
-                    className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-sm font-mono text-white text-right focus:outline-none focus:border-indigo-500"
+                    className="w-full bg-surface-container-lowest border border-[#333842] rounded-lg px-3 py-1.5 text-xs font-mono text-white text-right focus:outline-none focus:border-[#F5E900]"
                   />
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="flex justify-end pt-4 border-t border-slate-800">
+          <div className="flex justify-end pt-4 border-t border-[#262930]">
             <button
               onClick={handleSave}
               disabled={saving}
-              className="px-6 py-2 rounded-lg text-sm font-semibold bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg transition-colors disabled:opacity-50"
+              className="px-5 py-2 rounded-lg text-xs font-bold bg-[#F5E900] text-black hover:bg-[#ffe600] transition-colors disabled:opacity-50 flex items-center gap-1.5 shadow-sm"
             >
-              {saving ? "Saving Policy..." : "Save Policy Configuration"}
+              {saving ? (
+                <>
+                  <span className="w-3.5 h-3.5 border-2 border-black border-t-transparent rounded-full animate-spin"></span>
+                  <span>Enforcing Policy...</span>
+                </>
+              ) : (
+                <>
+                  <span className="material-symbols-outlined text-[16px]">save</span>
+                  <span>Save Policy Configuration</span>
+                </>
+              )}
             </button>
           </div>
         </div>
@@ -295,3 +319,4 @@ export default function PoliciesPage() {
     </div>
   );
 }
+

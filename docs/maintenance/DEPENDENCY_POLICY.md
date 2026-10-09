@@ -9,15 +9,15 @@ This inventory captures all direct dependencies across the CodeGuard AI ecosyste
 | Package Name | Specified Version | Direct/Transitive | Purpose | Runtime Context | Lockfile / Pinning |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | `fastapi` | `>=0.111.0` | Direct | High-performance ASGI REST Framework | `api` container | Compatible release |
-| `uvicorn[standard]` | `>=0.30.0` | Direct | ASGI Production Web Server | `api`, `mcp-server` | Standard extras |
-| `pydantic` | `>=2.7.0` | Direct | Data validation & settings management | `api`, worker, mcp | V2 core models |
+| `uvicorn[standard]` | `>=0.30.0` | Direct | ASGI Production Web Server | `api` | Standard extras |
+| `pydantic` | `>=2.7.0` | Direct | Data validation & settings management | `api`, worker | V2 core models |
 | `pydantic-settings`| `>=2.3.0` | Direct | Environment configuration parsing | `api`, worker | Environment bindings |
 | `sqlalchemy` | `>=2.0.30` | Direct | Asynchronous & synchronous ORM | `api`, worker | 2.0 style syntax |
 | `alembic` | `>=1.13.1` | Direct | Schema migrations engine | `api` migration job | Version-controlled DDL |
 | `psycopg2-binary` | `>=2.9.9` | Direct | PostgreSQL driver for migrations & pooling | `api`, worker | Production DB driver |
 | `redis` | `>=5.0.4` | Direct | Redis client for Celery broker & caching | `api`, worker | Async/sync Redis |
 | `celery` | `>=5.4.0` | Direct | Asynchronous task queue worker | worker process | Distributed review jobs |
-| `httpx` | `>=0.27.0` | Direct | Async HTTP client for external integrations | `api`, worker, mcp | GitHub & Gemini HTTP |
+| `httpx` | `>=0.27.0` | Direct | Async HTTP client for external integrations | `api`, worker | GitHub & Gemini HTTP |
 | `cryptography` | `>=42.0.7` | Direct | HMAC, SHA-256, and approval cryptography | `api`, worker | Critical security core |
 | `pyjwt[crypto]` | `>=2.8.0` | Direct | JWT verification for user & GitHub App auth | `api` auth | Cryptographic tokens |
 | `python-dateutil` | `>=2.9.0` | Direct | ISO-8601 date parsing & retention timing | `api`, worker | Date utility |

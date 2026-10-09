@@ -32,7 +32,7 @@ This document formalizes the 10 critical architectural contracts governing CodeG
 [Validation Engine & Sandbox]
        │
        ▼ Contract 7
-[MCP Governance & Sentinel Policies]
+[Zero-Trust Policy Governance & Sentinel Policies]
        │
        ▼ Contract 8
 [Human Authorization Lifecycle]
@@ -138,7 +138,7 @@ This document formalizes the 10 critical architectural contracts governing CodeG
 
 ---
 
-## 8. Contract 7: Validation Framework → MCP Governance & Sentinel
+## 8. Contract 7: Validation Framework → Zero-Trust Policy Governance
 
 - **Input**: Tool invocation request (`tool_name`, `arguments`, `caller_agent`).
 - **Output**: Tool execution result or Policy Block rejection.
@@ -154,7 +154,7 @@ This document formalizes the 10 critical architectural contracts governing CodeG
 
 ---
 
-## 9. Contract 8: MCP Governance → Human Authorization Lifecycle
+## 9. Contract 8: Policy Engine → Human Authorization Lifecycle
 
 - **Input**: Consequential tool call or publish action pending human approval.
 - **Output**: `ApprovalRequest` record with status `PENDING`, `APPROVED`, or `REJECTED`.

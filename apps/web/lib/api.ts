@@ -289,5 +289,52 @@ export const api = {
     authStorage.removeToken();
     return request<{ success: boolean; message: string }>("/auth/logout", { method: "POST" });
   },
+
+  // GitHub App Connection & Repository Discovery
+  getGitHubInstallUrl: () =>
+    request<import("./types").GitHubInstallUrlResponse>("/github/install-url"),
+
+  getGitHubInstallations: () =>
+    request<import("./types").GitHubInstallation[]>("/github/installations"),
+
+  verifyGitHubInstallation: (installationId: number) =>
+    request<import("./types").GitHubInstallation>("/github/installations/verify", {
+      method: "POST",
+      body: JSON.stringify({ installation_id: installationId }),
+    }),
+
+  getGitHubInstallationRepositories: (installationId: number) =>
+    request<import("./types").GitHubAccessibleRepositoriesResponse>(
+      `/github/installations/${installationId}/repositories`
+    ),
+
+  connectGitHubRepository: (data: import("./types").GitHubConnectRepositoryRequest) =>
+    request<Repository>("/github/repositories/connect", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+
+  disconnectRepository: (repositoryId: string) =>
+    request<import("./types").GitHubDisconnectResponse>(`/repositories/${repositoryId}`, {
+      method: "DELETE",
+    }),
+
+  // Benchmark API
+  getBenchmarkRuns: (page = 1, pageSize = 20) =>
+    request<{
+      items: import("./types").BenchmarkRunItem[];
+      total: number;
+      page: number;
+      page_size: number;
+    }>(`/benchmarks/runs?page=${page}&page_size=${pageSize}`),
+
+  getBenchmarkRun: (runId: string) =>
+    request<import("./types").BenchmarkRunDetail>(`/benchmarks/runs/${runId}`),
+
+  compareBenchmarkRuns: (baselineRunId: string, candidateRunId: string) =>
+    request<import("./types").BenchmarkComparison>(
+      `/benchmarks/compare?baseline_run_id=${baselineRunId}&candidate_run_id=${candidateRunId}`
+    ),
 };
+
 
