@@ -23,6 +23,10 @@ yarn-debug.log*
 yarn-error.log*
 *.tsbuildinfo
 
+# Generated UI / Design artifacts
+stitch_extracted/
+*.zip
+
 # Environment files
 .env
 .env.local

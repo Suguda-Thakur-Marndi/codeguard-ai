@@ -94,7 +94,7 @@
 
 ### Revision 005: Governance, Human Approval & Publishing (`005_phase5_mcp_governance_publishing`)
 19. **`approval_requests`**: Human authorization records tracking decision (`PENDING`, `APPROVED`, `REJECTED`, `EXPIRED`, `STALE`), authorized user ID, cryptographic signature, and target head SHA.
-20. **`tool_execution_audits`**: Immutable, append-only security log recording every tool called by agents or MCP clients, parameters, risk level, and policy decision.
+20. **`tool_execution_audits`**: Immutable, append-only security log recording every tool called by agents or internal services, parameters, risk level, and policy decision.
 21. **`organization_review_policies`**: Configurable organization review rules (e.g. require human approval for CRITICAL/HIGH, minimum confidence thresholds).
 22. **`github_review_publications`**: Records of reviews published to GitHub, tracking GitHub review ID, composite idempotency key, and publication timestamp.
 23. **`github_review_comments`**: Individual inline comments published to GitHub linked to the parent publication and source finding.

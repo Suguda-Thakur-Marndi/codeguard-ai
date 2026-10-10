@@ -1,4 +1,4 @@
-"""Phase 5 MCP governance, human approval, and GitHub publishing schema
+"""Phase 5 governance, human approval, and GitHub publishing schema
 
 Revision ID: 005_phase5_mcp_governance_publishing
 Revises: 004_phase4_adversarial_verification

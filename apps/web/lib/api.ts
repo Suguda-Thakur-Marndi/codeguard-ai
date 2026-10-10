@@ -247,8 +247,10 @@ export const api = {
       body: JSON.stringify({ reason: reason || "Rejected by reviewer" }),
     }),
 
-  getReviewJobPublication: (jobId: string) =>
-    request<import("./types").GitHubReviewPublication>(`/review-jobs/${jobId}/publication`),
+  getReviewJobPublication: async (jobId: string) => {
+    const res = await request<any>(`/review-jobs/${jobId}/publication`);
+    return (res?.publication ?? res) as import("./types").GitHubReviewPublication;
+  },
 
   requestJobApproval: (jobId: string, findingId?: string, action: string = "COMMENT") =>
     request<{ approval_id: string; status: string }>(`/review-jobs/${jobId}/publication/request-approval`, {
@@ -273,14 +275,21 @@ export const api = {
     return request<import("./types").PaginatedResponse<import("./types").ToolExecutionAudit>>(`/audit?${query.toString()}`);
   },
 
-  getOrganizationPolicies: (orgId: string) =>
-    request<import("./types").OrganizationReviewPolicy>(`/organizations/${orgId}/policies`),
+  getOrganizationPolicies: async (orgId: string) => {
+    const res = await request<any>(`/organizations/${orgId}/policies`);
+    return (res?.policy ?? res) as import("./types").OrganizationReviewPolicy;
+  },
 
-  updateOrganizationPolicies: (orgId: string, update: Partial<import("./types").OrganizationReviewPolicy>) =>
-    request<import("./types").OrganizationReviewPolicy>(`/organizations/${orgId}/policies`, {
+  updateOrganizationPolicies: async (
+    orgId: string,
+    update: Partial<import("./types").OrganizationReviewPolicy>
+  ) => {
+    const res = await request<any>(`/organizations/${orgId}/policies`, {
       method: "PATCH",
       body: JSON.stringify(update),
-    }),
+    });
+    return (res?.policy ?? res) as import("./types").OrganizationReviewPolicy;
+  },
 
   getAuthMe: () =>
     request<{ authenticated: boolean; user: { id: string; login: string; email?: string; role: string; picture?: string } }>("/auth/me"),
@@ -328,8 +337,10 @@ export const api = {
       page_size: number;
     }>(`/benchmarks/runs?page=${page}&page_size=${pageSize}`),
 
-  getBenchmarkRun: (runId: string) =>
-    request<import("./types").BenchmarkRunDetail>(`/benchmarks/runs/${runId}`),
+  getBenchmarkRun: async (runId: string) => {
+    const res = await request<any>(`/benchmarks/runs/${runId}`);
+    return (res?.run ?? res) as import("./types").BenchmarkRunDetail;
+  },
 
   compareBenchmarkRuns: (baselineRunId: string, candidateRunId: string) =>
     request<import("./types").BenchmarkComparison>(

@@ -55,12 +55,12 @@ function GitHubCallbackContent() {
 
   return (
     <div className="min-h-[60vh] flex items-center justify-center">
-      <div className="max-w-md w-full p-8 bg-slate-900 border border-slate-800 rounded-xl shadow-xl text-center">
+      <div className="max-w-md w-full p-8 bg-surface-container border border-[#333842] rounded-xl shadow-2xl text-center space-y-4">
         {status === "verifying" && (
           <div className="space-y-4">
-            <div className="w-12 h-12 rounded-full border-4 border-indigo-500 border-t-transparent animate-spin mx-auto" />
-            <h2 className="text-lg font-bold text-white">Connecting GitHub...</h2>
-            <p className="text-sm text-slate-400">
+            <div className="w-12 h-12 rounded-full border-4 border-primary-fixed border-t-transparent animate-spin mx-auto" />
+            <h2 className="font-headline-md text-headline-md text-primary font-bold">Connecting GitHub...</h2>
+            <p className="font-body-sm text-body-sm text-on-surface-variant">
               Verifying CodeGuard AI GitHub App installation and discovering accessible repositories.
             </p>
           </div>
@@ -68,11 +68,11 @@ function GitHubCallbackContent() {
 
         {status === "success" && (
           <div className="space-y-4">
-            <div className="w-12 h-12 rounded-full bg-emerald-950/80 border border-emerald-600 text-emerald-400 flex items-center justify-center mx-auto text-xl font-bold">
+            <div className="w-12 h-12 rounded-full bg-tertiary-container/20 border border-tertiary-fixed-dim text-tertiary-fixed-dim flex items-center justify-center mx-auto text-xl font-bold">
               ✓
             </div>
-            <h2 className="text-lg font-bold text-white">GitHub Connected!</h2>
-            <p className="text-sm text-slate-400">
+            <h2 className="font-headline-md text-headline-md text-primary font-bold">GitHub Connected!</h2>
+            <p className="font-body-sm text-body-sm text-on-surface-variant">
               Redirecting to repositories to select which projects to monitor...
             </p>
           </div>
@@ -80,17 +80,17 @@ function GitHubCallbackContent() {
 
         {status === "error" && (
           <div className="space-y-4">
-            <div className="w-12 h-12 rounded-full bg-rose-950/80 border border-rose-600 text-rose-400 flex items-center justify-center mx-auto text-xl font-bold">
+            <div className="w-12 h-12 rounded-full bg-error-container/20 border border-error text-error flex items-center justify-center mx-auto text-xl font-bold">
               ✕
             </div>
-            <h2 className="text-lg font-bold text-white">Connection Failed</h2>
-            <p className="text-sm text-rose-300 bg-rose-950/40 p-3 rounded border border-rose-900/50">
+            <h2 className="font-headline-md text-headline-md text-primary font-bold">Connection Failed</h2>
+            <p className="font-body-sm text-body-sm text-error bg-error-container/10 p-3 rounded border border-error/30 font-mono">
               {errorMessage}
             </p>
             <div className="pt-2">
               <Link
                 href="/repositories"
-                className="inline-flex items-center px-4 py-2 rounded-lg text-sm font-semibold bg-indigo-600 hover:bg-indigo-500 text-white transition shadow-sm"
+                className="inline-flex items-center px-4 py-2 rounded-lg font-headline-sm text-body-sm font-semibold bg-primary-container text-on-primary-container hover:brightness-105 transition shadow-sm"
               >
                 Return to Repositories
               </Link>

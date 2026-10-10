@@ -1,4 +1,4 @@
-.PHONY: help install dev test lint format migrate migration docker-up docker-down validate-benchmark verify-all verify-phase10 verify-phase11 verify-phase12 check-release
+.PHONY: help install dev test lint format migrate migration docker-up docker-down check-release
 
 PYTHON ?= python
 VENV_BIN ?= .venv/bin
@@ -13,8 +13,6 @@ help:
 	@echo "  make test               Run backend test suite with pytest"
 	@echo "  make lint               Run Ruff linter and TypeScript type check"
 	@echo "  make format             Format codebase using Ruff"
-	@echo "  make validate-benchmark Validate empirical benchmarking scenarios"
-	@echo "  make verify-all         Run all end-to-end phase verification suites"
 	@echo "  make check-release      Run complete pre-release validation pipeline"
 	@echo "  make migrate            Apply Alembic database migrations"
 	@echo "  make docker-up          Start full container stack with Docker Compose"

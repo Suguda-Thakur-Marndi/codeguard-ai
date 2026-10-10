@@ -12,7 +12,7 @@ CodeGuard AI uses PostgreSQL 16 (production/staging) and SQLite (hermetic local 
 | `002_phase2_code_intelligence_tables` | AST, symbol tables, reference graphs, call graphs | `ast_nodes`, `symbols`, `references`, `call_graph_edges`, `diff_hunks` | Yes |
 | `003_phase3_agentic_ai_review` | Multi-agent findings, raw observations, agent traces | `agent_runs`, `review_findings`, `finding_locations`, `evidence_items` | Yes |
 | `004_phase4_adversarial_verification` | Adversarial judge verdicts, test executions, sandbox runs | `judge_evaluations`, `verification_results`, `sandbox_runs`, `rejection_logs` | Yes |
-| `005_phase5_mcp_governance_publishing` | MCP policies, human approvals, audit logs, publications | `mcp_policies`, `approval_requests`, `approval_signatures`, `audit_logs`, `publications` | Yes |
+| `005_phase5_mcp_governance_publishing` | Zero-trust policies, human approvals, audit logs, publications | `governance_policies`, `approval_requests`, `approval_signatures`, `tool_execution_audits`, `github_review_publications` | Yes |
 | `006_phase7_benchmarking_tables` | Empirical benchmark runs, ground-truth scenarios, metrics | `benchmark_runs`, `benchmark_scenarios`, `benchmark_metrics` | Yes |
 
 Total tracked domain tables: **27 tables**.
